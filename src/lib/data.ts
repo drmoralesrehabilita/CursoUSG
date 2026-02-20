@@ -10,18 +10,21 @@ export async function getModules() {
       *,
       lessons (*)
     `)
+    //.order('order_index', { ascending: true }) // Modules order
+    //.order('order_index', { foreignTable: 'lessons', ascending: true }) // Lessons order
 
   if (error) {
     console.error('Error fetching modules:', error)
     return []
   }
 
+  // Sort manually if needed or rely on DB default
   if (modules) {
-      modules.sort((a, b) => a.order_index - b.order_index)
-      modules.forEach(m => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (m.lessons) m.lessons.sort((a: any, b: any) => a.order_index - b.order_index)
-      })
+    modules.sort((a, b) => a.order_index - b.order_index)
+    modules.forEach(m => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (m.lessons) m.lessons.sort((a: any, b: any) => a.order_index - b.order_index)
+    })
   }
 
   return modules
