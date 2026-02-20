@@ -54,30 +54,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  // Protected routes - require authentication
-  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Public/Auth routes handling
+  if (pathname.startsWith('/login') || pathname.startsWith('/register')) {
+    if (user) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    return response
   }
 
-  // Auth routes (redirect to appropriate dashboard if already logged in)
-  if (user && (pathname.startsWith('/login') || pathname.startsWith('/register'))) {
-    // Check role to redirect to proper dashboard
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+  // Protected routes handling
+  const protectedRoutes = ['/dashboard', '/admin', '/perfil', '/aprendiz']
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
-    if (profile?.role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (isProtectedRoute && !user) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // Role-based route protection
@@ -106,13 +99,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

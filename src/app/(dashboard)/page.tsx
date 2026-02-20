@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { createClient } from "@/lib/supabase/server"
 import { getModules } from "@/lib/data"
 import { redirect } from "next/navigation"
@@ -24,3 +25,11 @@ export default async function DashboardPage() {
     </div>
   )
 }
+=======
+/** 
+ * ALIAS FOR /dashboard 
+ * This ensures the (dashboard) routing group is also functional 
+ */
+import DashboardPage from "../dashboard/page"
+export default DashboardPage
+>>>>>>> origin/main

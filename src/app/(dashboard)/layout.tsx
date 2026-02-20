@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { MainLayout } from "@/components/layout/MainLayout"
 
 export default function DashboardLayout({
@@ -7,3 +8,11 @@ export default function DashboardLayout({
 }) {
   return <MainLayout>{children}</MainLayout>
 }
+=======
+/** 
+ * ALIAS FOR /dashboard 
+ * This ensures the (dashboard) routing group is also functional 
+ */
+import DashboardLayout from "../dashboard/layout"
+export default DashboardLayout
+>>>>>>> origin/main

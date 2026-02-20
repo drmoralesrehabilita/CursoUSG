@@ -1,151 +1,162 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { login } from "./actions"
+import { Label } from "@/components/ui/label"
+import { Eye, EyeOff, ArrowRight, Github } from "lucide-react"
 import Link from "next/link"
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react"
-import { Logo } from "@/components/ui/logo"
-import { useState } from "react"
+import { login } from "./actions"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-primary/30 selection:text-primary">
       
-      {/* Left Section: Hero Image */}
-      <div className="relative hidden lg:flex w-full lg:w-1/2 bg-cover bg-center items-end p-12 lg:p-16" 
-           style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCd8e3eM0ipCCVVU-WEi1nHcQ1d50V3obgSMOXphDxWs-5IBjwL-mX-ppHP35XgO4rwdVsb9TO74cBuuoMlq_pjxC-seD-qoM9QhiA4vtTw30RIChGZLJPcxvqQfPifgBbSu4lZtoRU36DIVTafHglUzWPGYoBgMmyhJcVWOXT7P3iGO7xz50820RQGq6bEmIqDiEBnq2HFXwgNdREktZ7WEhS2kgTGHrxDYDaKps5bXm8lnsaSUiPKf158006ZIYzf3j7wpgde1V35")' }}>
-        {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-linear-to-t from-background-dark/90 via-background-dark/40 to-transparent"></div>
-        {/* Content over Image */}
-        <div className="relative z-10 flex flex-col gap-4 max-w-lg">
-          <Logo variant="dark" showSubtitle />
-          <h1 className="text-4xl font-black leading-tight text-white tracking-tight">
-            Excelencia en educación médica continua.
-          </h1>
-          <p className="text-slate-300 text-lg leading-relaxed font-medium">
-            Acceda a la biblioteca más completa de casos clínicos, simposios y recursos de actualización para especialistas en México.
-          </p>
+      {/* Left Column: Form Section */}
+      <div className="flex flex-1 flex-col items-center justify-center p-6 bg-background-light dark:bg-background-dark lg:w-1/2 relative z-10 transition-colors duration-500">
+        
+        {/* Subtle background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="w-full max-w-[420px] space-y-8 relative">
+          
+          {/* Logo & Header */}
+          <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex items-center gap-3 group px-4 py-2 rounded-2xl transition-all duration-300">
+               <div className="relative">
+                 <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-150 group-hover:scale-200 transition-transform duration-500" />
+                 <span className="material-symbols-outlined text-4xl text-primary relative z-10 animate-pulse-slow">sensors</span>
+               </div>
+               <div className="flex flex-col items-start translate-y-0.5">
+                  <span className="text-xl font-black tracking-tighter leading-none text-slate-900 dark:text-white">DR. RAÚL</span>
+                  <span className="text-xl font-black tracking-tighter leading-none text-primary -mt-1">MORALES</span>
+               </div>
+            </div>
+            <div className="space-y-2">
+              <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Bienvenido de nuevo</h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Ingresa tus credenciales para acceder a tu curso</p>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <div className="bg-white dark:bg-surface-dark p-8 rounded-2xl border border-slate-200 dark:border-border/10 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
+            <form action={login} className="flex flex-col gap-5">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Correo Electrónico</Label>
+                  <div className="relative group">
+                     <Input 
+                      id="email" 
+                      name="email"
+                      type="email" 
+                      placeholder="nombre@ejemplo.com" 
+                      className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 focus:border-primary focus:ring-primary/20 transition-all rounded-xl pl-4 pr-10"
+                      required
+                    />
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl group-focus-within:text-primary transition-colors">mail</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Contraseña</Label>
+                    <Link href="#" className="text-xs font-bold text-primary hover:text-blue-600 transition-colors">¿Olvidaste tu contraseña?</Link>
+                  </div>
+                  <div className="relative group">
+                    <Input 
+                      id="password" 
+                      name="password"
+                      type={showPassword ? "text" : "password"} 
+                      placeholder="••••••••" 
+                      className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 focus:border-primary focus:ring-primary/20 transition-all rounded-xl pl-4 pr-10"
+                      required
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <Button type="submit" className="mt-2 w-full h-12 rounded-xl bg-primary hover:bg-blue-600 text-white font-bold text-base transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-[0.98]">
+                <span>Iniciar Sesión</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-100 dark:border-border/5"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-surface-dark px-2 text-slate-400 font-bold tracking-widest">O continúa con</span>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 dark:border-border/10 hover:bg-slate-50 dark:hover:bg-white/5 font-bold transition-all flex items-center gap-3">
+              <Github className="w-5 h-5" />
+              <span>GitHub</span>
+            </Button>
+          </div>
+
+          {/* Footer Link */}
+          <div className="text-center pt-4">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              ¿No tienes una cuenta?{" "}
+              <Link href="/register" className="text-primary font-bold hover:underline decoration-2 underline-offset-4 decoration-primary/30">
+                Regístrate gratis
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Right Section: Login Form */}
-      <div className="flex flex-1 flex-col items-center justify-center p-6 bg-background-light dark:bg-background-dark lg:w-1/2">
-        <div className="w-full max-w-md flex flex-col gap-8">
-          
-          {/* Mobile Logo (Visible only on small screens) */}
-          <div className="lg:hidden flex justify-center mb-4">
-            <Logo variant="light" compact />
-          </div>
+      {/* Right Column: Hero/Visual Section */}
+      <div className="hidden lg:flex flex-1 relative bg-[#0B2559] overflow-hidden">
+        
+        {/* Abstract shapes and patterns */}
+        <div className="absolute inset-0 z-0">
+           <div className="absolute -top-[10%] -right-[10%] w-[80%] h-[80%] bg-[radial-gradient(circle_at_center,_#00B4D8_0%,_transparent_70%)] opacity-20 blur-[100px]" />
+           <div className="absolute -bottom-[20%] -left-[20%] w-[70%] h-[70%] bg-[radial-gradient(circle_at_center,_#00B4D8_0%,_transparent_70%)] opacity-10 blur-[100px]" />
+           
+           {/* Grid pattern overlay */}
+           <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        </div>
 
-          {/* Form Header */}
-          <div className="flex flex-col gap-2 text-center lg:text-left">
-            <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-              Bienvenido, Doctor/a
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 text-base">
-              Ingrese sus credenciales para acceder a la plataforma.
-            </p>
-          </div>
-
-          {/* Form Fields */}
-          <form action={login} className="flex flex-col gap-5">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                Correo institucional o personal
-              </label>
-              <div className="relative flex items-center">
-                <div className="absolute left-4 text-slate-400">
-                  <Mail className="w-5 h-5" />
+        <div className="relative z-10 w-full flex flex-col justify-end p-16 space-y-8">
+           <div className="space-y-4 max-w-lg">
+             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white uppercase tracking-widest">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Acceso Exclusivo
+             </div>
+             <h2 className="text-5xl font-black text-white leading-tight">
+               Lidera la ecografía neuromuscular.
+             </h2>
+             <p className="text-lg text-blue-100/70 font-medium">
+                Accede a lecciones en alta definición, evaluaciones interactivas y material exclusivo diseñado para especialistas.
+             </p>
+           </div>
+           
+           {/* Visual element: stylized ultrasound visualization */}
+           <div className="flex gap-4">
+              {[1, 0.7, 0.4].map((op, i) => (
+                <div key={i} className="flex gap-1 items-end">
+                   {[1, 2, 3, 4, 5].map((bar) => (
+                     <div 
+                      key={bar} 
+                      className="w-1.5 bg-primary rounded-full transition-all duration-1000 animate-pulse"
+                      style={{ height: `${Math.random() * 40 + 20}px`, opacity: op }} 
+                    />
+                   ))}
                 </div>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  required 
-                  placeholder="ejemplo@hospital.com" 
-                  className="w-full h-12 rounded-lg bg-white dark:bg-[#1c2126] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-11 pr-4 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
-                />
-              </div>
-            </div>
-
-            {/* Password Input */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  Contraseña
-                </label>
-              </div>
-              <div className="relative flex items-center">
-                <div className="absolute left-4 text-slate-400">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type={showPassword ? "text" : "password"} 
-                  required 
-                  placeholder="••••••••" 
-                  className="w-full h-12 rounded-lg bg-white dark:bg-[#1c2126] border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white pl-11 pr-12 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
-                />
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-              <div className="flex justify-end mt-1">
-                <Link className="text-sm font-semibold text-primary hover:text-blue-500 transition-colors" href="#">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <Button type="submit" className="mt-2 w-full h-12 rounded-lg bg-primary hover:bg-blue-600 text-white font-bold text-base transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
-              <span>Iniciar Sesión</span>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative flex items-center py-2">
-            <div className="grow border-t border-slate-300 dark:border-slate-700"></div>
-            <span className="shrink-0 mx-4 text-slate-400 text-sm">¿Nuevo en la plataforma?</span>
-            <div className="grow border-t border-slate-300 dark:border-slate-700"></div>
-          </div>
-
-          {/* Create Account Link */}
-          <div className="text-center">
-            <Link 
-              href="/register" 
-              className="inline-flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors w-full"
-            >
-              Crear una cuenta
-            </Link>
-          </div>
-
-          {/* Trust Badges / Footer */}
-          <div className="mt-auto pt-8 flex flex-col items-center gap-4 opacity-60">
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">Avalado por</p>
-            <div className="flex gap-6 items-center grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-              {/* Placeholder logos for medical associations */}
-              <div className="h-8 w-auto flex items-center justify-center font-bold text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 px-2 rounded">
-                ASOC_MED
-              </div>
-              <div className="h-8 w-auto flex items-center justify-center font-bold text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 px-2 rounded">
-                FEMECOG
-              </div>
-              <div className="h-8 w-auto flex items-center justify-center font-bold text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 px-2 rounded">
-                CMIM
-              </div>
-            </div>
-          </div>
+              ))}
+           </div>
         </div>
       </div>
     </div>

@@ -1,107 +1,96 @@
 "use client"
 
-import * as React from "react"
+import { useState } from "react"
 import MuxPlayer from "@mux/mux-player-react"
 import { Button } from "@/components/ui/button"
-import { ArrowLeftRight } from "lucide-react"
+import { Repeat } from "lucide-react"
 
 interface DualPlayerProps {
-  cameraUrl: string | null
-  ultrasoundUrl: string | null
+  cameraUrl?: string | null
+  ultrasoundUrl?: string | null
   title?: string
 }
 
 export function DualPlayer({ cameraUrl, ultrasoundUrl, title }: DualPlayerProps) {
-  const [swapped, setSwapped] = React.useState(false)
-  // const [isPlaying, setIsPlaying] = React.useState(false) // Unused for now
-  
-  // Refs to control players 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const primaryRef = React.useRef<any>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const secondaryRef = React.useRef<any>(null)
+  const [isSwapped, setIsSwapped] = useState(false)
 
-  // Determine which URL goes where
-  const primaryUrl = swapped ? ultrasoundUrl : cameraUrl
-  const secondaryUrl = swapped ? cameraUrl : ultrasoundUrl
-
-  // Basic synchronization handler (Placeholder for future sync logic)
-  /*
-  const handlePlayPause = () => {
-    // Sync logic
+  const handleSwap = () => {
+    setIsSwapped(!isSwapped)
   }
-  */
 
-  // If only one URL is provided, show single player
-  if (!cameraUrl && !ultrasoundUrl) return <div className="aspect-video bg-muted flex items-center justify-center">No video sources</div>
-  
-  if (!cameraUrl || !ultrasoundUrl) {
-     return (
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-border shadow-lg bg-black">
-             <MuxPlayer
-                streamType="on-demand"
-                playbackId={cameraUrl || ultrasoundUrl || ""}
-                metadata={{ video_title: title }}
-                primaryColor="#1773cf"
-                secondaryColor="#0a0f18"
-             />
-        </div>
-     )
-  }
+  const PlayerA = cameraUrl ? (
+    <MuxPlayer
+      playbackId={cameraUrl}
+      metadata={{
+        video_title: `${title} - Cámara`,
+      }}
+      className="w-full h-full"
+    />
+  ) : (
+    <div className="w-full h-full bg-slate-900 flex items-center justify-center text-slate-500 text-sm">
+      Canal de Cámara no disponible
+    </div>
+  )
+
+  const PlayerB = ultrasoundUrl ? (
+    <MuxPlayer
+      playbackId={ultrasoundUrl}
+      metadata={{
+        video_title: `${title} - Ultrasonido`,
+      }}
+      className="w-full h-full"
+    />
+  ) : (
+    <div className="w-full h-full bg-slate-900 flex items-center justify-center text-slate-500 text-sm">
+      Canal de Ultrasonido no disponible
+    </div>
+  )
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden group">
+    <div className="space-y-4">
+      <div className="flex justify-between items-center bg-slate-100 dark:bg-white/5 p-4 rounded-2xl border border-slate-200 dark:border-border/10">
+        <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">Modo de Visualización Dual</h4>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleSwap}
+          className="rounded-xl border-primary/20 text-primary hover:bg-primary/10 transition-all font-bold group"
+        >
+          <Repeat className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+          Alternar Fuentes
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Main Viewport 1 */}
+        <div className="aspect-video bg-black rounded-3xl overflow-hidden border-4 border-slate-200 dark:border-border/10 shadow-2xl group transition-all duration-500">
+           <div className="w-full h-full relative">
+              <div className="absolute top-4 left-4 z-10">
+                 <div className="px-3 py-1 rounded-full bg-primary/20 backdrop-blur-md border border-white/20 text-[10px] font-black text-primary uppercase tracking-widest">
+                    {isSwapped ? "Ultrasonido" : "Cámara"}
+                 </div>
+              </div>
+              {isSwapped ? PlayerB : PlayerA}
+           </div>
+        </div>
+
+        {/* Main Viewport 2 */}
+        <div className="aspect-video bg-black rounded-3xl overflow-hidden border-4 border-slate-200 dark:border-border/10 shadow-2xl group transition-all duration-500">
+           <div className="w-full h-full relative">
+              <div className="absolute top-4 left-4 z-10">
+                 <div className="px-3 py-1 rounded-full bg-blue-500/20 backdrop-blur-md border border-white/20 text-[10px] font-black text-blue-400 uppercase tracking-widest">
+                    {isSwapped ? "Cámara" : "Ultrasonido"}
+                 </div>
+              </div>
+              {isSwapped ? PlayerA : PlayerB}
+           </div>
+        </div>
+      </div>
       
-      {/* Primary Player (Background) */}
-      <div className="absolute inset-0 z-0">
-         <MuxPlayer
-            ref={primaryRef}
-            streamType="on-demand"
-            playbackId={primaryUrl || ""}
-            metadata={{ video_title: `${title} - Primary` }}
-            primaryColor="#1773cf"
-            secondaryColor="#0a0f18"
-            className="w-full h-full object-contain"
-            // Hide native controls to use custom overlay? Or keep native.
-            // Keeping native controls on primary is easier for MVP.
-         />
+      <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10 border-dashed">
+         <span className="material-symbols-outlined text-primary text-sm">info</span>
+         <p className="text-[10px] text-slate-500 font-medium">Puedes alternar entre la vista de cámara y ultrasonido para un mejor análisis anatómico.</p>
       </div>
-
-      {/* Secondary Player (Picture-in-Picture style) */}
-      <div className="absolute top-4 right-4 z-10 w-1/3 aspect-video rounded-lg overflow-hidden border-2 border-primary shadow-2xl bg-black transition-all hover:scale-105">
-         <MuxPlayer
-            ref={secondaryRef}
-            streamType="on-demand"
-            playbackId={secondaryUrl || ""}
-            metadata={{ video_title: `${title} - Secondary` }}
-            muted={true} // Usually secondary is muted to avoid echo
-            className="w-full h-full object-cover"
-            // Hide controls on secondary
-         />
-         
-         {/* Overlay on secondary to swap */}
-         <div 
-            className="absolute inset-0 bg-transparent hover:bg-black/20 cursor-pointer flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-            onClick={() => setSwapped(!swapped)}
-         >
-            <ArrowLeftRight className="text-white drop-shadow-md w-8 h-8" />
-         </div>
-      </div>
-
-      {/* Custom Controls Overlay (Optional, if native controls are confusing) */}
-      {/* For MVP, let's add a prominent Swap button outside or top-left */}
-      <div className="absolute top-4 left-4 z-20">
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            className="bg-black/50 backdrop-blur-sm hover:bg-black/70 text-white border-white/10"
-            onClick={() => setSwapped(!swapped)}
-          >
-            <ArrowLeftRight className="mr-2 h-4 w-4" />
-            Intercambiar Pantallas
-          </Button>
-      </div>
-
     </div>
   )
 }
