@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useTheme } from "next-themes"
 import { Logo } from "@/components/ui/logo"
 
@@ -23,9 +24,9 @@ export function Header({ title = "Dashboard", userName }: { title?: string; user
         <nav aria-label="Breadcrumb" className="flex">
           <ol className="inline-flex items-center space-x-1 md:space-x-3">
             <li className="inline-flex items-center">
-              <a href="#" className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary">
+              <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-primary">
                 Dashboard
-              </a>
+              </Link>
             </li>
             {title !== "Dashboard" && (
                 <li>

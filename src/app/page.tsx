@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { 
   Menu, 
   ArrowRight, 
@@ -26,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   return (
     <div className="min-h-screen font-sans bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 overflow-x-hidden antialiased">
       {/* Navbar */}
@@ -35,7 +38,7 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-8">
             <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#program">Programa</Link>
             <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#methodology">Metodología</Link>
-            {/* <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#pricing">Precios</Link> */}
+            <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="/temario">Temario</Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
@@ -43,9 +46,23 @@ export default function LandingPage() {
                     Inscribirme Ahora
                 </Button>
             </Link>
-            <button className="sm:hidden text-white">
-              <Menu className="w-6 h-6" />
-            </button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="sm:hidden">
+                <button className="text-white p-2">
+                  <Menu className="w-6 h-6" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-background-dark border-surface-highlight w-64">
+                <nav className="flex flex-col gap-6 pt-8">
+                  <Link href="#program" className="text-slate-300 hover:text-white text-sm font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Programa</Link>
+                  <Link href="#methodology" className="text-slate-300 hover:text-white text-sm font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Metodología</Link>
+                  <Link href="/temario" className="text-slate-300 hover:text-white text-sm font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Temario</Link>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full h-10 rounded-lg bg-primary text-white font-bold text-sm">Inscribirme Ahora</Button>
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
@@ -85,10 +102,12 @@ export default function LandingPage() {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </Link>
-                <button className="h-12 px-8 rounded-lg border border-slate-600 bg-surface-dark/50 backdrop-blur text-white font-medium hover:bg-surface-dark transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
-                  <PlayCircle className="w-5 h-5" />
-                  <span>Ver Temario</span>
-                </button>
+                <Link href="/temario">
+                  <button className="h-12 px-8 rounded-lg border border-slate-600 bg-surface-dark/50 backdrop-blur text-white font-medium hover:bg-surface-dark transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+                    <PlayCircle className="w-5 h-5" />
+                    <span>Ver Temario</span>
+                  </button>
+                </Link>
               </div>
               <div className="mt-10 flex items-center gap-4 text-sm text-slate-400">
                 <div className="flex -space-x-2">
@@ -193,7 +212,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="pt-4">
-                  <a className="inline-flex items-center gap-2 text-primary hover:text-blue-400 font-semibold transition-colors group" href="#">
+                  <a className="inline-flex items-center gap-2 text-primary hover:text-blue-400 font-semibold transition-colors group" href="#methodology">
                     Ver Demostración
                     <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </a>
@@ -257,10 +276,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="mt-12 text-center">
-              <button className="inline-flex items-center justify-center rounded-lg border border-surface-highlight bg-transparent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-surface-highlight">
-                Descargar Temario Completo (PDF)
+              <Link href="/temario" className="inline-flex items-center justify-center rounded-lg border border-surface-highlight bg-transparent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-surface-highlight">
+                Ver Temario Completo
                 <Download className="ml-2 w-4 h-4" />
-              </button>
+              </Link>
             </div>
           </div>
         </section>
@@ -281,9 +300,9 @@ export default function LandingPage() {
                   Inscribirme Ahora
                 </button>
               </Link>
-              <button className="rounded-lg border border-white/30 bg-primary-600/50 px-8 py-4 text-base font-bold text-white hover:bg-primary-700/50 transition-colors">
+              <a href="mailto:drmoralesrehabilita@gmail.com" className="rounded-lg border border-white/30 bg-primary-600/50 px-8 py-4 text-base font-bold text-white hover:bg-primary-700/50 transition-colors inline-block">
                 Contactar a Admisiones
-              </button>
+              </a>
             </div>
           </div>
         </section>
@@ -294,12 +313,12 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <Logo variant="dark" compact />
               <div className="text-slate-500 text-sm">
-                © 2023 Diplomado en Rehabilitación Intervencionista. Todos los derechos reservados.
+                © {new Date().getFullYear()} Diplomado en Rehabilitación Intervencionista. Todos los derechos reservados.
               </div>
               <div className="flex gap-6">
-                <a className="text-slate-400 hover:text-white transition-colors" href="#">Privacidad</a>
-                <a className="text-slate-400 hover:text-white transition-colors" href="#">Términos</a>
-                <a className="text-slate-400 hover:text-white transition-colors" href="#">Soporte</a>
+                <Link className="text-slate-400 hover:text-white transition-colors" href="/privacidad">Privacidad</Link>
+                <Link className="text-slate-400 hover:text-white transition-colors" href="/terminos">Términos</Link>
+                <Link className="text-slate-400 hover:text-white transition-colors" href="/soporte">Soporte</Link>
               </div>
             </div>
           </div>

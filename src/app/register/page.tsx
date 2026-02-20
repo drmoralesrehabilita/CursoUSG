@@ -138,7 +138,7 @@ const totalSteps = 3
               {/* Footer inside card */}
               <div className="px-6 py-4 bg-slate-50 dark:bg-[#151c24] border-t border-slate-100 dark:border-border/10 text-center">
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Al registrarte, aceptas nuestros <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Términos de Servicio</a> y <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Política de Privacidad</a>.
+                  Al registrarte, aceptas nuestros <Link className="underline hover:text-slate-600 dark:hover:text-slate-300" href="/terminos">Términos de Servicio</Link> y <Link className="underline hover:text-slate-600 dark:hover:text-slate-300" href="/privacidad">Política de Privacidad</Link>.
                 </p>
               </div>
 
