@@ -1,36 +1,21 @@
-<<<<<<< HEAD
-'use server'
-=======
-"use server"
->>>>>>> origin/main
+﻿'use server'
+
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
-<<<<<<< HEAD
 const registerSchema = z.object({
   fullName: z.string().min(2, 'El nombre es muy corto'),
-  license: z.string().min(1, 'La cédula es requerida'),
+  license: z.string().min(1, 'La c├®dula es requerida'),
   specialty: z.string().min(1, 'La especialidad es requerida'),
   state: z.string().min(1, 'El estado es requerido'),
   experience: z.string().min(1, 'La experiencia es requerida'),
-  interest: z.string().min(1, 'El interés es requerido'),
-  email: z.string().email('Correo inválido'),
-  phone: z.string().min(10, 'Número inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-=======
-const RegisterSchema = z.object({
-  fullName: z.string().min(3, "El nombre es muy corto"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-  phone: z.string().min(10, "Teléfono inválido"),
-  licenseId: z.string().min(5, "Cédula inválida"),
-  specialty: z.string(),
-  state: z.string(),
-  experience: z.string(),
-  interestArea: z.string(),
->>>>>>> origin/main
+  interest: z.string().min(1, 'El inter├®s es requerido'),
+  email: z.string().email('Correo inv├ílido'),
+  phone: z.string().min(10, 'N├║mero inv├ílido'),
+  password: z.string().min(6, 'La contrase├▒a debe tener al menos 6 caracteres'),
+
 })
 
 export type RegisterState = {
@@ -41,8 +26,7 @@ export type RegisterState = {
 }
 
 export async function signup(prevState: RegisterState, formData: FormData): Promise<RegisterState> {
-<<<<<<< HEAD
-  const rawData = {
+const rawData = {
     fullName: formData.get('fullName'),
     license: formData.get('license'),
     specialty: formData.get('specialty'),
@@ -55,29 +39,12 @@ export async function signup(prevState: RegisterState, formData: FormData): Prom
   }
 
   const validatedFields = registerSchema.safeParse(rawData)
-=======
-  const supabase = await createClient()
 
-  const rawData = {
-    fullName: formData.get('fullName') as string,
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-    phone: formData.get('phone') as string,
-    licenseId: formData.get('licenseId') as string,
-    specialty: formData.get('specialty') as string,
-    state: formData.get('state') as string,
-    experience: formData.get('experience') as string,
-    interestArea: formData.get('interest') as string,
-  }
-
-  const validatedFields = RegisterSchema.safeParse(rawData)
->>>>>>> origin/main
 
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
-<<<<<<< HEAD
-      message: 'Por favor revisa los campos.',
+message: 'Por favor revisa los campos.',
     }
   }
 
@@ -99,43 +66,19 @@ export async function signup(prevState: RegisterState, formData: FormData): Prom
         phone,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
-=======
-      message: "Por favor revisa los campos.",
-    }
-  }
 
-  const { error, data } = await supabase.auth.signUp({
-    email: rawData.email,
-    password: rawData.password,
-    options: {
-      data: {
-        full_name: rawData.fullName,
-        license_id: rawData.licenseId,
-        specialty: rawData.specialty,
-        state: rawData.state,
-        experience_level: rawData.experience,
-        interest_area: rawData.interestArea,
-        phone: rawData.phone,
-      },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
->>>>>>> origin/main
     },
   })
 
   if (error) {
-<<<<<<< HEAD
-    console.error('Supabase SignUp Error:', error)
-=======
-    console.error('SupabaseSignUp Error:', error)
->>>>>>> origin/main
+console.error('Supabase SignUp Error:', error)
+
     return {
       message: error.message,
     }
   }
 
-<<<<<<< HEAD
-  // Redirect to verification page
-=======
->>>>>>> origin/main
+// Redirect to verification page
+
   redirect('/register/verify')
 }

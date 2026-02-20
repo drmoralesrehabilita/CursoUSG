@@ -18,7 +18,7 @@ export default async function LessonPage({ params }: { params: { id: string } })
   }
 
   const lesson = await getLesson(id)
-  const enrollment = await getUserEnrollment(user.id, lesson?.module_id || "")
+  const enrollment = await getUserEnrollment()
 
   if (!lesson) {
     return <div>Lección no encontrada</div>

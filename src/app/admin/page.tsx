@@ -1,19 +1,17 @@
-import { AdminHeader } from "@/components/admin/AdminHeader"
-<<<<<<< HEAD
-
+﻿import { AdminHeader } from "@/components/admin/AdminHeader"
 const kpiCards = [
   { label: "Ingresos del Mes", value: "$45,280", change: "+12.5%", positive: true, icon: "payments" },
-  { label: "Médicos Inscritos", value: "1,247", change: "+8.3%", positive: true, icon: "groups" },
-  { label: "Tasa de Finalización", value: "78%", change: "+5.2%", positive: true, icon: "trending_up" },
+  { label: "M├®dicos Inscritos", value: "1,247", change: "+8.3%", positive: true, icon: "groups" },
+  { label: "Tasa de Finalizaci├│n", value: "78%", change: "+5.2%", positive: true, icon: "trending_up" },
   { label: "NPS Score", value: "4.8", change: "+0.3", positive: true, icon: "star" },
 ]
 
 const recentDoctors = [
-  { name: "Dra. María García", specialty: "Traumatología", city: "CDMX", progress: 75, status: "active" },
-  { name: "Dr. Carlos López", specialty: "Rehabilitación", city: "Monterrey", progress: 45, status: "active" },
-  { name: "Dra. Ana Martínez", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed" },
-  { name: "Dr. Roberto Sánchez", specialty: "Neurología", city: "Puebla", progress: 30, status: "active" },
-  { name: "Dra. Laura Torres", specialty: "Fisiatría", city: "Mérida", progress: 10, status: "pending" },
+  { name: "Dra. Mar├¡a Garc├¡a", specialty: "Traumatolog├¡a", city: "CDMX", progress: 75, status: "active" },
+  { name: "Dr. Carlos L├│pez", specialty: "Rehabilitaci├│n", city: "Monterrey", progress: 45, status: "active" },
+  { name: "Dra. Ana Mart├¡nez", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed" },
+  { name: "Dr. Roberto S├ínchez", specialty: "Neurolog├¡a", city: "Puebla", progress: 30, status: "active" },
+  { name: "Dra. Laura Torres", specialty: "Fisiatr├¡a", city: "M├®rida", progress: 10, status: "pending" },
 ]
 
 function StatusBadge({ status }: { status: string }) {
@@ -69,10 +67,10 @@ export default function AdminDashboardPage() {
         <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 rounded-xl px-5 py-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-amber-400 text-xl">warning</span>
           <p className="text-sm text-amber-300 font-medium flex-1">
-            Hay <strong>5 facturas pendientes</strong> de revisión este mes.
+            Hay <strong>5 facturas pendientes</strong> de revisi├│n este mes.
           </p>
           <button className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors">
-            Ver detalles →
+            Ver detalles ÔåÆ
           </button>
         </div>
 
@@ -83,12 +81,12 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Ventas Mensuales</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Últimos 6 meses</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">├Ültimos 6 meses</p>
               </div>
               <select className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-1.5 text-gray-700 dark:text-gray-300 outline-none">
                 <option>6 meses</option>
                 <option>12 meses</option>
-                <option>Este año</option>
+                <option>Este a├▒o</option>
               </select>
             </div>
             {/* SVG Chart */}
@@ -112,7 +110,7 @@ export default function AdminDashboardPage() {
 
           {/* Specialty Distribution */}
           <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Distribución por Especialidad</h3>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Distribuci├│n por Especialidad</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">Top especialidades</p>
 
             {/* Simple donut representation */}
@@ -134,8 +132,8 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-2.5">
               {[
-                { label: "Traumatología", pct: "35%", color: "bg-primary" },
-                { label: "Rehabilitación", pct: "25%", color: "bg-blue-500" },
+                { label: "Traumatolog├¡a", pct: "35%", color: "bg-primary" },
+                { label: "Rehabilitaci├│n", pct: "25%", color: "bg-blue-500" },
                 { label: "Med. Deporte", pct: "20%", color: "bg-violet-500" },
                 { label: "Otros", pct: "20%", color: "bg-amber-500" },
               ].map((s) => (
@@ -153,18 +151,18 @@ export default function AdminDashboardPage() {
         <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">Médicos Recientes</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Últimas inscripciones</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">M├®dicos Recientes</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">├Ültimas inscripciones</p>
             </div>
             <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-              Ver todos →
+              Ver todos ÔåÆ
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-white/5">
-                  <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Médico</th>
+                  <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">M├®dico</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Especialidad</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Ciudad</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Progreso</th>
@@ -207,95 +205,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       </div>
-=======
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
-export default function AdminPage() {
-  return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <AdminHeader title="Dashboard de Administración" subtitle="Vista general de métricas y rendimiento del curso" />
-      
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard title="Total Alumnos" value="156" trend="+12" icon="group" />
-          <KPICard title="Ingresos Mes" value="$12,450" trend="+8.5%" icon="payments" color="emerald" />
-          <KPICard title="Completitud Media" value="42%" trend="+5%" icon="analytics" color="amber" />
-          <KPICard title="Certificados Emitidos" value="28" trend="+3" icon="workspace_premium" color="indigo" />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Chart Area */}
-          <Card className="lg:col-span-2 shadow-sm border-white/5 bg-surface-light dark:bg-white/5">
-            <CardHeader>
-              <CardTitle>Actividad Reciente</CardTitle>
-              <CardDescription>Visualización de interacciones de alumnos en los últimos 7 días</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center border-t border-white/5">
-              <p className="text-gray-500 text-sm">Espacio para gráfico de actividad</p>
-            </CardContent>
-          </Card>
-
-          {/* User Status Feed */}
-          <Card className="shadow-sm border-white/5 bg-surface-light dark:bg-white/5">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Médicos Recientes</CardTitle>
-                <CardDescription>Últimas inscripciones</CardDescription>
-              </div>
-              <button className="text-primary text-xs font-bold hover:underline">Ver todos</button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <UserActivityItem name="Dr. Alejandro Ruiz" time="Hace 15 min" role="Inscrito" />
-              <UserActivityItem name="Dra. Elena Silva" time="Hace 2 horas" role="Completado Mod 2" />
-              <UserActivityItem name="Dr. Roberto Méndez" time="Hace 5 horas" role="Inscrito" />
-              <UserActivityItem name="Dra. Monica G." time="Ayer" role="Certificado" />
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-function KPICard({ title, value, trend, icon, color = "primary" }: any) {
-  const colorMap: any = {
-    primary: "text-primary bg-primary/10",
-    emerald: "text-emerald-500 bg-emerald-500/10",
-    amber: "text-amber-500 bg-amber-500/10",
-    indigo: "text-indigo-500 bg-indigo-500/10"
-  }
-
-  return (
-    <Card className="border-white/5 bg-surface-light dark:bg-white/5">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div className={colorMap[color] + " p-2 rounded-lg"}>
-            <span className="material-symbols-outlined">{icon}</span>
-          </div>
-          <span className="text-emerald-500 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-full">{trend}</span>
-        </div>
-        <div className="mt-4">
-            <h3 className="text-gray-500 dark:text-gray-400 text-xs font-bold tracking-widest uppercase">{title}</h3>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function UserActivityItem({ name, time, role }: any) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
-        <span className="material-symbols-outlined text-sm text-gray-500">person</span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-900 dark:text-gray-200 truncate">{name}</p>
-        <p className="text-[10px] text-gray-500">{time}</p>
-      </div>
-      <span className="text-[10px] font-bold text-primary">{role}</span>
->>>>>>> origin/main
     </div>
   )
 }

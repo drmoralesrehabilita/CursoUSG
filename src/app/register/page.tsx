@@ -1,6 +1,5 @@
-"use client"
+﻿"use client"
 
-<<<<<<< HEAD
 import { useState, useActionState } from "react"
 import Link from "next/link"
 import { useFormStatus } from "react-dom"
@@ -14,40 +13,12 @@ import { signup, type RegisterState } from "./actions"
 const initialState = {
   message: '',
   errors: {}
-=======
-import { useState } from "react"
-import { useActionState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { 
-  ArrowRight, 
-  ArrowLeft, 
-  Stethoscope, 
-  User, 
-  Phone, 
-  MapPin, 
-  Mail, 
-  Lock,
-  ChevronRight,
-  ShieldCheck,
-  CheckCircle2
-} from "lucide-react"
-import Link from "next/link"
-import { signup } from "./actions"
 
-const initialState = {
-  message: "",
-  errors: {},
->>>>>>> origin/main
 }
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1)
-<<<<<<< HEAD
-  const totalSteps = 3
+const totalSteps = 3
   const progress = (step / totalSteps) * 100
   
   // Form Data State
@@ -78,34 +49,13 @@ export default function RegisterPage() {
 
   const updateFormData = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }))
-=======
-  const [formData, setFormData] = useState({
-    fullName: "",
-    licenseId: "",
-    specialty: "",
-    state: "",
-    experience: "",
-    interest: [] as string[],
-    email: "",
-    phone: "",
-    password: "",
-  })
 
-  const [state, dispatch] = useActionState(signup, initialState)
-
-  const handleNext = () => setStep(step + 1)
-  const handleBack = () => setStep(step - 1)
-
-  const updateFormData = (updates: any) => {
-    setFormData((prev) => ({ ...prev, ...updates }))
->>>>>>> origin/main
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-primary/30 selection:text-primary">
       
-<<<<<<< HEAD
-      {/* Header */}
+{/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-background-dark/5 backdrop-blur-sm sticky top-0 z-10">
         <Logo variant="light" compact />
         <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
@@ -120,13 +70,13 @@ export default function RegisterPage() {
           <div className="hidden lg:flex flex-col flex-1 gap-8 pt-10">
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
-                Registro de Médicos
+                Registro de M├®dicos
               </span>
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight mb-4">
-                Únete a la comunidad líder en educación continua.
+                ├Ünete a la comunidad l├¡der en educaci├│n continua.
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
-                Accede a diplomados, certificaciones y recursos exclusivos validados por las principales instituciones de salud en México.
+                Accede a diplomados, certificaciones y recursos exclusivos validados por las principales instituciones de salud en M├®xico.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -152,8 +102,8 @@ export default function RegisterPage() {
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold text-primary">Paso {step} de {totalSteps}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    {step === 1 && "Información Profesional"}
-                    {step === 2 && "Perfil de Interés"}
+                    {step === 1 && "Informaci├│n Profesional"}
+                    {step === 2 && "Perfil de Inter├®s"}
                     {step === 3 && "Cuenta y Seguridad"}
                   </span>
                 </div>
@@ -188,95 +138,18 @@ export default function RegisterPage() {
               {/* Footer inside card */}
               <div className="px-6 py-4 bg-slate-50 dark:bg-[#151c24] border-t border-slate-100 dark:border-border/10 text-center">
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Al registrarte, aceptas nuestros <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Términos de Servicio</a> y <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Política de Privacidad</a>.
+                  Al registrarte, aceptas nuestros <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">T├®rminos de Servicio</a> y <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Pol├¡tica de Privacidad</a>.
                 </p>
               </div>
 
             </div>
-=======
-      {/* Header / Brand */}
-      <header className="px-6 py-6 lg:px-12 flex justify-between items-center relative z-10">
-         <Link href="/" className="flex items-center gap-2 group">
-            <span className="material-symbols-outlined text-3xl text-primary relative z-10">sensors</span>
-            <div className="flex flex-col items-start translate-y-0.5">
-               <span className="text-base font-black tracking-tighter leading-none text-slate-900 dark:text-white">DR. RAÚL</span>
-               <span className="text-base font-black tracking-tighter leading-none text-primary -mt-1">MORALES</span>
-            </div>
-         </Link>
-         <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest hidden sm:block">
-           Registro de Alumnos
-         </p>
-      </header>
 
-      {/* Main Register Content */}
-      <main className="flex-1 flex flex-col items-center justify-center p-6 bg-background-light dark:bg-background-dark transition-colors duration-500 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
-
-        <div className="w-full lg:max-w-[500px] flex-1">
-          <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border/10 shadow-xl overflow-hidden">
-            
-            {/* Progress Header */}
-            <div className="bg-slate-50 dark:bg-background-dark/50 px-6 sm:px-8 py-6 border-b border-slate-100 dark:border-border/5">
-               <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-sm font-bold uppercase tracking-widest text-primary">Paso {step} de 3</h2>
-                  <div className="flex gap-1">
-                     {[1, 2, 3].map((s) => (
-                       <div key={s} className={`h-1 rounded-full transition-all duration-300 ${s <= step ? 'w-6 bg-primary' : 'w-2 bg-slate-200 dark:bg-white/10'}`} />
-                     ))}
-                  </div>
-               </div>
-               <h1 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
-                  {step === 1 && "Información Profesional"}
-                  {step === 2 && "Áreas de Interés"}
-                  {step === 3 && "Configura tu Cuenta"}
-               </h1>
-            </div>
-
-            <div className="p-6 sm:p-8">
-              {step === 1 && <StepOne formData={formData} updateFormData={updateFormData} onNext={handleNext} />}
-              {step === 2 && <StepTwo formData={formData} updateFormData={updateFormData} onNext={handleNext} onBack={handleBack} />}
-              {step === 3 && (
-                <form action={dispatch}>
-                  {/* Hidden inputs to pass data from previous steps */}
-                  <input type="hidden" name="fullName" value={formData.fullName} />
-                  <input type="hidden" name="licenseId" value={formData.licenseId} />
-                  <input type="hidden" name="specialty" value={formData.specialty} />
-                  <input type="hidden" name="state" value={formData.state} />
-                  <input type="hidden" name="experience" value={formData.experience} />
-                  <input type="hidden" name="interest" value={formData.interest.join(',')} />
-                  
-                  <StepThree formData={formData} updateFormData={updateFormData} onBack={handleBack} serverState={state} />
-                </form>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 sm:px-8 py-6 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-border/5 text-center">
-               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-tight">
-                 ¿Ya tienes una cuenta? <Link href="/login" className="text-primary font-bold hover:underline">Inicia sesión</Link>
-               </p>
-            </div>
-          </div>
-          
-          <div className="mt-8 flex items-center justify-center gap-4 text-slate-400 dark:text-slate-500">
-             <div className="flex items-center gap-1.5 opacity-60">
-                <ShieldCheck className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Protección SSL</span>
-             </div>
-             <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-             <div className="flex items-center gap-1.5 opacity-60">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Aviso de Privacidad</span>
-             </div>
->>>>>>> origin/main
           </div>
         </div>
       </main>
     </div>
   )
 }
-
-<<<<<<< HEAD
 
 interface RegisterFormData {
   fullName: string
@@ -296,7 +169,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
       <div className="text-center lg:text-left">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Crear nueva cuenta</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Completa tus datos profesionales para validar tu perfil médico.
+          Completa tus datos profesionales para validar tu perfil m├®dico.
         </p>
       </div>
       
@@ -307,7 +180,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
             <User className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
             <Input 
                 id="fullname" 
-                placeholder="Dr. Juan Pérez" 
+                placeholder="Dr. Juan P├®rez" 
                 className="pl-10" 
                 value={formData.fullName}
                 onChange={(e) => updateFormData('fullName', e.target.value)}
@@ -317,7 +190,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
 
         <div className="space-y-2">
           <div className="flex justify-between">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="license">Cédula Profesional</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="license">C├®dula Profesional</label>
             <CircleHelp className="h-4 w-4 text-slate-400 cursor-help" />
           </div>
           <div className="relative">
@@ -342,9 +215,9 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Medicina General">Medicina General</SelectItem>
-                <SelectItem value="Radiología">Radiología</SelectItem>
-                <SelectItem value="Traumatología">Traumatología</SelectItem>
-                <SelectItem value="Rehabilitación">Rehabilitación</SelectItem>
+                <SelectItem value="Radiolog├¡a">Radiolog├¡a</SelectItem>
+                <SelectItem value="Traumatolog├¡a">Traumatolog├¡a</SelectItem>
+                <SelectItem value="Rehabilitaci├│n">Rehabilitaci├│n</SelectItem>
                 <SelectItem value="Otra">Otra</SelectItem>
               </SelectContent>
             </Select>
@@ -360,9 +233,9 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
                 <SelectValue placeholder="Selecciona estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Ciudad de México">Ciudad de México</SelectItem>
+                <SelectItem value="Ciudad de M├®xico">Ciudad de M├®xico</SelectItem>
                 <SelectItem value="Jalisco">Jalisco</SelectItem>
-                <SelectItem value="Nuevo León">Nuevo León</SelectItem>
+                <SelectItem value="Nuevo Le├│n">Nuevo Le├│n</SelectItem>
                 <SelectItem value="Otro">Otro</SelectItem>
               </SelectContent>
             </Select>
@@ -373,87 +246,19 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
       <Button onClick={onNext} className="w-full h-12 text-base font-bold shadow-lg shadow-primary/20">
         Siguiente: Personalizar Perfil
         <ArrowRight className="ml-2 h-4 w-4" />
-=======
-function StepOne({ formData, updateFormData, onNext }: any) {
-  const isComplete = formData.fullName && formData.licenseId && formData.specialty
-  
-  return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Nombre Completo</Label>
-          <div className="relative">
-            <Input 
-              value={formData.fullName}
-              onChange={(e) => updateFormData({ fullName: e.target.value })}
-              className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-              placeholder="Dr. Roberto Pérez" 
-            />
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Cédula Profesional</Label>
-          <div className="relative">
-             <Input 
-              value={formData.licenseId}
-              onChange={(e) => updateFormData({ licenseId: e.target.value })}
-              className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-              placeholder="12345678" 
-            />
-             <CheckCircle2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Especialidad</Label>
-            <Select value={formData.specialty} onValueChange={(val) => updateFormData({ specialty: val })}>
-              <SelectTrigger className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl">
-                 <SelectValue placeholder="Seleccionar" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200 dark:border-border/10">
-                <SelectItem value="rehabil">Rehabilitación</SelectItem>
-                <SelectItem value="radio">Radiología</SelectItem>
-                <SelectItem value="anest">Anestesiología</SelectItem>
-                <SelectItem value="trauma">Traumatología</SelectItem>
-                <SelectItem value="other">Otra</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Estado / Provincia</Label>
-            <div className="relative">
-              <Input 
-                value={formData.state}
-                onChange={(e) => updateFormData({ state: e.target.value })}
-                className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-                placeholder="CDMX" 
-              />
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <Button 
-        onClick={onNext} 
-        disabled={!isComplete}
-        className="w-full h-12 rounded-xl bg-primary hover:bg-blue-600 text-white font-bold group"
-      >
-        Continuar <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
->>>>>>> origin/main
+
       </Button>
     </div>
   )
 }
 
-<<<<<<< HEAD
 function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: RegisterFormData, updateFormData: (k:string, v:string) => void, onNext: () => void, onBack: () => void }) {
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="text-center lg:text-left">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Experiencia</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Ayúdanos a recomendarte el mejor contenido.
+          Ay├║danos a recomendarte el mejor contenido.
         </p>
       </div>
 
@@ -471,7 +276,7 @@ function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: Regis
             ))}
         </div>
 
-        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-4">Área de Interés Principal</h3>
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-4">├ürea de Inter├®s Principal</h3>
         <div className="grid grid-cols-2 gap-3">
              {['Miembro Superior', 'Miembro Inferior', 'Columna', 'Intervencionismo'].map((area) => (
                 <div 
@@ -489,77 +294,17 @@ function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: Regis
       <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <Button variant="outline" onClick={onBack} className="w-full sm:w-1/3 h-12 flex items-center justify-center gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Atrás
+            Atr├ís
           </Button>
         <Button onClick={onNext} className="w-full sm:w-2/3 h-12 text-base font-bold shadow-lg shadow-primary/20">
             Siguiente: Cuenta
             <ArrowRight className="ml-2 h-4 w-4" />
-=======
-function StepTwo({ formData, updateFormData, onNext, onBack }: any) {
-  const interests = [
-    { id: 'msk', label: 'Musculoesquelético' },
-    { id: 'nerv', label: 'Nervio Periférico' },
-    { id: 'inter', label: 'Intervencionismo' },
-    { id: 'vasc', label: 'Vascular Doppler' },
-  ]
-  
-  const toggleInterest = (id: string) => {
-    const current = [...formData.interest]
-    const idx = current.indexOf(id)
-    if (idx > -1) current.splice(idx, 1)
-    else current.push(id)
-    updateFormData({ interest: current })
-  }
 
-  return (
-    <div className="space-y-8">
-      <div className="space-y-6">
-         <div className="space-y-3">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Experiencia en USG</Label>
-            <div className="grid grid-cols-2 gap-3">
-               {['Ninguna', 'Básica', 'Intermedia', 'Avanzada'].map((lvl) => (
-                 <button 
-                  key={lvl}
-                  onClick={() => updateFormData({ experience: lvl })}
-                  className={`p-3 text-xs font-bold rounded-xl border transition-all ${
-                    formData.experience === lvl 
-                      ? "bg-primary/10 border-primary text-primary" 
-                      : "bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 text-slate-500 hover:border-primary/40"
-                  }`}
-                 >
-                   {lvl}
-                 </button>
-               ))}
-            </div>
-         </div>
-
-         <div className="space-y-4">
-            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Áreas de Mayor Interés</Label>
-            <div className="space-y-3">
-               {interests.map((item) => (
-                 <div key={item.id} className="flex items-center gap-3 p-4 rounded-xl border border-slate-100 dark:border-border/5 bg-slate-50/50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer group" onClick={() => toggleInterest(item.id)}>
-                    <Checkbox checked={formData.interest.includes(item.id)} className="border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors">{item.label}</span>
-                    <ChevronRight className="w-4 h-4 ml-auto text-slate-300 group-hover:text-primary opacity-0 group-hover:opacity-100 transition-all" />
-                 </div>
-               ))}
-            </div>
-         </div>
-      </div>
-      <div className="flex gap-4">
-        <Button onClick={onBack} variant="outline" className="h-12 px-6 rounded-xl border-slate-200 dark:border-border/10 font-bold">
-           <ArrowLeft className="w-4 h-4 mr-2" /> Atrás
-        </Button>
-        <Button onClick={onNext} className="flex-1 h-12 rounded-xl bg-primary hover:bg-blue-600 font-bold group">
-           Finalizar Perfil <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
->>>>>>> origin/main
         </Button>
       </div>
     </div>
   )
 }
-
-<<<<<<< HEAD
 
 function StepThree({ formData, updateFormData, onBack, serverState }: { formData: RegisterFormData, updateFormData: (k:string, v:string) => void, onBack: () => void, serverState: RegisterState }) {
     const { pending } = useFormStatus()
@@ -582,7 +327,7 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
             )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="email">Correo Electrónico</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="email">Correo Electr├│nico</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
               <Input 
@@ -620,14 +365,14 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
           </div>
   
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">Contraseña</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">Contrase├▒a</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
               <Input 
                 id="password" 
                 name="password"
                 type="password" 
-                placeholder="••••••••" 
+                placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" 
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => updateFormData('password', e.target.value)}
@@ -641,7 +386,7 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
   
         <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <Button variant="outline" type="button" onClick={onBack} disabled={pending} className="w-full sm:w-1/3 h-12">
-              Atrás
+              Atr├ís
           </Button>
           <Button disabled={pending} type="submit" className="w-full sm:w-2/3 h-12 text-base font-bold bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
               {pending ? (
@@ -661,79 +406,4 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
     )
   }
 
-=======
-function StepThree({ formData, updateFormData, onBack, serverState }: any) {
-  return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Correo Electrónico</Label>
-          <div className="relative">
-            <Input 
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => updateFormData({ email: e.target.value })}
-              className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-              placeholder="raul@medico.com" 
-              required
-            />
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Teléfono (WhatsApp)</Label>
-          <div className="relative">
-            <Input 
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => updateFormData({ phone: e.target.value })}
-              className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-              placeholder="+52 55..." 
-              required
-            />
-            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs font-bold uppercase tracking-wider text-slate-500">Crear Contraseña</Label>
-          <div className="relative">
-            <Input 
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => updateFormData({ password: e.target.value })}
-              className="h-12 bg-slate-50 dark:bg-background-dark border-slate-200 dark:border-border/10 rounded-xl pl-10" 
-              placeholder="••••••••" 
-              required
-            />
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          </div>
-          <p className="text-[10px] text-slate-400 font-medium">Mínimo 8 caracteres, incluye una letra y un número.</p>
-        </div>
-      </div>
 
-      {serverState?.message && (
-        <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-bold flex items-center gap-2 animate-shake">
-           <span className="material-symbols-outlined text-base">error</span>
-           {serverState.message}
-        </div>
-      )}
-
-      <div className="flex gap-4 pt-2">
-        <Button type="button" onClick={onBack} variant="outline" className="h-12 px-6 rounded-xl border-slate-200 font-bold">
-           <ArrowLeft className="w-4 h-4 mr-2" />
-        </Button>
-        <Button type="submit" className="flex-1 h-12 rounded-xl bg-primary hover:bg-blue-600 font-bold shadow-lg shadow-primary/20">
-           Crear Cuenta <ArrowRight className="w-4 h-4 ml-2" />
-        </Button>
-      </div>
-      
-      <p className="text-[10px] text-center text-slate-400 leading-relaxed max-w-xs mx-auto">
-        Al hacer clic en crear cuenta, aceptas nuestros <Link href="#" className="underline">Términos de Servicio</Link> y <Link href="#" className="underline">Política de Privacidad</Link>.
-      </p>
-    </div>
-  )
-}
->>>>>>> origin/main
