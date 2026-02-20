@@ -1,8 +1,12 @@
+
 import { cn } from "@/lib/utils"
 
 interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** "dark" for dark backgrounds (white text), "light" for light backgrounds (dark text) */
   variant?: "dark" | "light"
+  /** Horizontal compact layout for navbars and headers */
   compact?: boolean
+  /** Show "ECOGRAFÍA NEUROMUSCULOESQUELÉTICA" subtitle */
   showSubtitle?: boolean
   iconClassName?: string
   textClassName?: string
