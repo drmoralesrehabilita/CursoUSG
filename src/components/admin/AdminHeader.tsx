@@ -30,6 +30,27 @@ export function AdminHeader({ title = "Dashboard", subtitle }: AdminHeaderProps)
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        {/* Search */}
+        <div className="hidden lg:flex items-center bg-gray-100 dark:bg-white/5 rounded-lg px-3 py-2 border border-transparent focus-within:border-primary/30 transition-colors">
+          <span className="material-symbols-outlined text-gray-400 text-lg mr-2">search</span>
+          <input
+            type="text"
+            placeholder="Buscar..."
+            className="bg-transparent text-sm text-gray-700 dark:text-gray-300 placeholder-gray-400 outline-none w-48"
+          />
+        </div>
+
+        {/* Notifications */}
+        <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 relative transition-colors">
+          <span className="material-symbols-outlined text-xl">notifications</span>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-[#0f1926]" />
+        </button>
+
+        {/* Chat */}
+        <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 transition-colors">
+          <span className="material-symbols-outlined text-xl">chat</span>
+        </button>
+
         {/* Theme Toggle */}
         <button
           className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 transition-colors"

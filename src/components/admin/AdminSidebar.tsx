@@ -38,10 +38,12 @@ export function AdminSidebar({ userProfile }: { userProfile: UserProfile | null 
 
   return (
     <aside className="w-72 bg-[#0a1628] text-white hidden md:flex flex-col flex-shrink-0 relative overflow-y-auto z-20 shadow-2xl font-body sidebar-scroll">
+      {/* Logo Section */}
       <div className="p-6 flex flex-col items-center border-b border-white/5">
         <Logo showSubtitle />
       </div>
 
+      {/* User Profile Card */}
       <div className="px-5 py-4 border-b border-white/5">
         <div className="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
@@ -54,6 +56,7 @@ export function AdminSidebar({ userProfile }: { userProfile: UserProfile | null 
         </div>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 px-3 py-5 space-y-1">
         <p className="px-4 text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-3">
           Administración
@@ -91,7 +94,30 @@ export function AdminSidebar({ userProfile }: { userProfile: UserProfile | null 
         })}
       </nav>
 
+      {/* Bottom Section */}
       <div className="p-3 border-t border-white/5 space-y-1">
+        {/* Settings */}
+        <Link
+          href="/admin/configuracion"
+          className={cn(
+            "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
+            pathname === "/admin/configuracion"
+              ? "bg-primary/15 text-white border border-primary/20"
+              : "text-gray-400 hover:bg-white/5 hover:text-white"
+          )}
+        >
+          <span
+            className={cn(
+              "material-symbols-outlined text-[22px] transition-colors duration-200",
+              pathname === "/admin/configuracion" ? "text-primary" : "text-gray-500 group-hover:text-primary"
+            )}
+          >
+            settings
+          </span>
+          <span className="font-medium text-sm">Configuración</span>
+        </Link>
+
+        {/* Logout */}
         <form action={logout}>
           <button
             type="submit"
