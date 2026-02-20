@@ -1,5 +1,7 @@
 [build]
   command = "npm run build"
+  # Do not set publish to repo root - Next.js plugin uses .next output
+  publish = ".next"
 
 [build.environment]
   NPM_FLAGS = "--legacy-peer-deps"
