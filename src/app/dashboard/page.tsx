@@ -1,4 +1,4 @@
-﻿import { Header } from "@/components/dashboard/header"
+import { Header } from "@/components/dashboard/header"
 import { getUserProfile } from "@/lib/data"
 
 export default async function DashboardPage() {
@@ -15,7 +15,7 @@ export default async function DashboardPage() {
               Bienvenido de nuevo, <span className="text-primary">{displayName}</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
-              Contin├║a tu especializaci├│n en ecograf├¡a intervencionista. Tienes 2 m├│dulos pendientes esta semana.
+              Continúa tu especialización en ecografía intervencionista. Tienes 2 módulos pendientes esta semana.
             </p>
           </div>
           <div className="flex gap-3">
@@ -44,14 +44,14 @@ export default async function DashboardPage() {
                   <span className="text-gray-400 text-sm">Actualizado hace 2h</span>
                 </div>
                 <h3 className="text-2xl font-bold text-secondary dark:text-white mb-2">
-                  M├│dulo 2: Miembro Superior (Hombro)
+                  Módulo 2: Miembro Superior (Hombro)
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-lg">
-                  Identificaci├│n de estructuras tendinosas del manguito rotador y t├®cnicas de infiltraci├│n subacromial guiada por ultrasonido.
+                  Identificación de estructuras tendinosas del manguito rotador y técnicas de infiltración subacromial guiada por ultrasonido.
                 </p>
                 <div className="mb-8">
                   <div className="flex justify-between text-sm mb-2 font-medium">
-                    <span className="text-secondary dark:text-gray-300">Progreso del m├│dulo</span>
+                    <span className="text-secondary dark:text-gray-300">Progreso del módulo</span>
                     <span className="text-primary">65%</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button className="flex-1 bg-primary hover:bg-cyan-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined">play_circle</span>
-                    Continuar Lecci├│n
+                    Continuar Lección
                   </button>
                   <button className="flex-1 bg-white dark:bg-gray-800 text-secondary dark:text-white font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined">description</span>
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
             <div>
               <h3 className="text-lg font-semibold text-secondary dark:text-white mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">bolt</span>
-                Micro-aprendizaje: Anatom├¡a Ecogr├ífica
+                Micro-aprendizaje: Anatomía Ecográfica
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-primary/50 dark:hover:border-primary/50 transition-all cursor-pointer group shadow-sm">
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
                         Rodilla: Meniscos
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        Exploraci├│n axial y longitudinal de meniscos medial y lateral.
+                        Exploración axial y longitudinal de meniscos medial y lateral.
                       </p>
                       <span className="text-[10px] font-semibold text-gray-400 mt-2 block flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px]">schedule</span> 12 min
@@ -113,10 +113,10 @@ export default async function DashboardPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-secondary dark:text-white group-hover:text-primary transition-colors">
-                        Mano: T├║nel Carpiano
+                        Mano: Túnel Carpiano
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        Medici├│n del ├írea del nervio mediano y retin├ículo.
+                        Medición del Área del nervio mediano y retináculo.
                       </p>
                       <span className="text-[10px] font-semibold text-gray-400 mt-2 block flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px]">schedule</span> 8 min
@@ -138,7 +138,7 @@ export default async function DashboardPage() {
                         Tobillo: Ligamentos
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                        Evaluaci├│n del complejo ligamentario lateral tras esguince.
+                        Evaluación del complejo ligamentario lateral tras esguince.
                       </p>
                       <span className="text-[10px] font-semibold text-gray-400 mt-2 block flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px]">schedule</span> 15 min
@@ -150,7 +150,7 @@ export default async function DashboardPage() {
                 <div className="bg-surface-light dark:bg-surface-dark p-4 rounded-xl border border-dashed border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all cursor-pointer group flex items-center justify-center">
                   <div className="text-center">
                     <span className="material-symbols-outlined text-primary mb-1">add_circle</span>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Ver cat├ílogo completo</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Ver catálogo completo</p>
                   </div>
                 </div>
               </div>
@@ -162,11 +162,11 @@ export default async function DashboardPage() {
               <div className="absolute top-[-20px] right-[-20px] w-24 h-24 rounded-full bg-primary/20 blur-xl"></div>
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
                 <span className="material-symbols-outlined text-red-400 animate-pulse">videocam</span>
-                Pr├│xima Sesi├│n en Vivo
+                Próxima Sesión en Vivo
               </h3>
               <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-4">
                 <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Webinar</p>
-                <p className="font-bold text-lg leading-tight mb-2">Infiltraci├│n de Cadera Guiada</p>
+                <p className="font-bold text-lg leading-tight mb-2">Infiltración de Cadera Guiada</p>
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <span className="material-symbols-outlined text-base">calendar_month</span>
                   <span>24 Oct, 18:00 hrs</span>

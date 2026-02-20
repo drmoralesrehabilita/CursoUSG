@@ -1,17 +1,17 @@
-﻿import { AdminHeader } from "@/components/admin/AdminHeader"
+import { AdminHeader } from "@/components/admin/AdminHeader"
 const kpiCards = [
   { label: "Ingresos del Mes", value: "$45,280", change: "+12.5%", positive: true, icon: "payments" },
-  { label: "M├®dicos Inscritos", value: "1,247", change: "+8.3%", positive: true, icon: "groups" },
-  { label: "Tasa de Finalizaci├│n", value: "78%", change: "+5.2%", positive: true, icon: "trending_up" },
+  { label: "Médicos Inscritos", value: "1,247", change: "+8.3%", positive: true, icon: "groups" },
+  { label: "Tasa de Finalización", value: "78%", change: "+5.2%", positive: true, icon: "trending_up" },
   { label: "NPS Score", value: "4.8", change: "+0.3", positive: true, icon: "star" },
 ]
 
 const recentDoctors = [
-  { name: "Dra. Mar├¡a Garc├¡a", specialty: "Traumatolog├¡a", city: "CDMX", progress: 75, status: "active" },
-  { name: "Dr. Carlos L├│pez", specialty: "Rehabilitaci├│n", city: "Monterrey", progress: 45, status: "active" },
-  { name: "Dra. Ana Mart├¡nez", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed" },
-  { name: "Dr. Roberto S├ínchez", specialty: "Neurolog├¡a", city: "Puebla", progress: 30, status: "active" },
-  { name: "Dra. Laura Torres", specialty: "Fisiatr├¡a", city: "M├®rida", progress: 10, status: "pending" },
+  { name: "Dra. María García", specialty: "Traumatología", city: "CDMX", progress: 75, status: "active" },
+  { name: "Dr. Carlos López", specialty: "Rehabilitación", city: "Monterrey", progress: 45, status: "active" },
+  { name: "Dra. Ana Martínez", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed" },
+  { name: "Dr. Roberto Sánchez", specialty: "Neurología", city: "Puebla", progress: 30, status: "active" },
+  { name: "Dra. Laura Torres", specialty: "Fisiatría", city: "Mérida", progress: 10, status: "pending" },
 ]
 
 function StatusBadge({ status }: { status: string }) {
@@ -67,10 +67,10 @@ export default function AdminDashboardPage() {
         <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 rounded-xl px-5 py-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-amber-400 text-xl">warning</span>
           <p className="text-sm text-amber-300 font-medium flex-1">
-            Hay <strong>5 facturas pendientes</strong> de revisi├│n este mes.
+            Hay <strong>5 facturas pendientes</strong> de revisión este mes.
           </p>
           <button className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors">
-            Ver detalles ÔåÆ
+            Ver detalles →
           </button>
         </div>
 
@@ -81,12 +81,12 @@ export default function AdminDashboardPage() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-base font-bold text-gray-900 dark:text-white">Ventas Mensuales</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">├Ültimos 6 meses</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Últimos 6 meses</p>
               </div>
               <select className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-1.5 text-gray-700 dark:text-gray-300 outline-none">
                 <option>6 meses</option>
                 <option>12 meses</option>
-                <option>Este a├▒o</option>
+                <option>Este año</option>
               </select>
             </div>
             {/* SVG Chart */}
@@ -110,7 +110,7 @@ export default function AdminDashboardPage() {
 
           {/* Specialty Distribution */}
           <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 p-6">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Distribuci├│n por Especialidad</h3>
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Distribución por Especialidad</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">Top especialidades</p>
 
             {/* Simple donut representation */}
@@ -132,8 +132,8 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-2.5">
               {[
-                { label: "Traumatolog├¡a", pct: "35%", color: "bg-primary" },
-                { label: "Rehabilitaci├│n", pct: "25%", color: "bg-blue-500" },
+                { label: "Traumatología", pct: "35%", color: "bg-primary" },
+                { label: "Rehabilitación", pct: "25%", color: "bg-blue-500" },
                 { label: "Med. Deporte", pct: "20%", color: "bg-violet-500" },
                 { label: "Otros", pct: "20%", color: "bg-amber-500" },
               ].map((s) => (
@@ -151,18 +151,18 @@ export default function AdminDashboardPage() {
         <div className="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-white/5 flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-white">M├®dicos Recientes</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">├Ültimas inscripciones</p>
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Médicos Recientes</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Últimas inscripciones</p>
             </div>
             <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-              Ver todos ÔåÆ
+              Ver todos →
             </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-white/5">
-                  <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">M├®dico</th>
+                  <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Médico</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Especialidad</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Ciudad</th>
                   <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">Progreso</th>

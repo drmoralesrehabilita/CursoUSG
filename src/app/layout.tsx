@@ -18,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         {/* Material Symbols Outlined */}
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />

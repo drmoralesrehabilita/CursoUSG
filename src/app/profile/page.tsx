@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { Header } from "@/components/dashboard/header"
 
@@ -21,15 +21,15 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 text-center md:text-left">
               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center md:justify-start">
-                <h1 className="text-3xl font-bold text-white">Dr. H├®ctor Garc├¡a</h1>
+                <h1 className="text-3xl font-bold text-white">Dr. Héctor García</h1>
                 <span className="bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-sm font-semibold inline-flex items-center gap-1 self-center md:self-auto">
                   <span className="material-symbols-outlined text-base">verified</span>
                   Residente 3
                 </span>
               </div>
-              <p className="text-gray-300 text-lg mb-1">Diplomado Internacional de Rehabilitaci├│n Intervencionista</p>
+              <p className="text-gray-300 text-lg mb-1">Diplomado Internacional de Rehabilitación Intervencionista</p>
               <p className="text-gray-400 text-sm flex items-center justify-center md:justify-start gap-1">
-                <span className="material-symbols-outlined text-base">location_on</span> Ciudad de M├®xico, M├®xico
+                <span className="material-symbols-outlined text-base">location_on</span> Ciudad de México, México
               </p>
               <div className="mt-6 flex flex-wrap gap-3 justify-center md:justify-start">
                 <button className="bg-primary hover:bg-cyan-500 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/20">
@@ -58,10 +58,10 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Nombre Completo</label>
-                  <p className="text-gray-800 dark:text-gray-200 font-medium">H├®ctor Manuel Garc├¡a L├│pez</p>
+                  <p className="text-gray-800 dark:text-gray-200 font-medium">Héctor Manuel García López</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Correo Electr├│nico</label>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Correo Electrónico</label>
                   <div className="flex items-center gap-2">
                     <p className="text-gray-800 dark:text-gray-200 font-medium">dr.garcia@medico.mx</p>
                     <span className="material-symbols-outlined text-green-500 text-sm" title="Verificado">check_circle</span>
@@ -72,39 +72,39 @@ export default function ProfilePage() {
                   <p className="text-gray-800 dark:text-gray-200 font-medium">+52 55 1234 5678</p>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">C├®dula Profesional</label>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Cédula Profesional</label>
                   <div className="flex items-center gap-2">
                     <p className="text-gray-800 dark:text-gray-200 font-medium tracking-widest">87654321</p>
                     <span className="bg-green-500/10 text-green-500 text-[10px] px-2 py-0.5 rounded border border-green-500/20 font-bold uppercase">Validada</span>
                   </div>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Instituci├│n Actual</label>
-                  <p className="text-gray-800 dark:text-gray-200 font-medium">Hospital General de M├®xico - Depto. de Rehabilitaci├│n</p>
+                  <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Institución Actual</label>
+                  <p className="text-gray-800 dark:text-gray-200 font-medium">Hospital General de México - Depto. de Rehabilitación</p>
                 </div>
               </div>
             </div>
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8">
               <h3 className="text-xl font-bold text-secondary dark:text-white flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-primary">medical_services</span>
-                Especialidad y ├üreas de Inter├®s
+                Especialidad y Áreas de Interés
               </h3>
               <div className="mb-6">
                 <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Especialidad Principal</label>
                 <div className="bg-background-light dark:bg-background-dark p-3 rounded-lg border border-gray-200 dark:border-gray-700 inline-block">
-                  <span className="text-secondary dark:text-white font-medium">Medicina F├¡sica y Rehabilitaci├│n</span>
+                  <span className="text-secondary dark:text-white font-medium">Medicina Física y Rehabilitación</span>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Intereses Cl├¡nicos (Tags)</label>
+                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Intereses Clínicos (Tags)</label>
                 <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium">Ecograf├¡a MSK</span>
+                  <span className="px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm font-medium">Ecografía MSK</span>
                   <span className="px-3 py-1.5 bg-secondary/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-full text-sm font-medium">Hombro</span>
                   <span className="px-3 py-1.5 bg-secondary/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-full text-sm font-medium">Columna</span>
                   <span className="px-3 py-1.5 bg-secondary/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-full text-sm font-medium">Intervencionismo</span>
-                  <span className="px-3 py-1.5 bg-secondary/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-full text-sm font-medium">Dolor Cr├│nico</span>
+                  <span className="px-3 py-1.5 bg-secondary/5 dark:bg-white/5 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-full text-sm font-medium">Dolor Crónico</span>
                   <button className="px-3 py-1.5 border border-dashed border-gray-400 text-gray-400 hover:text-primary hover:border-primary rounded-full text-sm font-medium transition-colors flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">add</span> A├▒adir
+                    <span className="material-symbols-outlined text-base">add</span> Añadir
                   </button>
                 </div>
               </div>
@@ -114,7 +114,7 @@ export default function ProfilePage() {
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-bold text-secondary dark:text-white flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-primary">analytics</span>
-                Mi Actividad Acad├®mica
+                Mi Actividad Académica
               </h3>
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
@@ -146,10 +146,10 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Pr├│ximo Examen</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Próximo Examen</p>
                 <div className="bg-gradient-to-r from-secondary to-blue-900 rounded-xl p-4 text-white relative overflow-hidden">
                   <div className="absolute right-0 top-0 w-16 h-16 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-lg"></div>
-                  <p className="font-bold text-sm">Certificaci├│n Mod. 3</p>
+                  <p className="font-bold text-sm">Certificación Mod. 3</p>
                   <p className="text-xs opacity-80 mb-2">28 de Octubre, 2023</p>
                   <div className="w-full bg-white/20 rounded-full h-1.5 mt-2">
                     <div className="bg-primary h-1.5 rounded-full w-[0%]"></div>
@@ -160,13 +160,13 @@ export default function ProfilePage() {
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-bold text-secondary dark:text-white flex items-center gap-2 mb-6">
                 <span className="material-symbols-outlined text-primary">settings_account_box</span>
-                Configuraci├│n de Cuenta
+                Configuración de Cuenta
               </h3>
               <div className="space-y-4">
                 <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">lock</span>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Cambiar Contrase├▒a</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Cambiar Contraseña</span>
                   </div>
                   <span className="material-symbols-outlined text-gray-300 text-sm">arrow_forward_ios</span>
                 </button>
@@ -183,14 +183,14 @@ export default function ProfilePage() {
                 <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
                   <div className="flex items-center gap-3">
                     <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">language</span>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Idioma / Regi├│n</span>
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Idioma / Región</span>
                   </div>
-                  <span className="text-xs text-gray-400">Espa├▒ol (MX)</span>
+                  <span className="text-xs text-gray-400">Español (MX)</span>
                 </button>
                 <div className="pt-4 mt-2 border-t border-gray-100 dark:border-gray-700">
                   <button className="w-full text-left text-sm text-red-500 hover:text-red-600 font-medium py-2 flex items-center gap-2">
                     <span className="material-symbols-outlined">logout</span>
-                    Cerrar Sesi├│n
+                    Cerrar Sesión
                   </button>
                 </div>
               </div>

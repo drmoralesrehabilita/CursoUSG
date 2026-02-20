@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { AdminHeader } from "@/components/admin/AdminHeader"
@@ -11,12 +11,12 @@ const statsCards = [
 ]
 
 const students = [
-  { id: 1, name: "Dra. Mar├¡a Garc├¡a L├│pez", email: "maria.garcia@hospital.mx", specialty: "Traumatolog├¡a", city: "CDMX", progress: 75, status: "active", enrollDate: "15 Ene 2025", lastAccess: "Hace 2 horas" },
-  { id: 2, name: "Dr. Carlos L├│pez Hern├índez", email: "carlos.lopez@clinica.mx", specialty: "Rehabilitaci├│n", city: "Monterrey", progress: 45, status: "active", enrollDate: "20 Ene 2025", lastAccess: "Hace 1 d├¡a" },
-  { id: 3, name: "Dra. Ana Mart├¡nez Ruiz", email: "ana.martinez@med.mx", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed", enrollDate: "10 Dic 2024", lastAccess: "Hace 3 horas" },
-  { id: 4, name: "Dr. Roberto S├ínchez D├¡az", email: "roberto.sanchez@salud.mx", specialty: "Neurolog├¡a", city: "Puebla", progress: 30, status: "active", enrollDate: "01 Feb 2025", lastAccess: "Hace 5 horas" },
-  { id: 5, name: "Dra. Laura Torres Vega", email: "laura.torres@hospital.mx", specialty: "Fisiatr├¡a", city: "M├®rida", progress: 10, status: "pending", enrollDate: "10 Feb 2025", lastAccess: "Nunca" },
-  { id: 6, name: "Dr. Miguel ├üngel Castro", email: "miguel.castro@clinica.mx", specialty: "Ortopedia", city: "Quer├®taro", progress: 60, status: "active", enrollDate: "05 Ene 2025", lastAccess: "Hace 12 horas" },
+  { id: 1, name: "Dra. María García López", email: "maria.garcia@hospital.mx", specialty: "Traumatología", city: "CDMX", progress: 75, status: "active", enrollDate: "15 Ene 2025", lastAccess: "Hace 2 horas" },
+  { id: 2, name: "Dr. Carlos López Hernández", email: "carlos.lopez@clinica.mx", specialty: "Rehabilitación", city: "Monterrey", progress: 45, status: "active", enrollDate: "20 Ene 2025", lastAccess: "Hace 1 día" },
+  { id: 3, name: "Dra. Ana Martínez Ruiz", email: "ana.martinez@med.mx", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed", enrollDate: "10 Dic 2024", lastAccess: "Hace 3 horas" },
+  { id: 4, name: "Dr. Roberto Sánchez Díaz", email: "roberto.sanchez@salud.mx", specialty: "Neurología", city: "Puebla", progress: 30, status: "active", enrollDate: "01 Feb 2025", lastAccess: "Hace 5 horas" },
+  { id: 5, name: "Dra. Laura Torres Vega", email: "laura.torres@hospital.mx", specialty: "Fisiatría", city: "Mérida", progress: 10, status: "pending", enrollDate: "10 Feb 2025", lastAccess: "Nunca" },
+  { id: 6, name: "Dr. Miguel Ángel Castro", email: "miguel.castro@clinica.mx", specialty: "Ortopedia", city: "Querétaro", progress: 60, status: "active", enrollDate: "05 Ene 2025", lastAccess: "Hace 12 horas" },
 ]
 
 function StatusBadge({ status }: { status: string }) {
@@ -42,7 +42,7 @@ export default function AlumnosPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader title="Gesti├│n de Alumnos" subtitle="Administra y monitorea a los m├®dicos inscritos" />
+      <AdminHeader title="Gestión de Alumnos" subtitle="Administra y monitorea a los médicos inscritos" />
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Stats Row */}
@@ -78,10 +78,10 @@ export default function AlumnosPage() {
           </div>
           <select className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-2.5 text-gray-700 dark:text-gray-300 outline-none">
             <option>Todas las especialidades</option>
-            <option>Traumatolog├¡a</option>
-            <option>Rehabilitaci├│n</option>
+            <option>Traumatología</option>
+            <option>Rehabilitación</option>
             <option>Medicina del Deporte</option>
-            <option>Neurolog├¡a</option>
+            <option>Neurología</option>
           </select>
           <select className="bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-xs px-3 py-2.5 text-gray-700 dark:text-gray-300 outline-none">
             <option>Todas las ciudades</option>
@@ -104,7 +104,7 @@ export default function AlumnosPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 dark:border-white/5">
-                    <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-5 py-3">M├®dico</th>
+                    <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-5 py-3">Médico</th>
                     <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-5 py-3">Especialidad</th>
                     <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Ciudad</th>
                     <th className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-5 py-3">Progreso</th>
@@ -181,8 +181,8 @@ export default function AlumnosPage() {
                 {[
                   { label: "Especialidad", value: selectedStudent.specialty },
                   { label: "Ciudad", value: selectedStudent.city },
-                  { label: "Fecha de Inscripci├│n", value: selectedStudent.enrollDate },
-                  { label: "├Ültimo Acceso", value: selectedStudent.lastAccess },
+                  { label: "Fecha de Inscripción", value: selectedStudent.enrollDate },
+                  { label: "Último Acceso", value: selectedStudent.lastAccess },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">{item.label}</span>

@@ -1,10 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import { AdminHeader } from "@/components/admin/AdminHeader"
 
 const statsCards = [
-  { label: "M├│dulos", value: "8", icon: "folder_open", color: "text-primary" },
+  { label: "Módulos", value: "8", icon: "folder_open", color: "text-primary" },
   { label: "Videos Publicados", value: "64", icon: "play_circle", color: "text-emerald-400" },
   { label: "Evaluaciones", value: "24", icon: "quiz", color: "text-violet-400" },
 ]
@@ -12,38 +12,38 @@ const statsCards = [
 const modules = [
   {
     id: 1,
-    title: "M├│dulo 1: Fundamentos de Ecograf├¡a",
+    title: "Módulo 1: Fundamentos de Ecografía",
     lessons: 8,
     published: 8,
     duration: "4h 30min",
     children: [
-      { id: "1-1", title: "1.1 Introducci├│n al Ultrasonido", type: "video", duration: "25 min", status: "published" },
-      { id: "1-2", title: "1.2 F├¡sica del Sonido", type: "video", duration: "35 min", status: "published" },
+      { id: "1-1", title: "1.1 Introducción al Ultrasonido", type: "video", duration: "25 min", status: "published" },
+      { id: "1-2", title: "1.2 Física del Sonido", type: "video", duration: "35 min", status: "published" },
       { id: "1-3", title: "1.3 Transductores y Equipos", type: "video", duration: "40 min", status: "published" },
-      { id: "1-4", title: "1.4 Evaluaci├│n del M├│dulo 1", type: "quiz", duration: "20 min", status: "published" },
+      { id: "1-4", title: "1.4 Evaluación del Módulo 1", type: "quiz", duration: "20 min", status: "published" },
     ],
   },
   {
     id: 2,
-    title: "M├│dulo 2: Anatom├¡a Musculoesquel├®tica",
+    title: "Módulo 2: Anatomía Musculoesquelética",
     lessons: 10,
     published: 7,
     duration: "6h 15min",
     children: [
-      { id: "2-1", title: "2.1 Hombro: Anatom├¡a y Abordajes", type: "video", duration: "45 min", status: "published" },
+      { id: "2-1", title: "2.1 Hombro: Anatomía y Abordajes", type: "video", duration: "45 min", status: "published" },
       { id: "2-2", title: "2.2 Codo: Estructuras Clave", type: "video", duration: "35 min", status: "published" },
-      { id: "2-3", title: "2.3 Mu├▒eca y Mano", type: "video", duration: "40 min", status: "draft" },
-      { id: "2-4", title: "2.4 Evaluaci├│n del M├│dulo 2", type: "quiz", duration: "20 min", status: "draft" },
+      { id: "2-3", title: "2.3 Muñeca y Mano", type: "video", duration: "40 min", status: "draft" },
+      { id: "2-4", title: "2.4 Evaluación del Módulo 2", type: "quiz", duration: "20 min", status: "draft" },
     ],
   },
   {
     id: 3,
-    title: "M├│dulo 3: Patolog├¡a Tendinosa",
+    title: "Módulo 3: Patología Tendinosa",
     lessons: 6,
     published: 3,
     duration: "3h 45min",
     children: [
-      { id: "3-1", title: "3.1 Tendinopat├¡as: Clasificaci├│n", type: "video", duration: "30 min", status: "published" },
+      { id: "3-1", title: "3.1 Tendinopatías: Clasificación", type: "video", duration: "30 min", status: "published" },
       { id: "3-2", title: "3.2 Roturas Tendinosas", type: "video", duration: "35 min", status: "draft" },
     ],
   },
@@ -68,7 +68,7 @@ export default function ContenidoPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <AdminHeader title="Gesti├│n de Contenido" subtitle="Administra los m├│dulos, lecciones y evaluaciones del curso" />
+      <AdminHeader title="Gestión de Contenido" subtitle="Administra los módulos, lecciones y evaluaciones del curso" />
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* Stats */}
@@ -102,8 +102,8 @@ export default function ContenidoPage() {
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                 <span className="material-symbols-outlined text-primary text-3xl">videocam</span>
               </div>
-              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Arrastra un video aqu├¡</p>
-              <p className="text-xs text-gray-400">MP4, MOV, AVI ÔÇó M├íx. 2GB</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Arrastra un video aquí</p>
+              <p className="text-xs text-gray-400">MP4, MOV, AVI • Máx. 2GB</p>
             </div>
             {/* Document Upload */}
             <div className="border-2 border-dashed border-gray-200 dark:border-white/10 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:border-violet-400/40 hover:bg-violet-500/5 transition-all duration-300 cursor-pointer group">
@@ -111,7 +111,7 @@ export default function ContenidoPage() {
                 <span className="material-symbols-outlined text-violet-400 text-3xl">description</span>
               </div>
               <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Arrastra un documento</p>
-              <p className="text-xs text-gray-400">PDF, PPTX, DOCX ÔÇó M├íx. 100MB</p>
+              <p className="text-xs text-gray-400">PDF, PPTX, DOCX • Máx. 100MB</p>
             </div>
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function ContenidoPage() {
             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Estructura del Curso</h3>
             <button className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-semibold hover:bg-primary/90 transition-colors flex items-center gap-1.5">
               <span className="material-symbols-outlined text-base">add</span>
-              Nuevo M├│dulo
+              Nuevo Módulo
             </button>
           </div>
 
@@ -147,7 +147,7 @@ export default function ContenidoPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{mod.title}</p>
                     <p className="text-[11px] text-gray-400">
-                      {mod.published}/{mod.lessons} lecciones ÔÇó {mod.duration}
+                      {mod.published}/{mod.lessons} lecciones • {mod.duration}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function ContenidoPage() {
                     {/* Add Lesson Button */}
                     <button className="w-full flex items-center justify-center gap-2 px-5 py-3 text-xs text-primary hover:bg-primary/5 transition-colors font-semibold">
                       <span className="material-symbols-outlined text-base">add</span>
-                      Agregar Lecci├│n
+                      Agregar Lección
                     </button>
                   </div>
                 )}

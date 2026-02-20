@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 
 import { createClient } from '@/lib/supabase/server'
@@ -7,14 +7,14 @@ import { z } from 'zod'
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'El nombre es muy corto'),
-  license: z.string().min(1, 'La c├®dula es requerida'),
+  license: z.string().min(1, 'La cédula es requerida'),
   specialty: z.string().min(1, 'La especialidad es requerida'),
   state: z.string().min(1, 'El estado es requerido'),
   experience: z.string().min(1, 'La experiencia es requerida'),
-  interest: z.string().min(1, 'El inter├®s es requerido'),
-  email: z.string().email('Correo inv├ílido'),
-  phone: z.string().min(10, 'N├║mero inv├ílido'),
-  password: z.string().min(6, 'La contrase├▒a debe tener al menos 6 caracteres'),
+  interest: z.string().min(1, 'El interés es requerido'),
+  email: z.string().email('Correo inválido'),
+  phone: z.string().min(10, 'Número inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 
 })
 

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useState, useActionState } from "react"
 import Link from "next/link"
@@ -70,13 +70,13 @@ const totalSteps = 3
           <div className="hidden lg:flex flex-col flex-1 gap-8 pt-10">
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
-                Registro de M├®dicos
+                Registro de Médicos
               </span>
               <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight mb-4">
-                ├Ünete a la comunidad l├¡der en educaci├│n continua.
+                Únete a la comunidad líder en educación continua.
               </h1>
               <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed max-w-md">
-                Accede a diplomados, certificaciones y recursos exclusivos validados por las principales instituciones de salud en M├®xico.
+                Accede a diplomados, certificaciones y recursos exclusivos validados por las principales instituciones de salud en México.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -102,8 +102,8 @@ const totalSteps = 3
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold text-primary">Paso {step} de {totalSteps}</span>
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                    {step === 1 && "Informaci├│n Profesional"}
-                    {step === 2 && "Perfil de Inter├®s"}
+                    {step === 1 && "Información Profesional"}
+                    {step === 2 && "Perfil de Interés"}
                     {step === 3 && "Cuenta y Seguridad"}
                   </span>
                 </div>
@@ -138,7 +138,7 @@ const totalSteps = 3
               {/* Footer inside card */}
               <div className="px-6 py-4 bg-slate-50 dark:bg-[#151c24] border-t border-slate-100 dark:border-border/10 text-center">
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Al registrarte, aceptas nuestros <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">T├®rminos de Servicio</a> y <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Pol├¡tica de Privacidad</a>.
+                  Al registrarte, aceptas nuestros <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Términos de Servicio</a> y <a className="underline hover:text-slate-600 dark:hover:text-slate-300" href="#">Política de Privacidad</a>.
                 </p>
               </div>
 
@@ -169,7 +169,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
       <div className="text-center lg:text-left">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Crear nueva cuenta</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Completa tus datos profesionales para validar tu perfil m├®dico.
+          Completa tus datos profesionales para validar tu perfil médico.
         </p>
       </div>
       
@@ -180,7 +180,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
             <User className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
             <Input 
                 id="fullname" 
-                placeholder="Dr. Juan P├®rez" 
+                placeholder="Dr. Juan Pérez" 
                 className="pl-10" 
                 value={formData.fullName}
                 onChange={(e) => updateFormData('fullName', e.target.value)}
@@ -190,7 +190,7 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
 
         <div className="space-y-2">
           <div className="flex justify-between">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="license">C├®dula Profesional</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="license">Cédula Profesional</label>
             <CircleHelp className="h-4 w-4 text-slate-400 cursor-help" />
           </div>
           <div className="relative">
@@ -215,9 +215,9 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Medicina General">Medicina General</SelectItem>
-                <SelectItem value="Radiolog├¡a">Radiolog├¡a</SelectItem>
-                <SelectItem value="Traumatolog├¡a">Traumatolog├¡a</SelectItem>
-                <SelectItem value="Rehabilitaci├│n">Rehabilitaci├│n</SelectItem>
+                <SelectItem value="Radiología">Radiología</SelectItem>
+                <SelectItem value="Traumatología">Traumatología</SelectItem>
+                <SelectItem value="Rehabilitación">Rehabilitación</SelectItem>
                 <SelectItem value="Otra">Otra</SelectItem>
               </SelectContent>
             </Select>
@@ -233,9 +233,9 @@ function StepOne({ formData, updateFormData, onNext }: { formData: RegisterFormD
                 <SelectValue placeholder="Selecciona estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Ciudad de M├®xico">Ciudad de M├®xico</SelectItem>
+                <SelectItem value="Ciudad de México">Ciudad de México</SelectItem>
                 <SelectItem value="Jalisco">Jalisco</SelectItem>
-                <SelectItem value="Nuevo Le├│n">Nuevo Le├│n</SelectItem>
+                <SelectItem value="Nuevo León">Nuevo León</SelectItem>
                 <SelectItem value="Otro">Otro</SelectItem>
               </SelectContent>
             </Select>
@@ -258,7 +258,7 @@ function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: Regis
       <div className="text-center lg:text-left">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Experiencia</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Ay├║danos a recomendarte el mejor contenido.
+          Ayúdanos a recomendarte el mejor contenido.
         </p>
       </div>
 
@@ -276,7 +276,7 @@ function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: Regis
             ))}
         </div>
 
-        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-4">├ürea de Inter├®s Principal</h3>
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-4">Área de Interés Principal</h3>
         <div className="grid grid-cols-2 gap-3">
              {['Miembro Superior', 'Miembro Inferior', 'Columna', 'Intervencionismo'].map((area) => (
                 <div 
@@ -294,7 +294,7 @@ function StepTwo({ formData, updateFormData, onNext, onBack }: { formData: Regis
       <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <Button variant="outline" onClick={onBack} className="w-full sm:w-1/3 h-12 flex items-center justify-center gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Atr├ís
+            Atrás
           </Button>
         <Button onClick={onNext} className="w-full sm:w-2/3 h-12 text-base font-bold shadow-lg shadow-primary/20">
             Siguiente: Cuenta
@@ -327,7 +327,7 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
             )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="email">Correo Electr├│nico</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="email">Correo Electrónico</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
               <Input 
@@ -365,14 +365,14 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
           </div>
   
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">Contrase├▒a</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">Contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
               <Input 
                 id="password" 
                 name="password"
                 type="password" 
-                placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" 
+                placeholder="••••••••" 
                 className="pl-10"
                 value={formData.password}
                 onChange={(e) => updateFormData('password', e.target.value)}
@@ -386,7 +386,7 @@ function StepThree({ formData, updateFormData, onBack, serverState }: { formData
   
         <div className="flex flex-col sm:flex-row gap-3 mt-4">
           <Button variant="outline" type="button" onClick={onBack} disabled={pending} className="w-full sm:w-1/3 h-12">
-              Atr├ís
+              Atrás
           </Button>
           <Button disabled={pending} type="submit" className="w-full sm:w-2/3 h-12 text-base font-bold bg-green-600 hover:bg-green-700 shadow-lg shadow-green-600/20">
               {pending ? (
