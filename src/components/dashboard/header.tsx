@@ -2,8 +2,9 @@
 "use client"
 
 import { useTheme } from "next-themes"
+import { Logo } from "@/components/ui/logo"
 
-export function Header({ title = "Dashboard" }: { title?: string }) {
+export function Header({ title = "Dashboard", userName }: { title?: string; userName?: string }) {
   const { setTheme, theme } = useTheme()
 
   return (
@@ -12,7 +13,11 @@ export function Header({ title = "Dashboard" }: { title?: string }) {
         <button className="text-gray-500 hover:text-primary">
           <span className="material-symbols-outlined">menu</span>
         </button>
-        <span className="font-bold text-secondary dark:text-white">Dr. Raúl Morales</span>
+        {userName ? (
+          <span className="font-bold text-secondary dark:text-white">{userName}</span>
+        ) : (
+          <Logo variant="light" compact />
+        )}
       </div>
 
       <div className="hidden md:block">

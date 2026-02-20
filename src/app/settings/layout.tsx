@@ -1,8 +1,7 @@
-
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { getUserProfile } from "@/lib/data"
 
-export default async function DashboardLayout({
+export default async function SettingsLayout({
   children,
 }: {
   children: React.ReactNode

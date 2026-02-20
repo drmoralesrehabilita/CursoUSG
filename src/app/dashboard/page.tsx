@@ -1,17 +1,19 @@
 
-"use client"
-
 import { Header } from "@/components/dashboard/header"
+import { getUserProfile } from "@/lib/data"
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const profile = await getUserProfile()
+  const displayName = profile?.full_name || "Estudiante"
+
   return (
     <>
-      <Header />
+      <Header userName={displayName} />
       <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-background-light dark:bg-background-dark font-body">
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-secondary dark:text-white mb-2">
-              Bienvenido de nuevo, <span className="text-primary">Dr. García</span>
+              Bienvenido de nuevo, <span className="text-primary">{displayName}</span>
             </h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
               Continúa tu especialización en ecografía intervencionista. Tienes 2 módulos pendientes esta semana.

@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ArrowRight, ArrowLeft, CheckCircle, Smartphone, Mail, Lock, HeartPulse, Stethoscope, MapPin, BadgeCheck, School, Users, User, CircleHelp, Loader2 } from "lucide-react"
+import { ArrowRight, ArrowLeft, CheckCircle, Smartphone, Mail, Lock, Stethoscope, MapPin, BadgeCheck, School, Users, User, CircleHelp, Loader2 } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { signup, type RegisterState } from "./actions"
 
@@ -54,12 +55,7 @@ export default function RegisterPage() {
       
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-background-dark/5 backdrop-blur-sm sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 text-primary">
-            <HeartPulse className="w-5 h-5" />
-          </div>
-          <span className="text-lg font-bold tracking-tight">Diplomado Morales</span>
-        </div>
+        <Logo variant="light" compact />
         <Link href="/login" className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">
           Ya tengo cuenta
         </Link>

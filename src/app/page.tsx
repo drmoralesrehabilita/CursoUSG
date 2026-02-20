@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import { Logo } from "@/components/ui/logo"
 import { 
-  Stethoscope, 
   Menu, 
   ArrowRight, 
   PlayCircle, 
@@ -31,12 +31,7 @@ export default function LandingPage() {
       {/* Navbar */}
       <div className="sticky top-0 z-50 w-full border-b border-surface-highlight bg-background-dark/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
-              <Stethoscope className="w-5 h-5" />
-            </div>
-            <h2 className="text-white text-lg font-bold leading-tight tracking-tight">Rehabilitación Intervencionista</h2>
-          </div>
+          <Logo variant="dark" compact />
           <nav className="hidden md:flex items-center gap-8">
             <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#program">Programa</Link>
             <Link className="text-slate-300 hover:text-white text-sm font-medium transition-colors" href="#methodology">Metodología</Link>
@@ -297,12 +292,7 @@ export default function LandingPage() {
         <footer className="bg-background-dark py-12 border-t border-surface-highlight">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20 text-primary">
-                  <Stethoscope className="w-5 h-5" />
-                </div>
-                <span className="text-slate-200 font-bold">Rehabilitación Intervencionista</span>
-              </div>
+              <Logo variant="dark" compact />
               <div className="text-slate-500 text-sm">
                 © 2023 Diplomado en Rehabilitación Intervencionista. Todos los derechos reservados.
               </div>

@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ModuleWithLessons, Enrollment } from "@/types/app"
 import { CheckCircle, Lock, Menu, PlayCircle, BarChart } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import { Database } from "@/types/supabase"
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -35,7 +36,7 @@ export function SidebarClient({ modules, enrollment, profile }: SidebarClientPro
   const SidebarContent = () => (
     <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center border-b px-4">
-        <span className="font-semibold px-2">Diplomado Morales</span>
+        <Logo variant="light" compact />
       </div>
       
       {/* User Progress / Status Section - Placeholder */}

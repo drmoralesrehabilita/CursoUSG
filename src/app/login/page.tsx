@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { login } from "./actions"
 import Link from "next/link"
-import { Mail, Lock, HeartPulse, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import { useState } from "react"
 
 export default function LoginPage() {
@@ -20,12 +21,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-linear-to-t from-background-dark/90 via-background-dark/40 to-transparent"></div>
         {/* Content over Image */}
         <div className="relative z-10 flex flex-col gap-4 max-w-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 bg-primary rounded-lg flex items-center justify-center text-white">
-              <HeartPulse className="w-6 h-6" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-wide">Diplomado Morales</span>
-          </div>
+          <Logo variant="dark" showSubtitle />
           <h1 className="text-4xl font-black leading-tight text-white tracking-tight">
             Excelencia en educación médica continua.
           </h1>
@@ -41,12 +37,7 @@ export default function LoginPage() {
           
           {/* Mobile Logo (Visible only on small screens) */}
           <div className="lg:hidden flex justify-center mb-4">
-            <div className="flex items-center gap-2 text-slate-900 dark:text-white">
-              <div className="h-8 w-8 bg-primary rounded flex items-center justify-center text-white">
-                <HeartPulse className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-lg">Diplomado Morales</span>
-            </div>
+            <Logo variant="light" compact />
           </div>
 
           {/* Form Header */}

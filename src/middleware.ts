@@ -58,14 +58,47 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  const pathname = request.nextUrl.pathname
+
+  // Protected routes - require authentication
+  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin'))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Auth routes (redirect to dashboard if already logged in)
-  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register'))) {
+  // Auth routes (redirect to appropriate dashboard if already logged in)
+  if (user && (pathname.startsWith('/login') || pathname.startsWith('/register'))) {
+    // Check role to redirect to proper dashboard
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
     return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  // Role-based route protection
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin'
+
+    // Admin accessing student dashboard → redirect to admin panel
+    if (isAdmin && pathname.startsWith('/dashboard')) {
+      return NextResponse.redirect(new URL('/admin', request.url))
+    }
+
+    // Non-admin accessing admin routes → redirect to student dashboard
+    if (!isAdmin && pathname.startsWith('/admin')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
   }
 
   return response

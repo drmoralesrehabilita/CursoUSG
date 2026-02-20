@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, PlayCircle, Lock } from "lucide-react"
+import { Menu, PlayCircle, Lock, LogOut } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { ModuleWithLessons } from "@/types/app"
 import { Button } from "../ui/button"
+import { logout } from "@/app/login/actions"
 
 // Mock Data for initial development since DB might be empty
 // Mock Data removed - now fetching from DB
@@ -23,9 +25,7 @@ function SidebarContent({ pathname, modules }: { pathname: string, modules: Modu
     return (
         <div className="flex bg-background-light dark:bg-[#0f141d] h-full flex-col border-r border-slate-200 dark:border-slate-800">
             <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-                <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-                    <span>Diplomado Morales</span>
-                </Link>
+                <Logo variant="light" compact />
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Progreso General: 15%
                 </p>
@@ -81,11 +81,16 @@ function SidebarContent({ pathname, modules }: { pathname: string, modules: Modu
             </ScrollArea>
 
             <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-                <Button variant="outline" className="w-full justify-start text-slate-600 dark:text-slate-400" asChild>
-                    <Link href="/login">
+                <form action={logout}>
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        className="w-full justify-start text-slate-600 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/5 transition-all duration-200 gap-2 cursor-pointer"
+                    >
+                        <LogOut className="w-4 h-4" />
                         Cerrar Sesión
-                    </Link>
-                </Button>
+                    </Button>
+                </form>
             </div>
         </div>
     )

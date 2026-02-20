@@ -47,6 +47,26 @@ export async function getUserEnrollment(userId: string) {
   return enrollment
 }
 
+export async function getUserProfile() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) return null
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('full_name, email, role, specialty, phone')
+    .eq('id', user.id)
+    .single()
+
+  if (error) {
+    console.error('Error fetching user profile:', error)
+    return null
+  }
+
+  return profile
+}
+
 export async function getLesson(id: string) {
   const supabase = await createClient()
   
