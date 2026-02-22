@@ -36,6 +36,16 @@ yarn-error.log*
 # vercel
 .vercel
 
+# netlify
+.netlify/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# logs
+*.log
+*_output.txt
+*_error.txt
+push_err.txt
+terminal_output.txt
