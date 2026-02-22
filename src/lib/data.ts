@@ -33,12 +33,12 @@ export async function getUserEnrollment(): Promise<Enrollment | null> {
     .eq("user_id", user.id)
     .single();
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') {
     console.error("Error fetching enrollment:", error);
     return null;
   }
 
-  return enrollment as Enrollment;
+  return (enrollment as Enrollment) || null;
 }
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];

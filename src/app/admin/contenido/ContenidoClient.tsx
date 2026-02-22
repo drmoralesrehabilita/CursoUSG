@@ -10,6 +10,13 @@ import { RichTextEditor } from "@/components/ui/RichTextEditor"
 import MuxPlayer from "@mux/mux-player-react"
 import { createBrowserClient } from '@supabase/ssr'
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet"
+import {
   DndContext,
   closestCenter,
   KeyboardSensor,
@@ -29,6 +36,7 @@ import { SortableLessonItem } from "@/components/admin/SortableLessonItem"
 type Lesson = {
   id: string
   title: string
+  description?: string | null
   lesson_type: string
   thumbnail_url?: string | null
   materials?: Array<{title: string, url: string}> | null
@@ -241,9 +249,7 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
 
   const handleOpenEditLesson = (e: React.MouseEvent, lesson: Lesson) => {
     e.stopPropagation()
-    // Type definition needs description added later when lessons data is fetched, but for now it's okay:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setEditingLesson({ id: lesson.id, title: lesson.title, lesson_type: lesson.lesson_type, is_published: lesson.is_published, thumbnail_url: lesson.thumbnail_url || "", description: (lesson as any).description || "", materials: lesson.materials || [], duration_minutes: lesson.duration_minutes || null, difficulty: lesson.difficulty || null, prerequisite_lesson_id: lesson.prerequisite_lesson_id || null, mux_playback_id: lesson.mux_playback_id || null, mux_upload_id: lesson.mux_upload_id || null })
+    setEditingLesson({ id: lesson.id, title: lesson.title, lesson_type: lesson.lesson_type, is_published: lesson.is_published, thumbnail_url: lesson.thumbnail_url || "", description: lesson.description || "", materials: lesson.materials || [], duration_minutes: lesson.duration_minutes || null, difficulty: lesson.difficulty || null, prerequisite_lesson_id: lesson.prerequisite_lesson_id || null, mux_playback_id: lesson.mux_playback_id || null, mux_upload_id: lesson.mux_upload_id || null })
     setIsLessonModalOpen(true)
   }
 
@@ -510,148 +516,218 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
         </div>
       )}
 
-      {/* Lesson Modal */}
-      {isLessonModalOpen && editingLesson && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                Editar Lección
-              </h2>
-              <div className="space-y-4">
-                {editingLesson.thumbnail_url && (
-                  <div className="mb-4">
-                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                     <img src={editingLesson.thumbnail_url} alt="Portada Lección" className="w-full h-32 object-cover rounded-xl" />
-                  </div>
-                )}
-                <div className="flex items-center gap-3">
-                   <label className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
-                     <span className="material-symbols-outlined text-lg">image</span>
-                     {uploadingImage ? 'Subiendo...' : (editingLesson.thumbnail_url ? 'Cambiar Portada' : 'Añadir Portada')}
-                     <input type="file" accept="image/*" className="hidden" disabled={uploadingImage} onChange={(e) => handleImageUpload(e, 'lesson')} />
-                   </label>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Título de la Lección</label>
-                  <input
-                    type="text"
-                    value={editingLesson.title}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900 dark:text-white placeholder-gray-400"
-                    placeholder="Ej. Anatomía Muscular"
-                  />
-                </div>
+      {/* Lesson Modal (Upgraded to Full Screen Sheet) */}
+      <Sheet open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
+        <SheetContent 
+          side="right" 
+          showCloseButton={false}
+          className="p-0 w-screen h-screen border-none shadow-none overflow-hidden flex flex-col sm:max-w-none bg-white dark:bg-[#0B0F1A] gap-0"
+        >
+          <SheetHeader className="p-6 border-b border-white/5 shrink-0 flex flex-row items-center justify-between bg-white dark:bg-[#0B0F1A] z-10">
+            <SheetTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-2xl">edit_note</span>
+              </div>
+              Editar Lección
+            </SheetTitle>
+            <button 
+              onClick={() => setIsLessonModalOpen(false)}
+              className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center transition-colors group"
+            >
+              <span className="material-symbols-outlined text-gray-400 group-hover:text-white transition-colors">close</span>
+            </button>
+          </SheetHeader>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Duración (minutos)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={editingLesson.duration_minutes || ""}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, duration_minutes: e.target.value ? parseInt(e.target.value) : null })}
-                      className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900 dark:text-white"
-                      placeholder="Ej. 15"
-                    />
+          <div className="flex-1 overflow-y-auto min-h-0 bg-gray-50/30 dark:bg-black/20">
+            {editingLesson && (
+              <div className="max-w-4xl mx-auto p-6 md:p-12 space-y-12">
+                {/* Visual Section: Media */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-teal-400 text-sm">image</span>
+                    <h3 className="text-xs font-bold text-teal-400 uppercase tracking-wider">Multimedia</h3>
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Dificultad</label>
-                    <select
-                      value={editingLesson.difficulty || ""}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, difficulty: e.target.value || null })}
-                      className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900 dark:text-white"
-                    >
-                      <option value="">Seleccionar...</option>
-                      <option value="Principiante">Principiante</option>
-                      <option value="Intermedio">Intermedio</option>
-                      <option value="Avanzado">Avanzado</option>
-                    </select>
+                  
+                  {editingLesson.thumbnail_url && (
+                    <div className="relative group rounded-2xl overflow-hidden border border-white/5 aspect-video bg-black/40">
+                       <img src={editingLesson.thumbnail_url} alt="Portada Lección" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                       <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                         <p className="text-[10px] text-white/80">Vista previa de la portada</p>
+                       </div>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-3">
+                     <label className="flex-1 bg-white/5 dark:bg-white/5 hover:bg-white/10 dark:hover:bg-white/10 cursor-pointer p-4 rounded-2xl border border-dashed border-white/10 transition-all flex flex-col items-center justify-center gap-2 text-center group">
+                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <span className="material-symbols-outlined text-primary text-xl">image</span>
+                       </div>
+                       <div>
+                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                           {uploadingImage ? 'Subiendo...' : (editingLesson.thumbnail_url ? 'Cambiar Portada' : 'Añadir Portada')}
+                         </p>
+                         <p className="text-[10px] text-gray-400">Recomendado: 1280x720px</p>
+                       </div>
+                       <input type="file" accept="image/*" className="hidden" disabled={uploadingImage} onChange={(e) => handleImageUpload(e, 'lesson')} />
+                     </label>
                   </div>
-                </div>
+                </section>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Lección Prerrequisito (opcional)</label>
-                  <select
-                    value={editingLesson.prerequisite_lesson_id || ""}
-                    onChange={(e) => setEditingLesson({ ...editingLesson, prerequisite_lesson_id: e.target.value || null })}
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-900 dark:text-white"
-                  >
-                    <option value="">Ninguna</option>
-                    {localModules.flatMap(m => m.lessons || []).filter(l => l.id !== editingLesson.id).map(l => (
-                      <option key={l.id} value={l.id}>{l.title}</option>
-                    ))}
-                  </select>
-                </div>
+                {/* Visual Section: Info */}
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="material-symbols-outlined text-primary text-sm">info</span>
+                    <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Información General</h3>
+                  </div>
 
-                {editingLesson.lesson_type !== 'quiz' ? (
-                  <>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Descripción de la Lección</label>
-                      <RichTextEditor
-                        content={editingLesson.description}
-                        onChange={(content) => setEditingLesson({ ...editingLesson, description: content })}
-                        placeholder="Contenido enriquecido adicional..."
+                  <div className="space-y-4">
+                    <div className="group">
+                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-1 uppercase">Título de la Lección</label>
+                      <input
+                        type="text"
+                        value={editingLesson.title}
+                        onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
+                        className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-gray-900 dark:text-white font-medium"
+                        placeholder="Ej. Anatomía Muscular de Miembro Superior"
                       />
                     </div>
 
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Video de la Lección</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="group">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-1 uppercase">Duración</label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            value={editingLesson.duration_minutes || ""}
+                            onChange={(e) => setEditingLesson({ ...editingLesson, duration_minutes: e.target.value ? parseInt(e.target.value) : null })}
+                            className="w-full pl-5 pr-12 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 focus:border-primary/50 transition-all text-gray-900 dark:text-white font-medium"
+                            placeholder="15"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 uppercase">Min</span>
+                        </div>
+                      </div>
+                      <div className="group">
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-1 uppercase">Dificultad</label>
+                        <select
+                          value={editingLesson.difficulty || ""}
+                          onChange={(e) => setEditingLesson({ ...editingLesson, difficulty: e.target.value || null })}
+                          className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 focus:border-primary/50 transition-all text-gray-900 dark:text-white font-medium appearance-none cursor-pointer"
+                        >
+                          <option value="">Seleccionar...</option>
+                          <option value="Principiante">Principiante</option>
+                          <option value="Intermedio">Intermedio</option>
+                          <option value="Avanzado">Avanzado</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-1 uppercase">Lección Prerrequisito</label>
+                      <select
+                        value={editingLesson.prerequisite_lesson_id || ""}
+                        onChange={(e) => setEditingLesson({ ...editingLesson, prerequisite_lesson_id: e.target.value || null })}
+                        className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 focus:border-primary/50 transition-all text-gray-900 dark:text-white font-medium appearance-none cursor-pointer"
+                      >
+                        <option value="">Ninguna</option>
+                        {localModules.flatMap(m => m.lessons || []).filter(l => l.id !== editingLesson.id).map(l => (
+                          <option key={l.id} value={l.id}>{l.title}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </section>
+
+                {editingLesson.lesson_type !== 'quiz' ? (
+                  <>
+                    <section className="space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-amber-400 text-sm">description</span>
+                        <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Descripción Detallada</h3>
+                      </div>
+                      <div className="rounded-2xl overflow-hidden border border-white/5 bg-white/5">
+                        <RichTextEditor
+                          content={editingLesson.description}
+                          onChange={(content) => setEditingLesson({ ...editingLesson, description: content })}
+                          placeholder="Información adicional relevante para el alumno..."
+                        />
+                      </div>
+                    </section>
+
+                    <section className="space-y-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="material-symbols-outlined text-purple-400 text-sm">movie_filter</span>
+                        <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider">Video de la Lección</h3>
                       </div>
                       
                       {editingLesson.lesson_type === 'video' ? (
                         editingLesson.mux_playback_id ? (
-                           <div className="bg-black rounded-xl overflow-hidden aspect-video relative shadow-inner">
+                           <div className="bg-black rounded-2xl overflow-hidden aspect-video relative shadow-2xl border border-white/5">
                              <MuxPlayer
-                               streamType="on-demand"
-                               playbackId={editingLesson.mux_playback_id}
-                               metadata={{
-                                 video_id: editingLesson.id,
-                                 video_title: editingLesson.title,
-                               }}
-                               primaryColor="#2DD4BF"
+                                streamType="on-demand"
+                                playbackId={editingLesson.mux_playback_id}
+                                metadata={{
+                                  video_id: editingLesson.id,
+                                  video_title: editingLesson.title,
+                                }}
+                                primaryColor="#2DD4BF"
                              />
                            </div>
                         ) : (
-                           <div className="w-full h-32 bg-gray-100 dark:bg-white/5 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex flex-col items-center justify-center gap-2">
+                           <div className="w-full h-40 bg-white/5 dark:bg-white/2 rounded-2xl border border-dashed border-white/10 flex flex-col items-center justify-center gap-4 text-center px-6">
                               {editingLesson.mux_upload_id ? (
                                 <>
-                                  <span className="material-symbols-outlined text-amber-500 animate-spin">sync</span>
-                                  <p className="text-gray-500 text-sm font-medium">El video se está procesando en Mux...</p>
-                                  <p className="text-gray-400 text-[11px] text-center px-4">Por favor espera unos minutos. La página o el video se actualizará automáticamente cuando finalice.</p>
+                                  <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-amber-500 animate-spin text-2xl">sync</span>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Procesando Video...</p>
+                                    <p className="text-[10px] text-gray-500 mt-1">Mux está preparando tu contenido. Se actualizará solo en breve.</p>
+                                  </div>
                                 </>
                               ) : (
                                 <>
-                                  <span className="material-symbols-outlined text-gray-400">video_file</span>
-                                  <p className="text-gray-500 text-sm font-medium">No hay video procesado aún.</p>
-                                  <p className="text-gray-400 text-[11px] text-center px-4">Sube un video usando el botón en la lista principal de lecciones.</p>
+                                  <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-gray-500 text-2xl">no_video</span>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-500">Sin video cargado</p>
+                                    <p className="text-[10px] text-gray-400 mt-1">Usa la sección principal para cargar un nuevo video.</p>
+                                  </div>
                                 </>
                               )}
                            </div>
                         )
                       ) : null }
-                    </div>
+                    </section>
 
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                    <section className="space-y-4">
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Recursos Adjuntos (PDFs u otros)</label>
-                        <label className="text-xs bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[14px]">upload_file</span>
-                          <span>{uploadingMaterial ? 'Subiendo...' : 'Añadir Archivo'}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-blue-400 text-sm">attachment</span>
+                          <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider">Recursos</h3>
+                        </div>
+                        <label className="text-[10px] uppercase font-bold bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white px-3 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-2 border border-white/5">
+                          <span className="material-symbols-outlined text-[14px]">add</span>
+                          <span>{uploadingMaterial ? 'Subiendo...' : 'Documento'}</span>
                           <input type="file" className="hidden" disabled={uploadingMaterial} onChange={handleMaterialUpload} />
                         </label>
                       </div>
                       
                       {(!editingLesson.materials || editingLesson.materials.length === 0) ? (
-                        <div className="text-sm text-gray-500 py-3 text-center border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
-                          No hay recursos adjuntos.
+                        <div className="text-[11px] text-gray-500 py-6 text-center border border-dashed border-white/5 rounded-2xl bg-white/2">
+                          No hay documentos o PDFs adjuntos.
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {editingLesson.materials.map((mat, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-sm p-3 bg-gray-50 dark:bg-black/30 border border-gray-200 dark:border-gray-800 rounded-xl">
-                              <span className="font-medium text-gray-700 dark:text-gray-300 truncate mr-3">{mat.title}</span>
+                            <div key={idx} className="group flex justify-between items-center bg-white/5 hover:bg-white/10 border border-white/5 p-3 rounded-2xl transition-all">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                  <span className="material-symbols-outlined text-blue-400 text-base">description</span>
+                                </div>
+                                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate max-w-[180px]">{mat.title}</span>
+                              </div>
                               <button
                                 type="button"
                                 onClick={() => {
@@ -659,70 +735,78 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
                                   newMats.splice(idx, 1);
                                   setEditingLesson({...editingLesson, materials: newMats});
                                 }}
-                                className="text-red-500 hover:text-red-600 bg-red-500/10 hover:bg-red-500/20 p-1.5 rounded-lg transition-colors shrink-0"
+                                className="w-8 h-8 flex items-center justify-center text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors opacity-0 group-hover:opacity-100"
                                 title="Eliminar recurso"
                               >
-                                <span className="material-symbols-outlined text-sm">delete</span>
+                                <span className="material-symbols-outlined text-base">delete</span>
                               </button>
                             </div>
                           ))}
                         </div>
                       )}
-                    </div>
+                    </section>
                   </>
                 ) : (
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center justify-between p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl">
+                  <section className="bg-linear-to-br from-violet-500/10 to-blue-500/5 p-6 rounded-3xl border border-violet-500/10">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-violet-500/20 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-violet-400 text-2xl">quiz</span>
+                      </div>
                       <div>
-                        <h4 className="font-bold text-violet-700 dark:text-violet-300 flex items-center gap-2">
-                          <span className="material-symbols-outlined text-lg">quiz</span>
-                          Lección de Evaluación
-                        </h4>
-                        <p className="text-xs text-violet-600/70 dark:text-violet-400 mt-1">
-                          Las preguntas y opciones se gestionan desde el Constructor de Evaluaciones. Puedes cambiar el estado de publicación abajo.
+                        <h4 className="font-bold text-gray-900 dark:text-white">Lección de Evaluación</h4>
+                        <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                          Este contenido se autogestiona. Las preguntas, opciones y lógica de puntaje deben configurarse desde el <span className="text-violet-400 font-bold">Constructor de Evaluaciones</span> incorporado.
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </section>
                 )}
                 
-                <div className="flex items-center gap-3 mt-4 bg-gray-50 dark:bg-black/20 p-4 rounded-xl border border-gray-200 dark:border-gray-800">
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Estado de Publicación</p>
-                    <p className="text-xs text-gray-500">Haz que esta lección sea visible para los alumnos.</p>
+                <section className="bg-[#141829] p-6 rounded-3xl border border-white/5 mt-8">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-white">Estado de Publicación</p>
+                      <p className="text-[10px] text-gray-400 mt-1">¿Visible para los estudiantes?</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={editingLesson.is_published}
+                        onChange={(e) => setEditingLesson({ ...editingLesson, is_published: e.target.checked })}
+                      />
+                      <div className="w-12 h-6.5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5.5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer"
-                      checked={editingLesson.is_published}
-                      onChange={(e) => setEditingLesson({ ...editingLesson, is_published: e.target.checked })}
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 dark:peer-focus:ring-primary/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                  </label>
-                </div>
+                </section>
+
+                {/* Extra space for scrolling */}
+                <div className="h-4" />
               </div>
-            </div>
-            <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+            )}
+          </div>
+
+          <SheetFooter className="p-6 border-t border-white/5 bg-white dark:bg-[#0B0F1A] shrink-0 z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]">
+            <div className="max-w-4xl mx-auto w-full flex sm:flex-row flex-col gap-3">
               <button
                 type="button"
                 onClick={() => setIsLessonModalOpen(false)}
-                className="px-6 py-2.5 rounded-xl font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 px-6 py-3.5 rounded-2xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/5 transition-all text-sm"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveLesson}
-                disabled={isSubmittingLesson || !editingLesson.title.trim()}
-                className="px-6 py-2.5 bg-primary hover:bg-cyan-500 text-white rounded-xl font-semibold shadow-lg shadow-primary/25 transition-all disabled:opacity-50"
+                disabled={isSubmittingLesson || !editingLesson?.title.trim()}
+                className="flex-1 px-6 py-3.5 bg-linear-to-r from-primary to-cyan-400 hover:from-cyan-400 hover:to-primary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 transition-all disabled:opacity-50 disabled:grayscale text-sm"
               >
                 {isSubmittingLesson ? "Guardando..." : "Guardar Lección"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
 
     </div>
   )

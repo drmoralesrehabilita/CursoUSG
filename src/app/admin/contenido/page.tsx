@@ -9,8 +9,8 @@ export default async function ContenidoPage() {
     id: m.id,
     title: m.title,
     lessons: m.lessons?.map(l => ({
-      id: l.id,
-      title: l.title,
+      ...l,
+      materials: l.materials as { title: string, url: string }[] | null | undefined,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       lesson_type: (l as any).lesson_type || 'video',
       is_published: l.is_published || false

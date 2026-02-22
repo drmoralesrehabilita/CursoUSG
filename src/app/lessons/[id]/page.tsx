@@ -1,10 +1,11 @@
-import { getLesson, getUserLessonProgress, getLessonQuiz, getUserEnrollment } from "@/lib/data"
+import { getLesson, getUserLessonProgress, getLessonQuiz, getUserEnrollment, getModules, getUserProfile } from "@/lib/data"
 import { notFound, redirect } from "next/navigation"
 import { LessonClient } from "./LessonClient"
 import { Header } from "@/components/dashboard/header"
 
-export default async function LessonPage({ params }: { params: { id: string } }) {
-  const lesson = await getLesson(params.id)
+export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const lesson = await getLesson(id)
   
   if (!lesson) {
     notFound()
@@ -12,31 +13,39 @@ export default async function LessonPage({ params }: { params: { id: string } })
 
   const enrollment = await getUserEnrollment()
   
-  // Basic access control: Check if user is enrolled and if module matches
-  // If we had a strict module-by-module lock, we would check if this module is unlocked.
-  // We will simply verify they have an enrollment for this module.
-  // As per requirements: Bloqueo de URLs de lecciones si el módulo está bloqueado
   if (enrollment?.status === "blocked") {
     redirect("/dashboard?error=module_blocked")
   }
 
-  const progress = await getUserLessonProgress(params.id)
+  const [progress, profile, allModules] = await Promise.all([
+    getUserLessonProgress(id),
+    getUserProfile(),
+    getModules(),
+  ])
+
   const isCompleted = progress?.is_completed || false
+  const userName = profile?.full_name || "Estudiante"
+
+  // Find the module of this lesson and its sibling lessons for navigation
+  const currentModule = allModules.find(m => m.id === lesson.module_id)
+  const moduleLessons = currentModule?.lessons || []
 
   // If it's a quiz type lesson, fetch the quiz data
   let quizData = null;
   if (lesson.lesson_type === 'quiz') {
-    quizData = await getLessonQuiz(params.id);
+    quizData = await getLessonQuiz(id);
   }
 
   return (
     <>
-      <Header userName="Estudiante" />
+      <Header userName={userName} />
       <div className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark font-body">
         <LessonClient 
           lesson={lesson} 
           isCompleted={isCompleted} 
-          quizData={quizData} 
+          quizData={quizData}
+          moduleLessons={moduleLessons}
+          moduleTitle={currentModule?.title || ""}
         />
       </div>
     </>

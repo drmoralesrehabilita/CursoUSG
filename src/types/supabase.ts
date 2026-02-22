@@ -62,6 +62,8 @@ export type Database = {
           description: string | null
           id: string
           is_published: boolean | null
+          is_master_camera: boolean | null
+          lesson_type: string | null
           materials: Json | null
           module_id: string | null
           order_index: number | null
@@ -77,6 +79,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean | null
+          is_master_camera?: boolean | null
+          lesson_type?: string | null
           materials?: Json | null
           module_id?: string | null
           order_index?: number | null
@@ -92,6 +96,8 @@ export type Database = {
           description?: string | null
           id?: string
           is_published?: boolean | null
+          is_master_camera?: boolean | null
+          lesson_type?: string | null
           materials?: Json | null
           module_id?: string | null
           order_index?: number | null
