@@ -1,0 +1,8 @@
+-- Migration to add enriched quiz fields
+ALTER TABLE questions 
+ADD COLUMN IF NOT EXISTS difficulty INTEGER DEFAULT 1,
+ADD COLUMN IF NOT EXISTS is_critical BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS pearl TEXT,
+ADD COLUMN IF NOT EXISTS source_reference TEXT,
+ADD COLUMN IF NOT EXISTS image_url TEXT,
+ADD COLUMN IF NOT EXISTS findings JSONB DEFAULT '[]'::jsonb;

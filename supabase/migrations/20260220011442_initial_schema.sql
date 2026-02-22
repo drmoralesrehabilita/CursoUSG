@@ -13,14 +13,17 @@ create table public.profiles (
 
 alter table public.profiles enable row level security;
 
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON public.profiles;
 create policy "Public profiles are viewable by everyone."
   on public.profiles for select
   using ( true );
 
+DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
 create policy "Users can insert their own profile."
   on public.profiles for insert
   with check ( auth.uid() = id );
 
+DROP POLICY IF EXISTS "Users can update own profile." ON public.profiles;
 create policy "Users can update own profile."
   on public.profiles for update
   using ( auth.uid() = id );
@@ -37,21 +40,25 @@ create table public.modules (
 
 alter table public.modules enable row level security;
 
+DROP POLICY IF EXISTS "Modules are viewable by authenticated users." ON public.modules;
 create policy "Modules are viewable by authenticated users."
   on public.modules for select
   to authenticated
   using ( true );
 
+DROP POLICY IF EXISTS "Admins can insert modules." ON public.modules;
 create policy "Admins can insert modules."
   on public.modules for insert
   to authenticated
   with check ( exists ( select 1 from public.profiles where id = auth.uid() and role = 'admin' ) );
 
+DROP POLICY IF EXISTS "Admins can update modules." ON public.modules;
 create policy "Admins can update modules."
   on public.modules for update
   to authenticated
   using ( exists ( select 1 from public.profiles where id = auth.uid() and role = 'admin' ) );
   
+DROP POLICY IF EXISTS "Admins can delete modules." ON public.modules;
 create policy "Admins can delete modules."
   on public.modules for delete
   to authenticated
@@ -74,11 +81,13 @@ create table public.lessons (
 
 alter table public.lessons enable row level security;
 
+DROP POLICY IF EXISTS "Lessons are viewable by authenticated users." ON public.lessons;
 create policy "Lessons are viewable by authenticated users."
   on public.lessons for select
   to authenticated
   using ( true );
 
+DROP POLICY IF EXISTS "Admins can manage lessons." ON public.lessons;
 create policy "Admins can manage lessons."
   on public.lessons for all
   to authenticated
@@ -97,16 +106,19 @@ create table public.enrollments (
 
 alter table public.enrollments enable row level security;
 
+DROP POLICY IF EXISTS "Users can view their own enrollments." ON public.enrollments;
 create policy "Users can view their own enrollments."
   on public.enrollments for select
   to authenticated
   using ( auth.uid() = user_id );
 
+DROP POLICY IF EXISTS "Admins can view all enrollments." ON public.enrollments;
 create policy "Admins can view all enrollments."
   on public.enrollments for select
   to authenticated
   using ( exists ( select 1 from public.profiles where id = auth.uid() and role = 'admin' ) );
 
+DROP POLICY IF EXISTS "Admins can manage enrollments." ON public.enrollments;
 create policy "Admins can manage enrollments."
   on public.enrollments for all
   to authenticated
