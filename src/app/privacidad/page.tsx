@@ -67,6 +67,20 @@ export default function PrivacidadPage() {
               Nos reservamos el derecho de modificar esta política. Los cambios serán notificados mediante la actualización de la fecha al inicio del documento y, cuando sea relevante, por correo electrónico.
             </p>
           </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">6. Base legal y conservación de datos</h2>
+            <p className="text-slate-400 leading-relaxed">
+              Tratamos sus datos con base en su consentimiento, la relación contractual derivada de su inscripción y obligaciones legales aplicables. Los datos se conservan durante el tiempo necesario para fines académicos, administrativos, fiscales y de cumplimiento regulatorio.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">7. Transferencias y terceros</h2>
+            <p className="text-slate-400 leading-relaxed">
+              Sus datos podrán compartirse con proveedores tecnológicos, plataformas de pago, servicios de soporte y entidades académicas vinculadas al proceso formativo y de certificación, siempre bajo acuerdos de confidencialidad y medidas de seguridad razonables.
+            </p>
+          </section>
         </div>
 
         <div className="mt-12 pt-8 border-t border-surface-highlight">

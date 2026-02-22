@@ -1,18 +1,5 @@
 import { AdminHeader } from "@/components/admin/AdminHeader"
-const kpiCards = [
-  { label: "Ingresos del Mes", value: "$45,280", change: "+12.5%", positive: true, icon: "payments" },
-  { label: "Médicos Inscritos", value: "1,247", change: "+8.3%", positive: true, icon: "groups" },
-  { label: "Tasa de Finalización", value: "78%", change: "+5.2%", positive: true, icon: "trending_up" },
-  { label: "NPS Score", value: "4.8", change: "+0.3", positive: true, icon: "star" },
-]
-
-const recentDoctors = [
-  { name: "Dra. María García", specialty: "Traumatología", city: "CDMX", progress: 75, status: "active" },
-  { name: "Dr. Carlos López", specialty: "Rehabilitación", city: "Monterrey", progress: 45, status: "active" },
-  { name: "Dra. Ana Martínez", specialty: "Medicina del Deporte", city: "Guadalajara", progress: 92, status: "completed" },
-  { name: "Dr. Roberto Sánchez", specialty: "Neurología", city: "Puebla", progress: 30, status: "active" },
-  { name: "Dra. Laura Torres", specialty: "Fisiatría", city: "Mérida", progress: 10, status: "pending" },
-]
+import { createClient } from "@/lib/supabase/server"
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -32,7 +19,54 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const supabase = await createClient();
+  
+  // Fetch profiles
+  const { data: profiles } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  const totalDoctors = profiles?.length || 0;
+
+  // Fetch payments
+  const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+  const { data: payments } = await supabase.from('payments').select('*').gte('created_at', currentMonthStart);
+  
+  const totalIncome = payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount), 0) || 0;
+  const pendingInvoices = payments?.filter(p => p.status === 'pending').length || 0;
+  
+  const kpiCards = [
+    { label: "Ingresos del Mes", value: `$${totalIncome.toLocaleString()}`, change: "-", positive: true, icon: "payments" },
+    { label: "Médicos Inscritos", value: totalDoctors.toString(), change: "Total", positive: true, icon: "groups" },
+    { label: "Tasa de Finalización", value: "Pendiente", change: "-", positive: true, icon: "trending_up" },
+    { label: "NPS Score", value: "Pendiente", change: "-", positive: true, icon: "star" },
+  ];
+
+  const specialtyCounts = profiles?.reduce((acc: Record<string, number>, profile: { specialty?: string | null }) => {
+    const spec = profile.specialty || "Otros";
+    acc[spec] = (acc[spec] || 0) + 1;
+    return acc;
+  }, {}) || {};
+
+  const specialtiesList = (Object.entries(specialtyCounts) as [string, number][])
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([label, count], index) => {
+       const colors = ["bg-primary", "bg-blue-500", "bg-violet-500", "bg-amber-500"];
+       const pct = totalDoctors > 0 ? Math.round((count / totalDoctors) * 100) : 0;
+       return {
+         label: label.length > 15 ? label.substring(0, 15) + "..." : label,
+         pct: `${pct}%`,
+         color: colors[index % colors.length]
+       }
+    });
+
+  const recentDoctors = (profiles || []).slice(0, 5).map((p: { full_name?: string | null, specialty?: string | null, state?: string | null, role?: string | null }) => ({
+    name: p.full_name || "Usuario",
+    specialty: p.specialty || "General",
+    city: p.state || "N/A",
+    progress: 0,
+    status: (p.role === "admin" ? "completed" : "active")
+  }));
+
   return (
     <div className="flex flex-col h-full">
       <AdminHeader title="Panel Ejecutivo" subtitle="Vista general del rendimiento" />
@@ -64,15 +98,17 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Alert Banner */}
-        <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 rounded-xl px-5 py-4 flex items-center gap-3">
-          <span className="material-symbols-outlined text-amber-400 text-xl">warning</span>
-          <p className="text-sm text-amber-300 font-medium flex-1">
-            Hay <strong>5 facturas pendientes</strong> de revisión este mes.
-          </p>
-          <button className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors">
-            Ver detalles →
-          </button>
-        </div>
+        {pendingInvoices > 0 && (
+          <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20 rounded-xl px-5 py-4 flex items-center gap-3">
+            <span className="material-symbols-outlined text-amber-400 text-xl">warning</span>
+            <p className="text-sm text-amber-300 font-medium flex-1">
+              Hay <strong>{pendingInvoices} facturas pendientes</strong> de revisión este mes.
+            </p>
+            <button className="text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors">
+              Ver detalles →
+            </button>
+          </div>
+        )}
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -124,19 +160,14 @@ export default function AdminDashboardPage() {
                   <circle cx="18" cy="18" r="14" fill="none" stroke="#f59e0b" strokeWidth="3.5" strokeDasharray="20 80" strokeDashoffset="-80" />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">1,247</span>
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">{totalDoctors}</span>
                   <span className="text-[10px] text-gray-400">Total</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2.5">
-              {[
-                { label: "Traumatología", pct: "35%", color: "bg-primary" },
-                { label: "Rehabilitación", pct: "25%", color: "bg-blue-500" },
-                { label: "Med. Deporte", pct: "20%", color: "bg-violet-500" },
-                { label: "Otros", pct: "20%", color: "bg-amber-500" },
-              ].map((s) => (
+              {specialtiesList.map((s) => (
                 <div key={s.label} className="flex items-center gap-2.5 text-xs">
                   <span className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
                   <span className="text-gray-600 dark:text-gray-300 flex-1">{s.label}</span>
@@ -176,7 +207,7 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                           <span className="text-[11px] font-bold text-primary">
-                            {doc.name.split(" ").filter(w => w.length > 2).slice(0,2).map(w => w[0]).join("")}
+                            {doc.name.split(" ").filter((w: string) => w.length > 2).slice(0,2).map((w: string) => w[0]).join("")}
                           </span>
                         </div>
                         <span className="text-sm font-medium text-gray-900 dark:text-white">{doc.name}</span>

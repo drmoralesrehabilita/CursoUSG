@@ -93,7 +93,7 @@ export default function LandingPage() {
                 Diplomado Internacional de <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-400">Rehabilitación Intervencionista</span>
               </h1>
               <p className="mt-4 max-w-xl text-lg text-slate-300 leading-relaxed mb-8">
-                Domina procedimientos guiados por ecografía con la plataforma de aprendizaje de doble perspectiva más avanzada del mundo. Eleva tu práctica con técnicas de precisión.
+                Domina procedimientos guiados por ecografía con entrenamiento clínico aplicado, casos reales y metodología de alta precisión. Eleva tu práctica con un programa estructurado para resultados medibles.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/login">
@@ -116,6 +116,11 @@ export default function LandingPage() {
                   <img alt="Student profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO-D0GR2SgeU1F0uwvB0n_2QoDZ1sQW5X3VGPE6ywEmU7EXgqRgQS9l--62DBv61sP_Ew2gX3QIr_XjYyADyzjzeMMRkjGXQxO7X0w7lFyG_A8M_mQwLUS-FxRViZHPRQ0Qtuhk_TyEJS6DqZQlYmanFD6XsTvYpq81ZzXguqdQnQQEQwALhfw5BrieUG7C56Bu0MARYpLe8-dbqCMmwYP30rkokbx3A1--k-Em3hWJ_-Cusm7tmIu5zIT3Q_TtiJC5A6cIAB3PXY1"/>
                 </div>
                 <p>Únete a <span className="text-white font-semibold">1,200+</span> profesionales médicos</p>
+              </div>
+              <div className="mt-6 max-w-2xl rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-blue-100">
+                <span className="font-semibold text-white">+</span>{" "}
+                Certificado con aval académico por parte de la{" "}
+                <span className="font-semibold text-white">Sociedad Mexicana de Medicina Física y Rehabilitación A.C.</span>
               </div>
             </div>
           </div>
@@ -228,6 +233,12 @@ export default function LandingPage() {
             <div className="mb-12 md:text-center max-w-3xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Módulos del Plan de Estudios</h2>
               <p className="mt-4 text-lg text-slate-400">Un camino integral desde la física básica hasta la intervención avanzada. Diseñado para una rápida adquisición de habilidades.</p>
+            </div>
+            <div className="mb-8 rounded-2xl border border-primary/25 bg-primary/10 p-5 text-center">
+              <p className="text-sm sm:text-base text-blue-100">
+                Al concluir el programa y cumplir los criterios académicos, obtendrás{" "}
+                <span className="font-semibold text-white">Certificado con aval académico por parte de la Sociedad Mexicana de Medicina Física y Rehabilitación A.C.</span>
+              </p>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               <div className="group relative flex flex-col overflow-hidden rounded-xl border border-surface-highlight bg-background-dark p-6 transition-all hover:border-primary/50 hover:bg-surface-highlight/50">

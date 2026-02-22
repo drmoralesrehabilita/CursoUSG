@@ -33,7 +33,7 @@ export function SidebarClient({ modules, enrollment, profile }: SidebarClientPro
 
   const isLocked = enrollment?.status === 'blocked' && profile?.role !== 'admin'
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex h-full flex-col border-r bg-sidebar text-sidebar-foreground">
       <div className="flex h-14 items-center border-b px-4">
         <Logo variant="light" compact />
@@ -107,13 +107,13 @@ export function SidebarClient({ modules, enrollment, profile }: SidebarClientPro
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64 bg-sidebar border-r-sidebar-border">
-          <SidebarContent />
+          {sidebarContent}
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 z-30">
-        <SidebarContent />
+        {sidebarContent}
       </aside>
     </>
   )

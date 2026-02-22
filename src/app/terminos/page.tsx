@@ -62,7 +62,28 @@ export default function TerminosPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">5. Contacto</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">5. Aval académico y certificación</h2>
+            <p className="text-slate-400 leading-relaxed">
+              El programa contempla la emisión de certificado con aval académico por parte de la Sociedad Mexicana de Medicina Física y Rehabilitación A.C., sujeto al cumplimiento de requisitos de asistencia, evaluaciones, prácticas y lineamientos académicos vigentes al momento de la emisión.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">6. Alcance formativo y responsabilidad profesional</h2>
+            <p className="text-slate-400 leading-relaxed">
+              El diplomado tiene fines exclusivamente educativos y de actualización profesional. La aplicación clínica de los conocimientos adquiridos es responsabilidad del médico participante, quien deberá actuar conforme a su cédula profesional, normatividad aplicable y protocolos institucionales.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">7. Jurisdicción y legislación aplicable</h2>
+            <p className="text-slate-400 leading-relaxed">
+              Para la interpretación y cumplimiento de estos términos, las partes se someten a la legislación mexicana y a la jurisdicción de los tribunales competentes en Ciudad de México, salvo disposición legal en contrario.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">8. Contacto</h2>
             <p className="text-slate-400 leading-relaxed">
               Para consultas sobre estos términos, contacte a <a href="mailto:drmoralesrehabilita@gmail.com" className="text-primary hover:underline">drmoralesrehabilita@gmail.com</a>.
             </p>

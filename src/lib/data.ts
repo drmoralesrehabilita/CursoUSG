@@ -1,5 +1,5 @@
 import { createClient } from "./supabase/server";
-import { ModuleWithLessons, Enrollment } from "@/types/app";
+import { ModuleWithLessons, Enrollment, LiveSession, Certificate } from "@/types/app";
 import { Database } from "@/types/supabase";
 
 export async function getModules(): Promise<ModuleWithLessons[]> {
@@ -77,4 +77,86 @@ export async function getLesson(id: string) {
     }
   
     return data;
+}
+
+export async function getLiveSessions(): Promise<LiveSession[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("live_sessions")
+    .select("*")
+    .gte("session_date", new Date().toISOString())
+    .order("session_date", { ascending: true })
+    .limit(1);
+
+  if (error) {
+    console.error("Error fetching live sessions:", error);
+    return [];
+  }
+
+  return data as LiveSession[];
+}
+
+export async function getUserCertificates(): Promise<Certificate[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("certificates")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("issue_date", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching certificates:", error);
+    return [];
+  }
+
+  return data as Certificate[];
+}
+
+export async function getUserLessonProgress(lessonId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("lesson_id", lessonId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // not found
+    console.error("Error fetching lesson progress:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function getLessonQuiz(lessonId: string) {
+  const supabase = await createClient();
+  
+  // Get quiz
+  const { data: quiz, error: quizError } = await supabase
+    .from("quizzes")
+    .select("*")
+    .eq("lesson_id", lessonId)
+    .single();
+    
+  if (quizError || !quiz) return null;
+  
+  // Get questions
+  const { data: questions, error: qError } = await supabase
+    .from("questions")
+    .select("*")
+    .eq("quiz_id", quiz.id)
+    .order("order_index", { ascending: true });
+    
+  if (qError) return null;
+  
+  return { ...quiz, questions };
 }

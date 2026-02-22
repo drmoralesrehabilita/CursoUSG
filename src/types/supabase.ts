@@ -68,6 +68,9 @@ export type Database = {
           title: string
           video_url_camera: string | null
           video_url_ultrasound: string | null
+          mux_asset_id?: string | null
+          mux_playback_id?: string | null
+          mux_upload_id?: string | null
         }
         Insert: {
           created_at?: string | null
@@ -80,6 +83,9 @@ export type Database = {
           title: string
           video_url_camera?: string | null
           video_url_ultrasound?: string | null
+          mux_asset_id?: string | null
+          mux_playback_id?: string | null
+          mux_upload_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -92,6 +98,9 @@ export type Database = {
           title?: string
           video_url_camera?: string | null
           video_url_ultrasound?: string | null
+          mux_asset_id?: string | null
+          mux_playback_id?: string | null
+          mux_upload_id?: string | null
         }
         Relationships: [
           {

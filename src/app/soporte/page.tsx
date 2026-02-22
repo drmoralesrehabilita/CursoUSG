@@ -87,6 +87,13 @@ export default function SoportePage() {
           </div>
         </div>
 
+        <div className="mt-6 p-6 rounded-2xl border border-primary/25 bg-primary/10">
+          <h2 className="font-semibold text-white mb-2">Respaldo académico y legal</h2>
+          <p className="text-sm text-blue-100 leading-relaxed">
+            Si necesitas constancias, información de facturación, requisitos de certificación o documentación sobre términos y privacidad, nuestro equipo te orienta por correo para un seguimiento formal.
+          </p>
+        </div>
+
         <div className="mt-12 pt-8 border-t border-surface-highlight">
           <Link href="/">
             <Button variant="outline" className="gap-2">

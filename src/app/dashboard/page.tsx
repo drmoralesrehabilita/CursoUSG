@@ -1,9 +1,33 @@
 import { Header } from "@/components/dashboard/header"
-import { getUserProfile } from "@/lib/data"
+import { getUserProfile, getUserEnrollment, getModules, getLiveSessions, getUserCertificates } from "@/lib/data"
+import Link from "next/link"
+import { CertificateGenerator } from "@/components/student/CertificateGenerator"
 
 export default async function DashboardPage() {
   const profile = await getUserProfile()
   const displayName = profile?.full_name || "Estudiante"
+  
+  const enrollment = await getUserEnrollment()
+  const modules = await getModules()
+  const liveSessions = await getLiveSessions()
+  const certificates = await getUserCertificates()
+  
+  const activeModule = modules.find(m => m.id === enrollment?.module_id) || modules[0];
+  const progressPercent = enrollment?.progress || 0;
+  
+  // Encontrar la primera lección del módulo para el botón de continuar
+  const firstLesson = activeModule?.lessons?.[0];
+  const firstLessonId = firstLesson?.id;
+
+  // Extraer el material PDF si existe en la lección
+  let pdfActivityUrl = "";
+  if (firstLesson?.materials && Array.isArray(firstLesson.materials) && firstLesson.materials.length > 0) {
+    const materials = firstLesson.materials as unknown as { title?: string, url?: string }[];
+    const pdfMaterial = materials.find(m => m.url);
+    if (pdfMaterial && pdfMaterial.url) {
+      pdfActivityUrl = pdfMaterial.url;
+    }
+  }
 
   return (
     <>
@@ -26,7 +50,7 @@ export default async function DashboardPage() {
             <div className="h-10 w-[1px] bg-gray-300 dark:bg-gray-700 mx-2"></div>
             <div className="text-right">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cursos Completados</p>
-              <p className="text-xl font-bold text-secondary dark:text-white">3/8</p>
+              <p className="text-xl font-bold text-secondary dark:text-white">{progressPercent === 100 ? 1 : 0}/{modules.length || 8}</p>
             </div>
           </div>
         </div>
@@ -44,32 +68,54 @@ export default async function DashboardPage() {
                   <span className="text-gray-400 text-sm">Actualizado hace 2h</span>
                 </div>
                 <h3 className="text-2xl font-bold text-secondary dark:text-white mb-2">
-                  Módulo 2: Miembro Superior (Hombro)
+                  {activeModule ? activeModule.title : "Módulo 2: Miembro Superior (Hombro)"}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-lg">
-                  Identificación de estructuras tendinosas del manguito rotador y técnicas de infiltración subacromial guiada por ultrasonido.
-                </p>
+                <div 
+                  className="text-gray-600 dark:text-gray-300 mb-6 max-w-lg [&>p]:mb-2"
+                  dangerouslySetInnerHTML={{ 
+                    __html: activeModule?.description || "Identificación de estructuras tendinosas del manguito rotador y técnicas de infiltración subacromial guiada por ultrasonido." 
+                  }}
+                />
                 <div className="mb-8">
                   <div className="flex justify-between text-sm mb-2 font-medium">
                     <span className="text-secondary dark:text-gray-300">Progreso del módulo</span>
-                    <span className="text-primary">65%</span>
+                    <span className="text-primary">{progressPercent}%</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                     <div
                       className="bg-primary h-3 rounded-full shadow-lg shadow-primary/30 transition-all duration-500"
-                      style={{ width: "65%" }}
+                      style={{ width: `${progressPercent}%` }}
                     ></div>
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="flex-1 bg-primary hover:bg-cyan-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined">play_circle</span>
-                    Continuar Lección
-                  </button>
-                  <button className="flex-1 bg-white dark:bg-gray-800 text-secondary dark:text-white font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                    <span className="material-symbols-outlined">description</span>
-                    Ver Material PDF
-                  </button>
+                  {firstLessonId ? (
+                    <Link href={`/lessons/${firstLessonId}`} className="flex-1 bg-primary hover:bg-cyan-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined">play_circle</span>
+                      Continuar Lección
+                    </Link>
+                  ) : (
+                    <button className="flex-1 bg-primary/50 text-white font-semibold py-3 px-6 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined">play_circle</span>
+                      Próximamente
+                    </button>
+                  )}
+                  {pdfActivityUrl ? (
+                    <a 
+                      href={pdfActivityUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-white dark:bg-gray-800 text-secondary dark:text-white font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined">description</span>
+                      Ver Material PDF
+                    </a>
+                  ) : (
+                    <button disabled className="flex-1 bg-white dark:bg-gray-800 text-secondary dark:text-white font-medium py-3 px-6 rounded-xl border border-gray-200 dark:border-gray-600 opacity-50 cursor-not-allowed flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined">description</span>
+                      Ver Material PDF
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -164,16 +210,26 @@ export default async function DashboardPage() {
                 <span className="material-symbols-outlined text-red-400 animate-pulse">videocam</span>
                 Próxima Sesión en Vivo
               </h3>
-              <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-4">
-                <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Webinar</p>
-                <p className="font-bold text-lg leading-tight mb-2">Infiltración de Cadera Guiada</p>
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <span className="material-symbols-outlined text-base">calendar_month</span>
-                  <span>24 Oct, 18:00 hrs</span>
+              
+              {liveSessions.length > 0 ? (
+                liveSessions.map((session) => (
+                  <div key={session.id} className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-4">
+                    <p className="text-xs text-primary font-bold uppercase tracking-wider mb-1">Webinar</p>
+                    <p className="font-bold text-lg leading-tight mb-2">{session.title}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-300">
+                      <span className="material-symbols-outlined text-base">calendar_month</span>
+                      <span>{new Date(session.session_date).toLocaleString('es-MX', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} hrs</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-4">
+                  <p className="text-sm text-gray-300">No hay sesiones en vivo programadas próximamente.</p>
                 </div>
-              </div>
-              <button className="w-full bg-white text-secondary font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors">
-                Inscribirse
+              )}
+              
+              <button disabled={liveSessions.length === 0} className="w-full bg-white text-secondary font-bold py-2 px-4 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                {liveSessions.length > 0 ? "Inscribirse" : "No disponible"}
               </button>
             </div>
 
@@ -209,27 +265,34 @@ export default async function DashboardPage() {
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="font-bold text-secondary dark:text-white mb-4">Certificados Recientes</h3>
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
-                    <span className="material-symbols-outlined">workspace_premium</span>
+                {certificates.length > 0 ? certificates.map((cert) => {
+                  const certModule = modules.find(m => m.id === cert.module_id);
+                  const isGlobal = !cert.module_id;
+                  return (
+                    <div key={cert.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isGlobal ? 'bg-primary/20 text-primary' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'}`}>
+                          <span className="material-symbols-outlined text-2xl">{isGlobal ? 'school' : 'workspace_premium'}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-secondary dark:text-gray-200">{isGlobal ? "Diplomado Compl. en Rehabilitación Intervencionista" : (certModule?.title || "Módulo Completado")}</p>
+                          <p className="text-xs text-gray-500">Emitido: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
+                        </div>
+                      </div>
+                      <CertificateGenerator studentName={displayName} date={cert.issue_date || undefined} />
+                    </div>
+                  );
+                }) : (
+                  <div className="flex items-center gap-3 opacity-60">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
+                      <span className="material-symbols-outlined">lock</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-secondary dark:text-gray-200">Aún no hay certificados</p>
+                      <p className="text-xs text-gray-500">Completa módulos para obtenerlos</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-secondary dark:text-gray-200">Fundamentos Eco</p>
-                    <p className="text-xs text-gray-500">Completado: 10 Oct</p>
-                  </div>
-                  <button className="text-primary hover:bg-primary/10 p-1 rounded transition-colors">
-                    <span className="material-symbols-outlined text-lg">download</span>
-                  </button>
-                </div>
-                <div className="flex items-center gap-3 opacity-60">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-                    <span className="material-symbols-outlined">lock</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-secondary dark:text-gray-200">Intervencionismo I</p>
-                    <p className="text-xs text-gray-500">Bloqueado</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

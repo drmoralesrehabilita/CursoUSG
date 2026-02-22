@@ -151,7 +151,7 @@ export default function TemarioPage() {
             </h1>
             <p className="text-xl text-slate-400 mb-6">Dr. Raúl Morales</p>
             <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
-              Este plan integra el temario académico del Dr. Raúl Morales con una infraestructura tecnológica de alto nivel para médicos especialistas y residentes.
+              Un plan académico de alto impacto clínico diseñado para médicos especialistas y residentes que buscan dominar el intervencionismo en rehabilitación con estándares actuales de seguridad, precisión y respaldo docente.
             </p>
             <nav className="flex flex-wrap justify-center gap-2">
               <a href="#concepto" className="px-3 py-1.5 rounded-lg bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 text-sm transition-colors">Concepto</a>
@@ -165,7 +165,7 @@ export default function TemarioPage() {
                 className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary hover:text-white hover:bg-primary/50 text-sm transition-colors inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                Plan.pdf
+                Descargar PDF
               </a>
             </nav>
           </div>
