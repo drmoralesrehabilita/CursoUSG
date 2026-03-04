@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
 import { createCheckoutSession } from "@/app/actions/stripe"
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const searchParams = useSearchParams()
   const canceled = searchParams.get("canceled") === "true"
   const [email, setEmail] = useState("")
@@ -182,5 +182,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#080B14] flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-primary text-4xl">autorenew</span></div>}>
+      <CheckoutContent />
+    </Suspense>
   )
 }

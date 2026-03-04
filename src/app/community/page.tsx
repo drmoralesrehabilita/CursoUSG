@@ -1,7 +1,6 @@
 import { Header } from "@/components/dashboard/header"
 import { getUserProfile } from "@/lib/data"
 import { createClient } from "@/lib/supabase/server"
-import Link from "next/link"
 import { CommunityClient } from "./CommunityClient"
 
 const CATEGORIES = ["General", "Casos Clínicos", "Técnica", "Anatomía", "Dudas", "Recursos"]
@@ -65,7 +64,7 @@ export default async function CommunityPage() {
           </div>
 
           <CommunityClient
-            threads={threads}
+            threads={threads as unknown as React.ComponentProps<typeof CommunityClient>["threads"]}
             likedIds={likedIds}
             currentUserId={currentUserId}
             isAdmin={isAdmin}

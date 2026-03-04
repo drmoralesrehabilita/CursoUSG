@@ -1,0 +1,13 @@
+src/app/community/[id]/page.tsx(64,13): error TS2322: Type '{ id: any; title: any; body: any; category: any; is_official: any; is_pinned: any; reply_count: any; like_count: any; created_at: any; profiles: { full_name: any; role: any; }[]; }' is not assignable to type 'Thread'.
+  Types of property 'profiles' are incompatible.
+    Type '{ full_name: any; role: any; }[]' is missing the following properties from type '{ full_name: string | null; role: string | null; }': full_name, role
+src/app/community/[id]/page.tsx(65,13): error TS2322: Type '{ id: any; body: any; like_count: any; created_at: any; profiles: { full_name: any; role: any; }[]; }[]' is not assignable to type 'Post[]'.
+  Type '{ id: any; body: any; like_count: any; created_at: any; profiles: { full_name: any; role: any; }[]; }' is not assignable to type 'Post'.
+    Types of property 'profiles' are incompatible.
+      Type '{ full_name: any; role: any; }[]' is missing the following properties from type '{ full_name: string | null; role: string | null; }': full_name, role
+src/app/community/page.tsx(68,13): error TS2322: Type '{ id: any; title: any; body: any; category: any; is_pinned: any; is_official: any; reply_count: any; like_count: any; created_at: any; profiles: { full_name: any; role: any; }[]; }[]' is not assignable to type 'Thread[]'.
+  Type '{ id: any; title: any; body: any; category: any; is_pinned: any; is_official: any; reply_count: any; like_count: any; created_at: any; profiles: { full_name: any; role: any; }[]; }' is not assignable to type 'Thread'.
+    Types of property 'profiles' are incompatible.
+      Type '{ full_name: any; role: any; }[]' is missing the following properties from type '{ full_name: string | null; role: string | null; }': full_name, role
+src/app/microlearning/[id]/MicroLessonViewer.tsx(46,11): error TS2322: Type '{ streamType: "on-demand"; playbackId: string; metadata: { video_title: string; viewer_user_id: string; }; primaryColor: string; secondaryColor: string; className: string; controls: true; }' is not assignable to type 'IntrinsicAttributes & Omit<MuxPlayerProps, "playerSoftwareName" | "playerSoftwareVersion"> & RefAttributes<MuxPlayerElement>'.
+  Property 'controls' does not exist on type 'IntrinsicAttributes & Omit<MuxPlayerProps, "playerSoftwareName" | "playerSoftwareVersion"> & RefAttributes<MuxPlayerElement>'.

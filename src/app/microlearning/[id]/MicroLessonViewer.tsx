@@ -43,7 +43,6 @@ export function MicroLessonViewer({ lesson }: { lesson: MicroLesson }) {
           primaryColor="#00b4d8"
           secondaryColor="#FFFFFF"
           className="w-full h-full object-contain"
-          controls
         />
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 p-6 text-center">

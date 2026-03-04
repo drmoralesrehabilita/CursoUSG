@@ -1,13 +1,16 @@
 import { Sidebar } from "@/components/dashboard/sidebar"
+import { getUserProfile } from "@/lib/data"
 
-export default function ProfileLayout({
+export default async function ProfileLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const userProfile = await getUserProfile()
+
   return (
     <div className="flex h-screen bg-background-light dark:bg-background-dark font-body overflow-hidden">
-      <Sidebar />
+      <Sidebar userProfile={userProfile} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {children}
       </div>

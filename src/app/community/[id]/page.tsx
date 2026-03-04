@@ -61,8 +61,8 @@ export default async function ThreadDetailPage({ params }: { params: Promise<{ i
             Volver al Foro
           </Link>
           <ThreadDetailClient
-            thread={thread}
-            posts={posts}
+            thread={thread as unknown as React.ComponentProps<typeof ThreadDetailClient>["thread"]}
+            posts={posts as unknown as React.ComponentProps<typeof ThreadDetailClient>["posts"]}
             currentUserId={user?.id || null}
             isAdmin={isAdmin}
           />
