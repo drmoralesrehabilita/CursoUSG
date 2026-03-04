@@ -3,15 +3,14 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 
-// Delaying Stripe initialization until it's actually needed in the route handler.
-// Supabase Admin client (Service Role key — bypasses RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
-
 export async function POST(req: Request) {
+  // ⚠️ Initialize inside handler — NOT at module level — so env vars are
+  // available at runtime and Next.js doesn't fail during the build phase.
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
   const body = await req.text()
   const signature = req.headers.get('stripe-signature')
 
