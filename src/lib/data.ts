@@ -55,9 +55,31 @@ export async function getUserProfile(): Promise<Profile | null> {
     .eq("id", user.id)
     .single();
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') {
     console.error("Error fetching profile:", error);
     return null;
+  }
+
+  // If profile exists but name is missing, try auth metadata
+  if (profile && !profile.full_name && user.user_metadata?.full_name) {
+    return { ...profile, full_name: user.user_metadata.full_name };
+  }
+
+  // If profile doesn't exist yet, return a skeleton from auth data
+  if (!profile) {
+    return {
+      id: user.id,
+      full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || "Usuario",
+      email: user.email || null,
+      role: (user.user_metadata?.role as string) || "student",
+      specialty: null,
+      phone: null,
+      created_at: new Date().toISOString(),
+      license_id: null,
+      state: null,
+      interest_area: null,
+      experience_level: null,
+    } as Profile;
   }
 
   return profile as Profile;
@@ -237,7 +259,7 @@ export async function getCertificatesList() {
   const { data, error } = await supabase
     .from("certificates")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("issue_date", { ascending: false });
 
   if (error) {
     console.error("Error fetching certificates list:", error.message, error.code, error.details, error.hint);

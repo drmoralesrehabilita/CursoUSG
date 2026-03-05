@@ -52,36 +52,36 @@ export default async function ProfilePage() {
     <>
       <Header title="Mi Perfil" />
       <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-background-light dark:bg-background-dark font-body">
-        <div className="relative bg-secondary rounded-2xl shadow-lg p-6 md:p-8 mb-8 overflow-hidden">
+        <div className="relative bg-secondary rounded-2xl shadow-lg p-6 md:p-10 mb-8 overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-            <div className="relative">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-primary shadow-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
-                <span className="material-symbols-outlined text-6xl text-gray-400">person</span>
+          <div className="relative z-10 flex flex-col items-center md:items-start md:flex-row gap-6 md:gap-10">
+            <div className="relative shrink-0">
+              <div className="w-28 h-28 md:w-40 md:h-40 rounded-full border-4 border-primary/30 shadow-2xl bg-gray-200 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
+                <span className="material-symbols-outlined text-5xl md:text-6xl text-gray-400">person</span>
               </div>
               <span className="absolute bottom-2 right-2 bg-green-500 w-5 h-5 rounded-full border-2 border-secondary"></span>
             </div>
-            <div className="flex-1 text-center md:text-left">
+            <div className="flex-1 text-center md:text-left min-w-0">
               <div className="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center md:justify-start">
-                <h1 className="text-3xl font-bold text-white">{displayName}</h1>
-                <span className="bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-sm font-semibold inline-flex items-center gap-1 self-center md:self-auto uppercase">
+                <h1 className="text-2xl md:text-3xl font-bold text-white truncate">{displayName}</h1>
+                <span className="bg-primary/20 text-primary border border-primary/30 px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1 self-center md:self-auto uppercase tracking-wider">
                   <span className="material-symbols-outlined text-base">verified</span>
                   {role}
                 </span>
               </div>
-              <p className="text-gray-300 text-lg mb-1">{specialty}</p>
+              <p className="text-gray-300 text-base md:text-lg mb-1">{specialty}</p>
               <p className="text-gray-400 text-sm flex items-center justify-center md:justify-start gap-1">
-                <span className="material-symbols-outlined text-base">location_on</span> {profile?.state || 'Ubicación no especificada'}
+                <span className="material-symbols-outlined text-base text-primary/70">location_on</span> {profile?.state || 'México'}
               </p>
               <div className="mt-6 flex flex-wrap gap-3 justify-center md:justify-start">
-                <button className="bg-primary hover:bg-cyan-500 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 shadow-lg shadow-primary/20">
+                <button className="flex-1 sm:flex-none justify-center bg-primary hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-primary/20">
                   <span className="material-symbols-outlined text-xl">edit_square</span>
                   Editar Perfil
                 </button>
-                <button className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 border border-white/10">
+                <button className="flex-1 sm:flex-none justify-center bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2 border border-white/10">
                   <span className="material-symbols-outlined text-xl">history_edu</span>
-                  Descargar Historial
+                  Historial
                 </button>
               </div>
             </div>

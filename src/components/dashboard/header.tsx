@@ -3,14 +3,19 @@
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import { Logo } from "@/components/ui/logo"
+import { useSidebar } from "./sidebar-context"
 
 export function Header({ title = "Dashboard", userName }: { title?: string; userName?: string }) {
   const { setTheme, theme } = useTheme()
+  const { toggle } = useSidebar()
 
   return (
     <header className="h-16 flex items-center justify-between px-6 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 shadow-sm z-10 font-body transition-colors">
       <div className="md:hidden flex items-center gap-2">
-        <button className="text-gray-500 hover:text-primary">
+        <button 
+          onClick={toggle}
+          className="text-gray-500 hover:text-primary p-1"
+        >
           <span className="material-symbols-outlined">menu</span>
         </button>
         {userName ? (
