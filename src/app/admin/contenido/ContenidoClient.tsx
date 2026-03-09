@@ -65,6 +65,12 @@ function LessonIcon({ type }: { type: string }) {
   if (type === "document") {
     return <span className="material-symbols-outlined text-blue-400 text-lg">description</span>
   }
+  if (type === "image") {
+    return <span className="material-symbols-outlined text-teal-400 text-lg">image</span>
+  }
+  if (type === "link") {
+    return <span className="material-symbols-outlined text-amber-400 text-lg">link</span>
+  }
   return <span className="material-symbols-outlined text-primary text-lg">play_circle</span>
 }
 
@@ -139,6 +145,63 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
+
+  // Link & Image Inline Creation State
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
+  const [editingLink, setEditingLink] = useState<{ moduleId: string, title: string, url: string } | null>(null)
+  const [isSubmittingLink, setIsSubmittingLink] = useState(false)
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false)
+  const [editingImage, setEditingImage] = useState<{ moduleId: string, title: string, file: File | null } | null>(null)
+  const [isSubmittingImage, setIsSubmittingImage] = useState(false)
+
+  const handleSaveLink = async () => {
+    if (!editingLink || !editingLink.title.trim() || !editingLink.url.trim()) return
+    setIsSubmittingLink(true)
+    // Importing dynamically to avoid breaking existing imports at top
+    const { createLinkLesson } = await import('@/app/actions/contentSetup')
+    const res = await createLinkLesson({ moduleId: editingLink.moduleId, title: editingLink.title, linkUrl: editingLink.url })
+    setIsSubmittingLink(false)
+    if (res?.success) {
+      toast.success("Enlace añadido")
+      setIsLinkModalOpen(false)
+    } else {
+      toast.error(res?.error || "Error al añadir enlace")
+    }
+  }
+
+  const handleSaveImage = async () => {
+    if (!editingImage || !editingImage.title.trim() || !editingImage.file) return
+    setIsSubmittingImage(true)
+    
+    try {
+      const fileExt = editingImage.file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = `thumbnails/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('thumbnails') 
+        .upload(filePath, editingImage.file)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('thumbnails').getPublicUrl(filePath)
+      
+      const { createImageLesson } = await import('@/app/actions/contentSetup')
+      const res = await createImageLesson({ moduleId: editingImage.moduleId, title: editingImage.title, imageUrl: data.publicUrl })
+      
+      if (res?.success) {
+        toast.success("Imagen añadida")
+        setIsImageModalOpen(false)
+      } else {
+        toast.error(res?.error || "Error al añadir imagen")
+      }
+    } catch (error) {
+      toast.error('Error al subir imagen: ' + (error as Error).message)
+    } finally {
+      setIsSubmittingImage(false)
+    }
+  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'module' | 'lesson') => {
     const file = e.target.files?.[0]
@@ -436,9 +499,30 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
                       </DndContext>
                     </div>
 
-                    {/* Add Lesson Button - Maybe just open UploadEngine modal? Or a separate basic lesson creator */}
-                    <div className="p-4 bg-gray-50 dark:bg-black/20 border-t border-gray-200 dark:border-white/5">
+                    <div className="p-4 bg-gray-50 dark:bg-black/20 border-t border-gray-200 dark:border-white/5 flex flex-col gap-3">
                        <QuizBuilder modules={[mod]} />
+                       <div className="flex flex-wrap items-center gap-2 mt-2 pt-4 border-t border-gray-200 dark:border-white/5">
+                         <span className="text-xs font-semibold text-gray-500 mr-2">Añadir Recurso:</span>
+                         <button 
+                           onClick={() => {
+                             setEditingLink({ moduleId: mod.id, title: "", url: "" })
+                             setIsLinkModalOpen(true)
+                           }}
+                           className="px-3 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 rounded-lg text-[11px] font-semibold transition-colors flex items-center gap-1.5 border border-amber-500/20"
+                         >
+                           <span className="material-symbols-outlined text-sm">link</span> Enlace
+                         </button>
+                         <button 
+                           onClick={() => {
+                             setEditingImage({ moduleId: mod.id, title: "", file: null })
+                             setIsImageModalOpen(true)
+                           }}
+                           className="px-3 py-1.5 bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 rounded-lg text-[11px] font-semibold transition-colors flex items-center gap-1.5 border border-teal-500/20"
+                         >
+                           <span className="material-symbols-outlined text-sm">image</span> Imagen
+                         </button>
+                         {/* To add specific documents or videos directly here, we could add them, but the UploadEngine at the top covers them well for now. The user asked specifically for easier image and links. */}
+                       </div>
                     </div>
                   </div>
                 )}
@@ -524,6 +608,117 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
         </div>
       )}
 
+      {/* Link Modal */}
+      {isLinkModalOpen && editingLink && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-amber-500">link</span>
+                Añadir Enlace
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Título del Enlace</label>
+                  <input
+                    type="text"
+                    value={editingLink.title}
+                    onChange={(e) => setEditingLink({ ...editingLink, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-gray-900 dark:text-white"
+                    placeholder="Ej. Artículo Científico de Referencia"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">URL (https://...)</label>
+                  <input
+                    type="url"
+                    value={editingLink.url}
+                    onChange={(e) => setEditingLink({ ...editingLink, url: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-gray-900 dark:text-white"
+                    placeholder="https://ejemplo.com/articulo"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsLinkModalOpen(false)}
+                className="px-6 py-2.5 rounded-xl font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                disabled={isSubmittingLink}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveLink}
+                disabled={isSubmittingLink || !editingLink.title.trim() || !editingLink.url.trim()}
+                className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-semibold shadow-lg shadow-amber-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSubmittingLink ? "Guardando..." : "Guardar Enlace"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Modal */}
+      {isImageModalOpen && editingImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-800 shadow-2xl">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-teal-500">image</span>
+                Añadir Imagen
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Título de la Imagen</label>
+                  <input
+                    type="text"
+                    value={editingImage.title}
+                    onChange={(e) => setEditingImage({ ...editingImage, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-gray-900 dark:text-white"
+                    placeholder="Ej. Esquema del Plexo Braquial"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Archivo de Imagen</label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl cursor-pointer bg-gray-50 dark:bg-black/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <span className="material-symbols-outlined text-3xl text-gray-400 mb-2">cloud_upload</span>
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-semibold">{editingImage.file ? editingImage.file.name : 'Haz click para subir'}</span>
+                      </p>
+                      {!editingImage.file && <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG o GIF</p>}
+                    </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && setEditingImage({ ...editingImage, file: e.target.files[0] })} />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsImageModalOpen(false)}
+                className="px-6 py-2.5 rounded-xl font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                disabled={isSubmittingImage}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveImage}
+                disabled={isSubmittingImage || !editingImage.title.trim() || !editingImage.file}
+                className="px-6 py-2.5 bg-teal-500 hover:bg-teal-400 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSubmittingImage ? "Guardando..." : "Subir Imagen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lesson Modal (Upgraded to Full Screen Sheet) */}
       <Sheet open={isLessonModalOpen} onOpenChange={setIsLessonModalOpen}>
         <SheetContent 
@@ -558,6 +753,7 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
                   
                   {editingLesson.thumbnail_url && (
                     <div className="relative group rounded-2xl overflow-hidden border border-white/5 aspect-video bg-black/40">
+                       {/* eslint-disable-next-line @next/next/no-img-element */}
                        <img src={editingLesson.thumbnail_url} alt="Portada Lección" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                          <p className="text-[10px] text-white/80">Vista previa de la portada</p>
@@ -661,6 +857,31 @@ export function ContenidoClient({ modules }: { modules: Module[] }) {
                         />
                       </div>
                     </section>
+
+                    {editingLesson.lesson_type === 'link' && (
+                       <section className="space-y-4">
+                         <div className="flex items-center gap-2 mb-2">
+                           <span className="material-symbols-outlined text-amber-400 text-sm">link</span>
+                           <h3 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Configuración del Enlace</h3>
+                         </div>
+                         <div>
+                            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ml-1 uppercase">URL Destino</label>
+                            <input
+                              type="url"
+                              value={editingLesson.materials?.[0]?.url || ""}
+                              onChange={(e) => {
+                                 const url = e.target.value;
+                                 setEditingLesson({
+                                   ...editingLesson,
+                                   materials: [{ title: editingLesson.materials?.[0]?.title || editingLesson.title, url }]
+                                 })
+                              }}
+                              className="w-full px-5 py-3.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/5 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all text-gray-900 dark:text-white font-medium"
+                              placeholder="https://ejemplo.com"
+                            />
+                         </div>
+                       </section>
+                    )}
 
                     <section className="space-y-4">
                       <div className="flex items-center gap-2 mb-2">

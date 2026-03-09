@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
+import { ImageCarousel } from "@/components/ui/image-carousel"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { 
   Menu, 
@@ -71,56 +72,110 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative flex min-h-[600px] flex-col justify-center overflow-hidden py-16 lg:py-24">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/90 to-transparent z-10"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/90 to-background-dark/70 z-10"></div>
             <div className="absolute inset-0 bg-linear-to-t from-background-dark via-transparent to-transparent z-10"></div>
             {/* Using img for external source to avoid Next.js config requirement for now */}
             <img 
                 alt="Doctor performing ultrasound guided procedure in dark room" 
-                className="h-full w-full object-cover opacity-60" 
+                className="h-full w-full object-cover opacity-40" 
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLvALLsJGZ5dQL1KrpVdL29z2luaqM1sWjPhoQxywfzZx7BTo-Ku18z5r7z2tc_oCAAJF0NvD_62VJD2V8MolhlHeXrKRdbFupQb7XWmoIm1ioeAYgU4jWcEOaUEFNWRz6tsz-IJ2q_JSOhOk7-UFP2aiqUmd25wQtU6CS6GC6lo83yAKotWdSWtwJitHwjhTJpG2t91D1DL6VJEU393PvV6KsAGD_QuCngHR6aunqn05FVVKRP0j12GBuNwPpkAn-HTSHcs-tBYBr"
             />
           </div>
           <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 mb-6 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                </span>
-                <span className="text-xs font-medium text-primary-300 uppercase tracking-wider">Nueva Cohorte Abierta</span>
-              </div>
-              <h1 className="text-4xl font-black text-white sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter mb-6 leading-[1.1]">
-                Diplomado Internacional de <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-400">Rehabilitación Intervencionista</span>
-              </h1>
-              <p className="mt-4 max-w-xl text-lg text-slate-300 leading-relaxed mb-8">
-                Domina procedimientos guiados por ecografía con entrenamiento clínico aplicado, casos reales y metodología de alta precisión. Eleva tu práctica con un programa estructurado para resultados medibles.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/register">
-                  <button className="h-12 px-8 rounded-lg bg-primary text-white font-bold text-base transition-all hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(23,115,207,0.5)] flex items-center justify-center gap-2 w-full sm:w-auto">
-                    <span>Inscribirme Ahora</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-                <Link href="/temario">
-                  <button className="h-12 px-8 rounded-lg border border-slate-600 bg-surface-dark/50 backdrop-blur text-white font-medium hover:bg-surface-dark transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
-                    <PlayCircle className="w-5 h-5" />
-                    <span>Ver Temario</span>
-                  </button>
-                </Link>
-              </div>
-              <div className="mt-10 flex items-center gap-4 text-sm text-slate-400">
-                <div className="flex -space-x-2">
-                  <img alt="Doctor profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqnGJUfqpTKADcwFI_u-97C-OsXKVgAiOncoIOLWPAPdbiMJVtaYeDcm_E3IK3t0fbIlo-D5erHDpFZg1lQsw4xPxtHVsZHCuCdQCDNug91riuepF_PZ66knUuhdLIqJ66VwWcMjWbGiwdZJccD6lSoUdNF_XyIG964qUVtVbgxkwLLzgELWLGglnAMyK-fkidFMRi0YWnEda5HoSoOUP91KmIIOHTwJqBzvzK93umUfexJTRDfU5xeSr1F2lBvlgjNpKnmTQ5bczm"/>
-                  <img alt="Specialist profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqhKsSwuwJzVrTWmyBBS3in3SRvncMfijApG0Be60gar6NciG1qROJ6vVpGnv-Hlvc3JxL5651fg8GxmK9FhAVNFeqS60IWaNDGpSZ23AH1hat4-b14CFFU6-WGQh38RCyk_2tcmQ7RiUUTXDUHFLEN9H194phsdrRTqxDPGuca64keJxZGh8-wQZvmpfxKr05RvPAKeuNBMrAM652Gj_Jf8C3I0vwSxfinD_67wBAVWkkqO_TSOTzPPGjcWWO4aRxrj_VNhd_b4os"/>
-                  <img alt="Student profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO-D0GR2SgeU1F0uwvB0n_2QoDZ1sQW5X3VGPE6ywEmU7EXgqRgQS9l--62DBv61sP_Ew2gX3QIr_XjYyADyzjzeMMRkjGXQxO7X0w7lFyG_A8M_mQwLUS-FxRViZHPRQ0Qtuhk_TyEJS6DqZQlYmanFD6XsTvYpq81ZzXguqdQnQQEQwALhfw5BrieUG7C56Bu0MARYpLe8-dbqCMmwYP30rkokbx3A1--k-Em3hWJ_-Cusm7tmIu5zIT3Q_TtiJC5A6cIAB3PXY1"/>
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left: Text Content */}
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 mb-6 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                  </span>
+                  <span className="text-xs font-medium text-primary-300 uppercase tracking-wider">Nueva Cohorte Abierta</span>
                 </div>
-                <p>Únete a <span className="text-white font-semibold">1,200+</span> profesionales médicos</p>
+                <h1 className="text-4xl font-black text-white sm:text-5xl lg:text-6xl tracking-tighter mb-6 leading-[1.1]">
+                  Diplomado Internacional de <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-blue-400">Rehabilitación Intervencionista</span>
+                </h1>
+                <p className="mt-4 max-w-xl text-lg text-slate-300 leading-relaxed mb-8">
+                  Domina procedimientos guiados por ecografía con entrenamiento clínico aplicado, casos reales y metodología de alta precisión.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link href="/register">
+                    <button className="h-12 px-8 rounded-lg bg-primary text-white font-bold text-base transition-all hover:bg-blue-600 hover:shadow-[0_0_20px_rgba(23,115,207,0.5)] flex items-center justify-center gap-2 w-full sm:w-auto">
+                      <span>Inscribirme Ahora</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
+                  <Link href="/temario">
+                    <button className="h-12 px-8 rounded-lg border border-slate-600 bg-surface-dark/50 backdrop-blur text-white font-medium hover:bg-surface-dark transition-colors flex items-center justify-center gap-2 w-full sm:w-auto">
+                      <PlayCircle className="w-5 h-5" />
+                      <span>Ver Temario</span>
+                    </button>
+                  </Link>
+                </div>
+                <div className="mt-8 flex items-center gap-4 text-sm text-slate-400">
+                  <div className="flex -space-x-2">
+                    <img alt="Doctor profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqnGJUfqpTKADcwFI_u-97C-OsXKVgAiOncoIOLWPAPdbiMJVtaYeDcm_E3IK3t0fbIlo-D5erHDpFZg1lQsw4xPxtHVsZHCuCdQCDNug91riuepF_PZ66knUuhdLIqJ66VwWcMjWbGiwdZJccD6lSoUdNF_XyIG964qUVtVbgxkwLLzgELWLGglnAMyK-fkidFMRi0YWnEda5HoSoOUP91KmIIOHTwJqBzvzK93umUfexJTRDfU5xeSr1F2lBvlgjNpKnmTQ5bczm"/>
+                    <img alt="Specialist profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqhKsSwuwJzVrTWmyBBS3in3SRvncMfijApG0Be60gar6NciG1qROJ6vVpGnv-Hlvc3JxL5651fg8GxmK9FhAVNFeqS60IWaNDGpSZ23AH1hat4-b14CFFU6-WGQh38RCyk_2tcmQ7RiUUTXDUHFLEN9H194phsdrRTqxDPGuca64keJxZGh8-wQZvmpfxKr05RvPAKeuNBMrAM652Gj_Jf8C3I0vwSxfinD_67wBAVWkkqO_TSOTzPPGjcWWO4aRxrj_VNhd_b4os"/>
+                    <img alt="Student profile" className="inline-block h-8 w-8 rounded-full ring-2 ring-background-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCO-D0GR2SgeU1F0uwvB0n_2QoDZ1sQW5X3VGPE6ywEmU7EXgqRgQS9l--62DBv61sP_Ew2gX3QIr_XjYyADyzjzeMMRkjGXQxO7X0w7lFyG_A8M_mQwLUS-FxRViZHPRQ0Qtuhk_TyEJS6DqZQlYmanFD6XsTvYpq81ZzXguqdQnQQEQwALhfw5BrieUG7C56Bu0MARYpLe8-dbqCMmwYP30rkokbx3A1--k-Em3hWJ_-Cusm7tmIu5zIT3Q_TtiJC5A6cIAB3PXY1"/>
+                  </div>
+                  <p>Únete a <span className="text-white font-semibold">1,200+</span> profesionales médicos</p>
+                </div>
+                <div className="mt-5 max-w-lg rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-blue-100">
+                  <span className="font-semibold text-white">+</span>{" "}
+                  Certificado con aval académico por parte de la{" "}
+                  <span className="font-semibold text-white">Sociedad Mexicana de Medicina Física y Rehabilitación A.C.</span>
+                </div>
               </div>
-              <div className="mt-6 max-w-2xl rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-blue-100">
-                <span className="font-semibold text-white">+</span>{" "}
-                Certificado con aval académico por parte de la{" "}
-                <span className="font-semibold text-white">Sociedad Mexicana de Medicina Física y Rehabilitación A.C.</span>
+
+              {/* Right (desktop) / Below (mobile): Image Carousel */}
+              <div className="relative mt-8 lg:mt-0">
+                <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl"></div>
+                <ImageCarousel
+                  compact
+                  autoPlayInterval={3500}
+                  images={[
+                    { id: "12OX9KISyLZwQmsTdvZFPjJVR1QS3Oj4a" },
+                    { id: "1Cq5yj63TKcDc5aEySsHOzFQdc59UEVam" },
+                    { id: "1jcfr1dzHU3gVYOXF_xXdoyCLyr32pgdq" },
+                    { id: "1GL3kOq2MGgIuApjWBIlQvEcSrMO3CYLs" },
+                    { id: "17hNfIE4JjQ0OicvvlLtqW1x1A82yBcvS" },
+                    { id: "11kg28JygXpmxU3Tqm3r_X93Y4WIcpTR7" },
+                    { id: "18o7yvGIOlF3RnFWhzSXiudYL6UEieH76" },
+                    { id: "1_ECK1rguctHJP0bvxZ8WXfhAeqPO4zxo" },
+                    { id: "1YENSlBTnXwAdOPlRJsPtS3lMzCluEQn1" },
+                    { id: "1CHzDGDZH8KtT78_W-9RQnS0iPDHSUwbo" },
+                    { id: "1z3Xw9w6sx0EgMHljQjn6ZO6lRv4pRk9c" },
+                    { id: "1Aq65InR8GVTu8TYR1oipXvezjPalx0TY" },
+                    { id: "15CED7iVBieY3HSyW-Rmj3l7RMvI1fkxi" },
+                    { id: "1qZhrXmVorg_y7wuP0A-9Q5bPMleHIdI4" },
+                    { id: "1JE3f7tKIrSXLO6XJ4dgchisH03u4aOXR" },
+                    { id: "1yNGsAbAC8WSNTGT2WSManLusiEnUuHzN" },
+                    { id: "1MALcYGr3h-1nvhLQ-jM-umIReqjKYzGg" },
+                    { id: "1Pwavv011MFOZMcEy0qgh0s4smI_ZfNKf" },
+                    { id: "1777M_aeXYIQa0xXwfDyeZoTZ0gcsnLUh" },
+                    { id: "1pgsfZAFkIT7Dn-IxPcGnFojvAuGaW69a" },
+                    { id: "1DOQE4yKykKQ9WFcfdZibXrXTeWexo_NT" },
+                    { id: "1OhBQxgny3LEREZXLRT05hTnV3fMzr6cX" },
+                    { id: "1HmHPwM55Lkhp5vGmFVqm4r2NmwpwMPx3" },
+                    { id: "11lY1iB0m-aYa-FOCbJ1FmKYfcroz-_WC" },
+                    { id: "1uOQ0l183vLgOEVEPqmLGY_MpJ7mrjRsO" },
+                    { id: "1znTIawuUtyb8sdGuJUBchxGeJ3XvPzXD" },
+                    { id: "1kDmXVGVWPJ-RQpCGws7p59GpTXC9nbCH" },
+                    { id: "1PC2bd_gK9HaLfECli3BkNGQzwIlAguc4" },
+                    { id: "1T689XlGoLz52a76PopbIBpzjkeF710W2" },
+                    { id: "1iE26Coso5D4RKQHuEDi3yOf0UpftPmvw" },
+                    { id: "1rwlW-Lz2Hu0qsTN7dBqLwhHmqQlA9wNJ" },
+                    { id: "10Vgq72XBUTMsyODm78__GL7MQtoRHEqm" },
+                    { id: "1wGqAHxamQGi8qFuvbd0ylvuPqN884p6g" },
+                    { id: "1zwqisNg2is6DjkeUUxtQ52NxkDAH0p-8" },
+                    { id: "1-fwAkm6YUgBPTLtwrKt26E3EMJyatDSa" },
+                    { id: "1zPquklwqF4k0BgcVLN6DuYcTxBHp32hV" },
+                    { id: "1GaV1eHSvDnlteVglxg18JREECCY0QYDT" },
+                    { id: "1EZG9TPsTQYnVih8B9sodlw9nUDxIBnbc" },
+                    { id: "11J465vc1txfLD0MV4ahC3ny2KVsR0U10" },
+                    { id: "1jrjxWUbUem99wzEFIF9zJ_H5c7WutWZZ" },
+                  ]}
+                />
               </div>
             </div>
           </div>
@@ -142,9 +197,6 @@ export default function LandingPage() {
 
         {/* Methodology Section */}
         <section className="py-20 bg-background-dark relative" id="methodology">
-            {/* Grid Pattern manually simulated/styled in CSS or just use a subtle background if available, user provided style class bg-grid-pattern which we missed. 
-                Let's add the style directly or assume global CSS. 
-            */}
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#293038 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -294,6 +346,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
 
         {/* Call to Action */}
         <section className="relative py-20 bg-primary overflow-hidden">

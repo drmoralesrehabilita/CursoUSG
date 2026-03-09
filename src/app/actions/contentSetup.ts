@@ -414,6 +414,56 @@ export async function createDocumentLesson({ moduleId, title, documentUrl }: { m
   return { success: true, newLessonId: newLesson.id };
 }
 
+export async function createImageLesson({ moduleId, title, imageUrl }: { moduleId: string; title: string; imageUrl: string }) {
+  const supabase = await createClient();
+  
+  if (!(await verifyAdmin(supabase))) {
+    return { success: false, error: "Not an admin" };
+  }
+
+  // Insert the new image lesson
+  const { data: newLesson, error } = await supabase.from("lessons").insert({
+    module_id: moduleId,
+    title: title,
+    lesson_type: "image",
+    thumbnail_url: imageUrl, 
+    is_published: true 
+  }).select("id").single();
+
+  if (error) {
+    console.error("DB error adding image lesson:", error);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/admin/contenido");
+  return { success: true, newLessonId: newLesson.id };
+}
+
+export async function createLinkLesson({ moduleId, title, linkUrl }: { moduleId: string; title: string; linkUrl: string }) {
+  const supabase = await createClient();
+  
+  if (!(await verifyAdmin(supabase))) {
+    return { success: false, error: "Not an admin" };
+  }
+
+  // Insert the new link lesson
+  const { data: newLesson, error } = await supabase.from("lessons").insert({
+    module_id: moduleId,
+    title: title,
+    lesson_type: "link",
+    materials: [{ title: title, url: linkUrl }], 
+    is_published: true 
+  }).select("id").single();
+
+  if (error) {
+    console.error("DB error adding link lesson:", error);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/admin/contenido");
+  return { success: true, newLessonId: newLesson.id };
+}
+
 export async function createModule(data: { title: string; description?: string; thumbnail_url?: string; prerequisite_module_id?: string | null }) {
   const supabase = await createClient();
   
