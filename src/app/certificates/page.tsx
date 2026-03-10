@@ -82,9 +82,9 @@ export default async function CertificatesPage() {
                         <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full border border-green-200 dark:border-green-800">
                           {isGlobal ? 'Diplomado' : 'Módulo'}
                         </div>
-                        {cert.folio && (
+                        {cert.folio ? (
                           <span className="text-[10px] text-gray-400 font-mono">{String(cert.folio)}</span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
 
