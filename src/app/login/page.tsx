@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +11,8 @@ import { login } from "./actions"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
+  const searchParams = useSearchParams()
+  const loginError = searchParams.get('error')
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row overflow-hidden bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-primary/30 selection:text-primary">
@@ -42,6 +45,18 @@ export default function LoginPage() {
 
           {/* Login Form */}
           <div className="bg-white dark:bg-surface-dark p-8 rounded-2xl border border-slate-200 dark:border-border/10 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
+            {loginError && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                <span className="material-symbols-outlined text-red-400 text-lg shrink-0">error</span>
+                <p className="text-sm text-red-400 font-medium">
+                  {loginError === 'credentials'
+                    ? 'Email o contraseña incorrectos. Verifica tus datos e intenta de nuevo.'
+                    : loginError === 'not_confirmed'
+                    ? 'Tu correo aún no ha sido confirmado. Revisa tu bandeja de entrada.'
+                    : 'Ocurrió un error al iniciar sesión. Intenta de nuevo.'}
+                </p>
+              </div>
+            )}
             <form action={login} className="flex flex-col gap-5">
               <div className="space-y-4">
                 <div className="space-y-2">

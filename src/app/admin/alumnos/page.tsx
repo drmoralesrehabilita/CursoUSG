@@ -11,10 +11,10 @@ export default async function AlumnosPage() {
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", userAuth.user.id).single()
   if (profile?.role !== 'admin') redirect('/login')
 
-  // Obtener alumnos (asegurarse de incluir los que tienen role null)
+  // Obtener alumnos con toda la información del registro
   const { data: studentsData } = await supabase
     .from("profiles")
-    .select("id, full_name, email, specialty, state, created_at, is_active")
+    .select("id, full_name, email, specialty, state, created_at, is_active, license_id, experience_level, interest_area, phone, access_requested, access_requested_at")
     .or("role.neq.admin,role.is.null")
     .order("created_at", { ascending: false })
   
@@ -58,7 +58,7 @@ export default async function AlumnosPage() {
       if (completedModLessons.length === modLessons.length && modLessons.length > 0) mStatus = "Completado"
       else if (completedModLessons.length > 0) mStatus = "En Progreso"
 
-      // Calcular calificacion (promedio de los quizzes del modulo usando el puntaje guardado en lesson_progress)
+      // Calcular calificacion
       if (quizLessons.length > 0) {
         let sum = 0;
         let count = 0;
@@ -97,6 +97,12 @@ export default async function AlumnosPage() {
       globalGrade: evalModules > 0 ? Math.round(totalScoreSum / evalModules) : null,
       moduleGrades,
       isActive: student.is_active ?? false,
+      licenseId: student.license_id || null,
+      experienceLevel: student.experience_level || null,
+      interestArea: student.interest_area || null,
+      phone: student.phone || null,
+      accessRequested: student.access_requested ?? false,
+      accessRequestedAt: student.access_requested_at || null,
     }
   })
 
@@ -105,7 +111,8 @@ export default async function AlumnosPage() {
     total: students.length,
     completed: students.filter(s => s.status === 'completed').length,
     inProgress: students.filter(s => s.status === 'active').length,
-    pending: students.filter(s => s.status === 'pending').length
+    pending: students.filter(s => s.status === 'pending').length,
+    accessRequests: students.filter(s => s.accessRequested && !s.isActive).length,
   }
 
   return <AlumnosClient students={students} stats={stats} />

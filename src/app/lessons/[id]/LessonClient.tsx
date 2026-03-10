@@ -1,17 +1,20 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { completeLessonProgress, submitQuizAttempt } from '@/app/actions/contentSetup'
 import MuxPlayer from '@mux/mux-player-react'
+import confetti from 'canvas-confetti'
+import type { QuizAttempt } from '@/lib/data'
 
 type LessonItem = {
   id: string
   title: string
   order_index?: number | null
   lesson_type?: string | null
+  duration_minutes?: number | null
   is_completed?: boolean
   is_locked?: boolean
 }
@@ -112,6 +115,8 @@ function LessonSidebar({ sidebarOpen, setSidebarOpen, moduleTitle, moduleLessons
   const iconMap: Record<string, string> = {
     quiz: 'quiz',
     document: 'description',
+    image: 'image',
+    link: 'link',
   }
 
   const completedCount = moduleLessons.filter(l => l.is_completed).length
@@ -194,7 +199,12 @@ function LessonSidebar({ sidebarOpen, setSidebarOpen, moduleTitle, moduleLessons
                 <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold transition-colors bg-gray-200 dark:bg-gray-800 text-gray-400">
                   <span className="material-symbols-outlined text-[14px]">lock</span>
                 </div>
-                <span className="flex-1 line-clamp-2 leading-snug">{l.title}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="line-clamp-2 leading-snug block">{l.title}</span>
+                  {l.duration_minutes && l.duration_minutes > 0 && (
+                    <span className="text-[10px] text-gray-400 mt-0.5 block">{l.duration_minutes} min</span>
+                  )}
+                </div>
                 <span className="material-symbols-outlined text-base shrink-0 text-gray-400">
                   {icon}
                 </span>
@@ -224,7 +234,12 @@ function LessonSidebar({ sidebarOpen, setSidebarOpen, moduleTitle, moduleLessons
                     i + 1
                   )}
                 </div>
-                <span className="flex-1 line-clamp-2 leading-snug">{l.title}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="line-clamp-2 leading-snug block">{l.title}</span>
+                  {l.duration_minutes && l.duration_minutes > 0 && (
+                    <span className="text-[10px] text-gray-400 mt-0.5 block">{l.duration_minutes} min</span>
+                  )}
+                </div>
                 <span className={`material-symbols-outlined text-base shrink-0 ${isActive ? 'text-primary' : 'text-gray-400'}`}>
                   {icon}
                 </span>
@@ -247,17 +262,104 @@ function FloatingNextButton({ nextLesson }: { nextLesson: LessonItem | null }) {
     return () => clearTimeout(timer)
   }, [])
 
-  if (!nextLesson || !visible) return null
+  if (!visible) return null
 
+  // If there's a next lesson, show "Siguiente lección"
+  if (nextLesson) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
+        <Link
+          href={`/lessons/${nextLesson.id}`}
+          className="flex items-center gap-2 bg-primary hover:bg-cyan-500 text-white px-5 py-3 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all active:scale-95 hover:scale-105"
+        >
+          <span className="text-sm">Siguiente lección</span>
+          <span className="material-symbols-outlined text-xl">arrow_forward</span>
+        </Link>
+      </div>
+    )
+  }
+
+  // Last lesson in module — show "Module Complete" navigation
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
       <Link
-        href={`/lessons/${nextLesson.id}`}
-        className="flex items-center gap-2 bg-primary hover:bg-cyan-500 text-white px-5 py-3 rounded-2xl font-bold shadow-xl shadow-primary/30 transition-all active:scale-95 hover:scale-105"
+        href="/courses"
+        className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-2xl font-bold shadow-xl shadow-green-500/30 transition-all active:scale-95 hover:scale-105"
       >
-        <span className="text-sm">Siguiente lección</span>
-        <span className="material-symbols-outlined text-xl">arrow_forward</span>
+        <span className="material-symbols-outlined text-xl">school</span>
+        <span className="text-sm">Ver Módulos</span>
       </Link>
+    </div>
+  )
+}
+
+// ============ Student Notes ============
+
+function StudentNotes({ lessonId }: { lessonId: string }) {
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !!localStorage.getItem(`lesson_notes_${lessonId}`)
+  })
+  const [notes, setNotes] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return localStorage.getItem(`lesson_notes_${lessonId}`) || ''
+  })
+  const [saved, setSaved] = useState(true)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleNotesChange = (value: string) => {
+    setNotes(value)
+    setSaved(false)
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    saveTimeoutRef.current = setTimeout(() => {
+      if (value.trim()) {
+        localStorage.setItem(`lesson_notes_${lessonId}`, value)
+      } else {
+        localStorage.removeItem(`lesson_notes_${lessonId}`)
+      }
+      setSaved(true)
+    }, 800)
+  }
+
+  return (
+    <div className="my-6 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-5 py-3.5 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <div className="flex items-center gap-2.5 text-sm font-semibold text-secondary dark:text-white">
+          <span className="material-symbols-outlined text-amber-500 text-lg">edit_note</span>
+          Mis Notas
+          {notes.trim() && (
+            <span className="text-[10px] font-medium px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded-full">
+              {notes.trim().split(/\s+/).length} palabras
+            </span>
+          )}
+        </div>
+        <span className={`material-symbols-outlined text-gray-400 text-sm transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+          expand_more
+        </span>
+      </button>
+      {isOpen && (
+        <div className="p-4 bg-white dark:bg-gray-900/50">
+          <textarea
+            value={notes}
+            onChange={(e) => handleNotesChange(e.target.value)}
+            placeholder="Escribe tus notas sobre esta lección... Puntos clave, preguntas, ideas..."
+            rows={5}
+            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm text-secondary dark:text-gray-200 placeholder-gray-400 resize-y focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
+          />
+          <div className="flex items-center justify-between mt-2 text-[11px] text-gray-400">
+            <span className="flex items-center gap-1">
+              <span className="material-symbols-outlined text-[13px]">info</span>
+              Guardado localmente en tu navegador
+            </span>
+            <span className={saved ? 'text-green-500' : 'text-amber-500'}>
+              {saved ? '✓ Guardado' : 'Guardando...'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -270,6 +372,7 @@ export function LessonClient({
   quizData,
   moduleLessons = [],
   moduleTitle = "",
+  quizAttempts = [],
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lesson: any
@@ -278,6 +381,7 @@ export function LessonClient({
   quizData: any
   moduleLessons?: LessonItem[]
   moduleTitle?: string
+  quizAttempts?: QuizAttempt[]
 }) {
   const router = useRouter()
   const [marking, setMarking] = useState(false)
@@ -292,10 +396,41 @@ export function LessonClient({
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(
     () => typeof window !== 'undefined' && window.innerWidth >= 1024
   )
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [showModuleWelcome, setShowModuleWelcome] = useState(() => {
+    const noLessonsCompleted = moduleLessons.every(l => !l.is_completed)
+    const isFirstLesson = moduleLessons.length > 0 && moduleLessons[0]?.id === lesson.id
+    const storageKey = `module_welcome_${lesson.module_id}`
+    const alreadySeen = typeof window !== 'undefined' && localStorage.getItem(storageKey)
+    return noLessonsCompleted && isFirstLesson && !alreadySeen && moduleLessons.length > 1
+  })
 
   const currentIndex = moduleLessons.findIndex(l => l.id === lesson.id)
   const prevLesson = currentIndex > 0 ? moduleLessons[currentIndex - 1] : null
   const nextLesson = currentIndex < moduleLessons.length - 1 ? moduleLessons[currentIndex + 1] : null
+
+  // Detect if completing this lesson finishes the module
+  const checkModuleCompletion = useCallback(() => {
+    const otherLessons = moduleLessons.filter(l => l.id !== lesson.id)
+    const allOthersCompleted = otherLessons.every(l => l.is_completed)
+    return allOthersCompleted
+  }, [moduleLessons, lesson.id])
+
+  const fireConfetti = useCallback(() => {
+    const duration = 3000
+    const end = Date.now() + duration
+    const colors = ['#00b4d8', '#0077b6', '#48cae4', '#90e0ef', '#ffd700', '#ff6b6b']
+    const frame = () => {
+      confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors })
+      confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors })
+      if (Date.now() < end) requestAnimationFrame(frame)
+    }
+    frame()
+    // Extra burst in the center
+    setTimeout(() => {
+      confetti({ particleCount: 100, spread: 100, origin: { y: 0.6, x: 0.5 }, colors })
+    }, 300)
+  }, [])
 
   const handleComplete = async (quizScore?: number) => {
     setMarking(true)
@@ -304,7 +439,14 @@ export function LessonClient({
     if (res?.success) {
       setIsCompleted(true)
       setShowFloatingNext(true)
-      toast.success(quizScore !== undefined ? '¡Cuestionario aprobado!' : '¡Lección completada!')
+      
+      // Check if this completes the entire module
+      if (checkModuleCompletion()) {
+        fireConfetti()
+        setShowCelebration(true)
+      } else {
+        toast.success(quizScore !== undefined ? '¡Cuestionario aprobado!' : '¡Lección completada!')
+      }
       router.refresh()
     } else {
       toast.error('Error al guardar progreso: ' + res?.error)
@@ -339,7 +481,14 @@ export function LessonClient({
       if (isPassed) {
         setIsCompleted(true)
         setShowFloatingNext(true)
-        toast.success(`¡Cuestionario aprobado! Calificación: ${percentage}%`)
+        
+        // Check if this completes the entire module
+        if (checkModuleCompletion()) {
+          fireConfetti()
+          setShowCelebration(true)
+        } else {
+          toast.success(`¡Cuestionario aprobado! Calificación: ${percentage}%`)
+        }
         router.refresh()
       } else {
         toast.error(`Calificación: ${percentage}%. Necesitas al menos ${quizData.min_score_to_pass || 80}% para aprobar.`)
@@ -351,6 +500,82 @@ export function LessonClient({
 
   const sharedTopBarProps = { lesson, moduleTitle, prevLesson, nextLesson, sidebarOpen, setSidebarOpen }
   const sharedSidebarProps = { sidebarOpen, setSidebarOpen, moduleTitle, moduleLessons, currentLessonId: lesson.id }
+
+  // ─────────────────────────────────────────────
+  // MODULE WELCOME SCREEN
+  // ─────────────────────────────────────────────
+  if (showModuleWelcome) {
+    const totalLessons = moduleLessons.length
+    const quizCount = moduleLessons.filter(l => l.lesson_type === 'quiz').length
+    const videoCount = moduleLessons.filter(l => !l.lesson_type || l.lesson_type === 'video').length
+
+    const dismissWelcome = () => {
+      localStorage.setItem(`module_welcome_${lesson.module_id}`, 'seen')
+      setShowModuleWelcome(false)
+    }
+
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center p-4">
+        {/* Animated background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative max-w-lg w-full text-center space-y-8">
+          {/* Module icon */}
+          <div className="mx-auto w-20 h-20 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center backdrop-blur-sm">
+            <span className="material-symbols-outlined text-primary text-4xl">school</span>
+          </div>
+
+          {/* Module title */}
+          <div>
+            <p className="text-primary text-sm font-semibold tracking-widest uppercase mb-3">Nuevo Módulo</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">{moduleTitle}</h1>
+            <p className="text-gray-400 text-lg">Prepárate para una nueva etapa de aprendizaje</p>
+          </div>
+
+          {/* Module stats */}
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2 text-gray-300">
+              <span className="material-symbols-outlined text-primary text-lg">menu_book</span>
+              <span>{totalLessons} Lecciones</span>
+            </div>
+            {videoCount > 0 && (
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="material-symbols-outlined text-cyan-400 text-lg">play_circle</span>
+                <span>{videoCount} Videos</span>
+              </div>
+            )}
+            {quizCount > 0 && (
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="material-symbols-outlined text-amber-400 text-lg">quiz</span>
+                <span>{quizCount} {quizCount === 1 ? 'Evaluación' : 'Evaluaciones'}</span>
+              </div>
+            )}
+          </div>
+
+          {/* CTA button */}
+          <button
+            onClick={dismissWelcome}
+            className="mx-auto bg-primary hover:bg-cyan-500 text-white font-bold px-10 py-4 rounded-2xl shadow-lg shadow-primary/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-3 text-lg"
+          >
+            <span className="material-symbols-outlined text-2xl">rocket_launch</span>
+            Comenzar Módulo
+          </button>
+
+          {/* Skip link */}
+          <button
+            onClick={dismissWelcome}
+            className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+          >
+            Ir directo a la lección →
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   // ─────────────────────────────────────────────
   // DOCUMENT VIEW
@@ -396,18 +621,180 @@ export function LessonClient({
               )}
             </div>
             <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
-              <button
-                onClick={() => handleComplete()}
-                disabled={isCompleted || marking}
-                className={`flex-1 px-8 py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 ${
-                  isCompleted
-                    ? 'bg-green-500 text-white cursor-not-allowed'
-                    : 'bg-primary hover:bg-cyan-500 text-white shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01]'
-                }`}
-              >
-                <span className="material-symbols-outlined">{isCompleted ? 'check_circle' : 'done_all'}</span>
-                {isCompleted ? 'Completado' : marking ? 'Guardando...' : 'Marcar como Leído'}
-              </button>
+              {!isCompleted ? (
+                <button
+                  onClick={() => handleComplete()}
+                  disabled={marking}
+                  className="flex-1 px-8 py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2.5 transition-all active:scale-95 bg-primary hover:bg-cyan-500 text-white shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01]"
+                >
+                  <span className="material-symbols-outlined">task_alt</span>
+                  {marking ? 'Guardando...' : 'Marcar como Completada'}
+                </button>
+              ) : (
+                <div className="flex-1 px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className="material-symbols-outlined">check_circle</span>
+                  Completada
+                </div>
+              )}
+              {nextLesson && (
+                <Link
+                  href={`/lessons/${nextLesson.id}`}
+                  className="flex-1 bg-gray-100 dark:bg-gray-800 text-secondary dark:text-white font-semibold px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  Siguiente <span className="material-symbols-outlined">arrow_forward</span>
+                </Link>
+              )}
+            </div>
+          </main>
+          <LessonSidebar {...sharedSidebarProps} />
+        </div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────
+  // IMAGE VIEW
+  // ─────────────────────────────────────────────
+  if (lesson.lesson_type === 'image') {
+    const imageUrl = lesson.thumbnail_url || ''
+    return (
+      <div className="flex flex-col h-full">
+        <TopBar {...sharedTopBarProps} />
+        <div className="flex flex-1 overflow-hidden relative">
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-secondary dark:text-white mb-3">{lesson.title}</h1>
+            {lesson.description && (
+              <div
+                className="lesson-description text-gray-500 dark:text-gray-400 mb-8 max-w-2xl"
+                dangerouslySetInnerHTML={{ __html: lesson.description }}
+              />
+            )}
+            {imageUrl ? (
+              <div className="bg-surface-light dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-8 max-w-3xl">
+                <div className="bg-black/5 dark:bg-white/5 flex items-center justify-center p-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imageUrl}
+                    alt={lesson.title}
+                    className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                  />
+                </div>
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">image</span>
+                    Imagen de referencia
+                  </span>
+                  <a
+                    href={imageUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-primary hover:text-cyan-500 font-medium flex items-center gap-1 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">open_in_new</span>
+                    Abrir completa
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-12 text-center mb-8">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-3 block">image</span>
+                <p className="text-gray-500">Imagen no disponible</p>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
+              {!isCompleted ? (
+                <button
+                  onClick={() => handleComplete()}
+                  disabled={marking}
+                  className="flex-1 px-8 py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2.5 transition-all active:scale-95 bg-primary hover:bg-cyan-500 text-white shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01]"
+                >
+                  <span className="material-symbols-outlined">task_alt</span>
+                  {marking ? 'Guardando...' : 'Marcar como Completada'}
+                </button>
+              ) : (
+                <div className="flex-1 px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className="material-symbols-outlined">check_circle</span>
+                  Completada
+                </div>
+              )}
+              {nextLesson && (
+                <Link
+                  href={`/lessons/${nextLesson.id}`}
+                  className="flex-1 bg-gray-100 dark:bg-gray-800 text-secondary dark:text-white font-semibold px-6 py-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  Siguiente <span className="material-symbols-outlined">arrow_forward</span>
+                </Link>
+              )}
+            </div>
+          </main>
+          <LessonSidebar {...sharedSidebarProps} />
+        </div>
+      </div>
+    )
+  }
+
+  // ─────────────────────────────────────────────
+  // LINK VIEW
+  // ─────────────────────────────────────────────
+  if (lesson.lesson_type === 'link') {
+    const linkMaterials = lesson.materials || []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const linkUrl = linkMaterials.length > 0 ? (linkMaterials[0] as any).url : ''
+    return (
+      <div className="flex flex-col h-full">
+        <TopBar {...sharedTopBarProps} />
+        <div className="flex flex-1 overflow-hidden relative">
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-secondary dark:text-white mb-3">{lesson.title}</h1>
+            {lesson.description && (
+              <div
+                className="lesson-description text-gray-500 dark:text-gray-400 mb-8 max-w-2xl"
+                dangerouslySetInnerHTML={{ __html: lesson.description }}
+              />
+            )}
+            {linkUrl ? (
+              <div className="bg-surface-light dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm mb-8 max-w-3xl">
+                <div className="p-6 flex flex-col items-center gap-5">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary text-3xl">link</span>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold text-secondary dark:text-white mb-2">Recurso Externo</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-md break-all">{linkUrl}</p>
+                  </div>
+                  <a
+                    href={linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-primary hover:bg-cyan-500 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined">open_in_new</span>
+                    Abrir Recurso
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-12 text-center mb-8">
+                <span className="material-symbols-outlined text-5xl text-gray-300 mb-3 block">link_off</span>
+                <p className="text-gray-500">Enlace no disponible</p>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
+              {!isCompleted ? (
+                <button
+                  onClick={() => handleComplete()}
+                  disabled={marking}
+                  className="flex-1 px-8 py-3 rounded-xl font-bold shadow-lg flex items-center justify-center gap-2.5 transition-all active:scale-95 bg-primary hover:bg-cyan-500 text-white shadow-primary/20 hover:shadow-primary/30 hover:scale-[1.01]"
+                >
+                  <span className="material-symbols-outlined">task_alt</span>
+                  {marking ? 'Guardando...' : 'Marcar como Completada'}
+                </button>
+              ) : (
+                <div className="flex-1 px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className="material-symbols-outlined">check_circle</span>
+                  Completada
+                </div>
+              )}
               {nextLesson && (
                 <Link
                   href={`/lessons/${nextLesson.id}`}
@@ -664,6 +1051,59 @@ export function LessonClient({
                 </div>
               </div>
             </div>
+
+              {/* Quiz Attempt History */}
+              {quizAttempts.length > 0 && (
+                <div className="mt-8 mb-8 bg-surface-light dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+                  <h3 className="font-bold text-secondary dark:text-white mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">history</span>
+                    Historial de Intentos
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-gray-500">{quizAttempts.length}</span>
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800">
+                          <th className="pb-2 font-medium">#</th>
+                          <th className="pb-2 font-medium">Calificación</th>
+                          <th className="pb-2 font-medium">Estado</th>
+                          <th className="pb-2 font-medium text-right">Fecha</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                        {quizAttempts.map((attempt, i) => (
+                          <tr key={attempt.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <td className="py-2.5 text-gray-400">{quizAttempts.length - i}</td>
+                            <td className="py-2.5">
+                              <span className={`font-bold text-base ${
+                                attempt.score >= (quizData?.min_score_to_pass || 80) ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'
+                              }`}>
+                                {attempt.score}%
+                              </span>
+                            </td>
+                            <td className="py-2.5">
+                              {attempt.passed ? (
+                                <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-lg text-xs font-semibold">
+                                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>check_circle</span>
+                                  Aprobado
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-lg text-xs font-semibold">
+                                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>cancel</span>
+                                  Reprobado
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 text-right text-gray-400 text-xs">
+                              {new Date(attempt.created_at).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
           </main>
           <LessonSidebar {...sharedSidebarProps} />
         </div>
@@ -690,9 +1130,6 @@ export function LessonClient({
               <MuxPlayer
                 playbackId={lesson.mux_playback_id}
                 className="w-full h-full"
-                onEnded={() => {
-                  if (!isCompleted && !marking) handleComplete()
-                }}
                 accentColor="#00b4d8"
                 style={{ aspectRatio: '16/9' }}
                 streamType="on-demand"
@@ -702,7 +1139,6 @@ export function LessonClient({
                 controls
                 className="w-full h-full"
                 src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/videos/${legacyVideoUrl}`}
-                onEnded={() => { if (!isCompleted && !marking) handleComplete() }}
                 playsInline
               />
             ) : (
@@ -725,19 +1161,25 @@ export function LessonClient({
                   />
                 )}
               </div>
-              <button
-                onClick={() => handleComplete()}
-                disabled={isCompleted || marking}
-                className={`shrink-0 px-5 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap ${
-                  isCompleted
-                    ? 'bg-green-500 text-white cursor-not-allowed'
-                    : 'bg-primary hover:bg-cyan-500 text-white shadow-primary/30 hover:scale-[1.02]'
-                }`}
-              >
-                <span className="material-symbols-outlined text-xl">{isCompleted ? 'check_circle' : 'done_all'}</span>
-                {isCompleted ? 'Completada' : marking ? 'Guardando...' : 'Marcar Completada'}
-              </button>
+              {!isCompleted ? (
+                <button
+                  onClick={() => handleComplete()}
+                  disabled={marking}
+                  className="shrink-0 px-6 py-3 rounded-xl font-bold text-sm shadow-lg flex items-center gap-2.5 transition-all active:scale-95 whitespace-nowrap bg-primary hover:bg-cyan-500 text-white shadow-primary/30 hover:scale-[1.02]"
+                >
+                  <span className="material-symbols-outlined text-xl">task_alt</span>
+                  {marking ? 'Guardando...' : 'Marcar como Completada'}
+                </button>
+              ) : (
+                <div className="shrink-0 px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 bg-green-500/10 text-green-500 border border-green-500/20">
+                  <span className="material-symbols-outlined text-xl">check_circle</span>
+                  Lección Completada
+                </div>
+              )}
             </div>
+
+            {/* Student Notes Panel */}
+            <StudentNotes lessonId={lesson.id} />
 
             {/* Prev / Next navigation */}
             <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -794,6 +1236,67 @@ export function LessonClient({
 
       {/* Floating next button (shows when lesson is completed) */}
       {showFloatingNext && <FloatingNextButton nextLesson={nextLesson} />}
+
+      {/* 🎉 MODULE COMPLETION CELEBRATION MODAL */}
+      {showCelebration && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-surface-light dark:bg-surface-dark rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl border border-gray-200 dark:border-gray-700 animate-in zoom-in-95 duration-500">
+            {/* Trophy Icon */}
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+              <span className="material-symbols-outlined text-white" style={{ fontSize: '40px' }}>emoji_events</span>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-black text-secondary dark:text-white mb-2">
+              ¡Módulo Completado!
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-primary font-semibold text-lg mb-1">{moduleTitle}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              Has completado todas las lecciones de este módulo. ¡Excelente trabajo! 🏆
+            </p>
+
+            {/* Stats */}
+            <div className="flex justify-center gap-6 mb-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">{moduleLessons.length}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Lecciones</p>
+              </div>
+              <div className="w-px bg-gray-200 dark:bg-gray-700"></div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-green-500">100%</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Completado</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-3">
+              <Link
+                href="/certificates"
+                className="block w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>workspace_premium</span>
+                  Ver Certificado
+                </span>
+              </Link>
+              <button
+                onClick={() => setShowCelebration(false)}
+                className="block w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-secondary dark:text-white font-medium py-3 px-6 rounded-xl transition-colors"
+              >
+                Continuar Explorando
+              </button>
+              <Link
+                href="/courses"
+                className="block text-sm text-gray-400 hover:text-primary transition-colors pt-1"
+              >
+                ← Volver a Mis Cursos
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

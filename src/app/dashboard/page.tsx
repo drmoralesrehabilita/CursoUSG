@@ -1,5 +1,5 @@
 import { Header } from "@/components/dashboard/header"
-import { getUserProfile, getUserEnrollment, getModules, getLiveSessions, getUserCertificates, getUserCompletedLessons, getMicroLessons } from "@/lib/data"
+import { getUserProfile, getUserEnrollment, getModules, getLiveSessions, getUserCertificates, getUserCompletedLessons, getMicroLessons, getRecentActivity, getStudyStreak, getCertificateConfig } from "@/lib/data"
 import Link from "next/link"
 import { CertificateGenerator } from "@/components/student/CertificateGenerator"
 
@@ -13,13 +13,19 @@ export default async function DashboardPage() {
   const certificates = await getUserCertificates()
   const completedLessons = await getUserCompletedLessons()
   const microLessons = await getMicroLessons()
+  const recentActivity = await getRecentActivity(5)
+  const streak = await getStudyStreak()
+  const certConfig = await getCertificateConfig()
   
   const activeModule = modules.find(m => m.id === enrollment?.module_id) || modules[0];
   const progressPercent = enrollment?.progress || 0;
   
-  // Encontrar la primera lección del módulo para el botón de continuar
-  const firstLesson = activeModule?.lessons?.filter(l => l.is_published)?.[0];
-  const firstLessonId = firstLesson?.id;
+  // Encontrar la primera lección NO completada del módulo para el botón de continuar
+  const firstIncompleteLesson = activeModule?.lessons
+    ?.filter(l => l.is_published && !completedLessons.includes(l.id))?.[0];
+  const firstLessonFallback = activeModule?.lessons?.filter(l => l.is_published)?.[0];
+  const continueLessonId = firstIncompleteLesson?.id || firstLessonFallback?.id;
+  const continueLesson = firstIncompleteLesson || firstLessonFallback;
 
   // Revisar si el módulo actual está bloqueado por otro módulo
   let isModuleLocked = false;
@@ -33,15 +39,20 @@ export default async function DashboardPage() {
     }
   }
 
-  // Extraer el material PDF si existe en la lección
   let pdfActivityUrl = "";
-  if (firstLesson?.materials && Array.isArray(firstLesson.materials) && firstLesson.materials.length > 0) {
-    const materials = firstLesson.materials as unknown as { title?: string, url?: string }[];
+  if (continueLesson?.materials && Array.isArray(continueLesson.materials) && continueLesson.materials.length > 0) {
+    const materials = continueLesson.materials as unknown as { title?: string, url?: string }[];
     const pdfMaterial = materials.find(m => m.url);
     if (pdfMaterial && pdfMaterial.url) {
       pdfActivityUrl = pdfMaterial.url;
     }
   }
+
+  // Calcular módulos realmente completados
+  const completedModulesCount = modules.filter(mod => {
+    const publishedLessons = mod.lessons?.filter(l => l.is_published) || [];
+    return publishedLessons.length > 0 && publishedLessons.every(l => completedLessons.includes(l.id));
+  }).length;
 
   return (
     <>
@@ -64,7 +75,7 @@ export default async function DashboardPage() {
             <div className="h-10 w-px bg-gray-300 dark:bg-gray-700 mx-2"></div>
             <div className="text-right">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Cursos Completados</p>
-              <p className="text-xl font-bold text-secondary dark:text-white">{progressPercent === 100 ? 1 : 0}/{modules.length || 8}</p>
+              <p className="text-xl font-bold text-secondary dark:text-white">{completedModulesCount}/{modules.length || 8}</p>
             </div>
           </div>
         </div>
@@ -108,10 +119,10 @@ export default async function DashboardPage() {
                       <span className="material-symbols-outlined">lock</span>
                       Bloqueado: Requiere Módulo Anterior
                     </button>
-                  ) : firstLessonId ? (
-                    <Link href={`/lessons/${firstLessonId}`} className="flex-1 bg-primary hover:bg-cyan-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                  ) : continueLessonId ? (
+                    <Link href={`/lessons/${continueLessonId}`} className="flex-1 bg-primary hover:bg-cyan-500 text-white font-semibold py-3 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined">play_circle</span>
-                      Continuar Lección
+                      {firstIncompleteLesson ? 'Continuar Lección' : 'Repasar Módulo'}
                     </Link>
                   ) : (
                     <button disabled className="flex-1 bg-primary/50 text-white font-semibold py-3 px-6 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
@@ -189,6 +200,39 @@ export default async function DashboardPage() {
           </div>
 
           <div className="lg:col-span-1 space-y-8">
+            {/* Streak Widget */}
+            <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="flex items-center justify-between mb-5 relative z-10">
+                <h3 className="font-bold text-secondary dark:text-white flex items-center gap-2">
+                  <span className="text-2xl">🔥</span>
+                  Racha de Estudio
+                </h3>
+                <div className="text-right">
+                  <p className="text-3xl font-black text-orange-500">{streak.currentStreak}</p>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider">{streak.currentStreak === 1 ? 'Día' : 'Días'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 mb-3">
+                {['L','M','X','J','V','S','D'].map((day, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div className={`w-full aspect-square rounded-lg flex items-center justify-center text-xs font-bold transition-colors ${
+                      streak.last7Days[i] 
+                        ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' 
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-300 dark:text-gray-600 border border-transparent'
+                    }`}>
+                      {streak.last7Days[i] ? '✓' : ''}
+                    </div>
+                    <span className="text-[9px] text-gray-400 font-medium">{day}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 text-center">
+                {streak.totalActiveDays} días activos en total
+                {streak.currentStreak > 0 && ' · ¡Sigue así!'}
+              </p>
+            </div>
+
             <div className="bg-secondary rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
               <div className="absolute top-[-20px] right-[-20px] w-24 h-24 rounded-full bg-primary/20 blur-xl"></div>
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
@@ -218,32 +262,49 @@ export default async function DashboardPage() {
               </button>
             </div>
 
-            {/* Performance Chart Placeholder */}
+            {/* Recent Activity */}
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-secondary dark:text-white">Rendimiento Semanal</h3>
-                <button className="text-gray-400 hover:text-primary">
-                  <span className="material-symbols-outlined">more_horiz</span>
-                </button>
+                <h3 className="font-bold text-secondary dark:text-white">Actividad Reciente</h3>
+                <Link href="/progress" className="text-xs text-primary font-medium hover:underline">Ver todo</Link>
               </div>
-              <div className="flex items-end justify-between h-32 gap-2 mb-2">
-                <div className="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative group h-[40%]">
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded">2h</div>
+              {recentActivity.length > 0 ? (
+                <div className="space-y-4">
+                  {recentActivity.map((act) => {
+                    const iconMap: Record<string, string> = { quiz: 'quiz', document: 'description', image: 'image', link: 'link' };
+                    const icon = iconMap[act.lesson_type || ''] || 'play_circle';
+                    const timeAgo = act.completed_at ? (() => {
+                      const diff = Date.now() - new Date(act.completed_at).getTime();
+                      const mins = Math.floor(diff / 60000);
+                      if (mins < 60) return `Hace ${mins}m`;
+                      const hrs = Math.floor(mins / 60);
+                      if (hrs < 24) return `Hace ${hrs}h`;
+                      const days = Math.floor(hrs / 24);
+                      return `Hace ${days}d`;
+                    })() : '';
+                    return (
+                      <div key={act.lesson_id} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-primary text-base">{icon}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-secondary dark:text-gray-200 truncate">{act.lesson_title}</p>
+                          <p className="text-xs text-gray-400">
+                            {act.score !== null ? `Calificación: ${act.score}%` : 'Completada'}
+                            {timeAgo && ` · ${timeAgo}`}
+                          </p>
+                        </div>
+                        <span className="material-symbols-outlined text-green-500 text-base shrink-0">check_circle</span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative group h-[60%]">
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded">3h</div>
+              ) : (
+                <div className="text-center py-6">
+                  <span className="material-symbols-outlined text-3xl text-gray-300 mb-2 block">history</span>
+                  <p className="text-sm text-gray-400">No hay actividad reciente</p>
                 </div>
-                <div className="w-full bg-primary rounded-t-sm relative group h-[85%] shadow-[0_0_15px_rgba(0,180,216,0.5)]">
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-secondary text-white text-xs px-2 py-1 rounded font-bold">4.2h</div>
-                </div>
-                <div className="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative group h-[30%]"></div>
-                <div className="w-full bg-primary/20 dark:bg-primary/10 rounded-t-sm relative group h-[50%]"></div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-t-sm h-[10%]"></div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-t-sm h-[10%]"></div>
-              </div>
-              <div className="flex justify-between text-xs text-gray-400 font-medium px-1">
-                <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
-              </div>
+              )}
             </div>
 
             {/* Recent Certificates */}
@@ -264,7 +325,20 @@ export default async function DashboardPage() {
                           <p className="text-xs text-gray-500">Emitido: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
                         </div>
                       </div>
-                      <CertificateGenerator studentName={displayName} date={cert.issue_date || undefined} />
+                      <CertificateGenerator certificate={{
+                        folio: cert.folio || "SIN-FOLIO",
+                        recipientName: cert.recipient_name || displayName,
+                        courseName: isGlobal ? "Diplomado Compl. en Rehabilitación Intervencionista" : (certModule?.title || cert.course_name || "Módulo"),
+                        courseHours: cert.course_hours || certConfig?.course_hours || "",
+                        institutionalText: certConfig?.institutional_text || `Por haber completado con éxito el programa de Rehabilitación Intervencionista.`,
+                        issueDate: cert.issue_date || new Date().toISOString(),
+                        issuedBy: cert.issued_by || "Dr. Raúl Morales",
+                        qrUrl: cert.qr_url || null,
+                        signers: certConfig?.signers || [{ name: "Dr. Raúl Morales", role: "Director General del Curso" }],
+                        primaryColor: certConfig?.primary_color || "#0ea5e9",
+                        elementLayout: certConfig?.element_layout || null,
+                        backgroundUrl: certConfig?.background_url || null,
+                      }} />
                     </div>
                   );
                 }) : (

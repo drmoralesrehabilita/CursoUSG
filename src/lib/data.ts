@@ -179,6 +179,149 @@ export async function getUserCompletedLessons(): Promise<string[]> {
   return data.map(d => d.lesson_id);
 }
 
+export type RecentActivityItem = {
+  lesson_id: string;
+  lesson_title: string;
+  completed_at: string;
+  lesson_type: string | null;
+  score: number | null;
+}
+
+export async function getRecentActivity(limit = 5): Promise<RecentActivityItem[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, completed_at, score, lessons(title, lesson_type)")
+    .eq("user_id", user.id)
+    .eq("is_completed", true)
+    .order("completed_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error fetching recent activity:", error);
+    return [];
+  }
+
+  return (data || []).map((d: any) => ({
+    lesson_id: d.lesson_id,
+    lesson_title: d.lessons?.title || 'Lección',
+    completed_at: d.completed_at || '',
+    lesson_type: d.lessons?.lesson_type || null,
+    score: d.score,
+  }));
+}
+
+export async function getAllUserEnrollments(): Promise<Enrollment[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error fetching all enrollments:", error);
+    return [];
+  }
+
+  return (data as Enrollment[]) || [];
+}
+
+export type QuizAttempt = {
+  id: string;
+  score: number;
+  passed: boolean;
+  created_at: string;
+}
+
+export async function getUserQuizAttempts(quizId: string): Promise<QuizAttempt[]> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select("id, score, passed, created_at")
+    .eq("user_id", user.id)
+    .eq("quiz_id", quizId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching quiz attempts:", error);
+    return [];
+  }
+
+  return (data as QuizAttempt[]) || [];
+}
+
+// ============================================================
+// STUDY STREAK (computed from lesson_progress dates)
+// ============================================================
+export type StudyStreak = {
+  currentStreak: number;
+  totalActiveDays: number;
+  last7Days: boolean[]; // [6 days ago, 5 days ago, ..., today]
+}
+
+export async function getStudyStreak(): Promise<StudyStreak> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { currentStreak: 0, totalActiveDays: 0, last7Days: Array(7).fill(false) };
+
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("completed_at")
+    .eq("user_id", user.id)
+    .not("completed_at", "is", null)
+    .order("completed_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    return { currentStreak: 0, totalActiveDays: 0, last7Days: Array(7).fill(false) };
+  }
+
+  // Get unique active dates (in local timezone)
+  const activeDates = new Set<string>();
+  data.forEach(row => {
+    if (row.completed_at) {
+      const d = new Date(row.completed_at);
+      activeDates.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+    }
+  });
+
+  // Compute current streak
+  let currentStreak = 0;
+  const today = new Date();
+  const checkDate = new Date(today);
+  
+  // Check today first, then go backwards
+  for (let i = 0; i < 365; i++) {
+    const dateStr = `${checkDate.getFullYear()}-${String(checkDate.getMonth()+1).padStart(2,'0')}-${String(checkDate.getDate()).padStart(2,'0')}`;
+    if (activeDates.has(dateStr)) {
+      currentStreak++;
+    } else if (i > 0) {
+      // Allow skipping today (might not have studied yet today)
+      break;
+    }
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  // Last 7 days activity
+  const last7Days: boolean[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    last7Days.push(activeDates.has(dateStr));
+  }
+
+  return { currentStreak, totalActiveDays: activeDates.size, last7Days };
+}
+
 export async function getLessonQuiz(lessonId: string) {
   const supabase = await createClient();
   

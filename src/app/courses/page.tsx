@@ -12,10 +12,37 @@ export default async function CoursesPage() {
   
   const progressPercent = enrollment?.progress || 0;
   
-  // Encontrar la primera lección del módulo activo para el botón de continuar
-  const activeModule = modules.find(m => m.id === enrollment?.module_id) || modules[0];
-  const firstLesson = activeModule?.lessons?.filter(l => l.is_published)?.[0];
-  const firstLessonId = firstLesson?.id;
+  // Find first incomplete lesson across all unlocked modules
+  let continueLessonId: string | undefined;
+  let hasIncompleteLesson = false;
+  
+  for (const mod of modules) {
+    // Check if module is unlocked (no prereq, or prereq completed)
+    let unlocked = true;
+    if (mod.prerequisite_module_id) {
+      const prereq = modules.find(m => m.id === mod.prerequisite_module_id);
+      if (prereq) {
+        const prereqPub = (prereq.lessons || []).filter(l => l.is_published);
+        const prereqDone = prereqPub.filter(l => completedLessons.includes(l.id)).length;
+        unlocked = prereqPub.length > 0 && prereqDone === prereqPub.length;
+      }
+    }
+    if (!unlocked) continue;
+    
+    const published = (mod.lessons || []).filter(l => l.is_published);
+    const firstIncomplete = published.find(l => !completedLessons.includes(l.id));
+    if (firstIncomplete) {
+      continueLessonId = firstIncomplete.id;
+      hasIncompleteLesson = true;
+      break;
+    }
+  }
+  
+  // Fallback: if everything is complete, use first lesson of first module  
+  if (!continueLessonId) {
+    const fallback = modules[0]?.lessons?.filter(l => l.is_published)?.[0];
+    continueLessonId = fallback?.id;
+  }
 
   return (
     <>
@@ -90,10 +117,10 @@ export default async function CoursesPage() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4">
-                    {firstLessonId ? (
-                      <Link href={`/lessons/${firstLessonId}`} className="flex-1 bg-primary hover:bg-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    {continueLessonId ? (
+                      <Link href={`/lessons/${continueLessonId}`} className="flex-1 bg-primary hover:bg-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-primary/25 transition-transform active:scale-95 flex items-center justify-center gap-2">
                         <span className="material-symbols-outlined text-xl">play_circle</span>
-                        Continuar Aprendizaje
+                        {hasIncompleteLesson ? 'Continuar Aprendizaje' : 'Repasar Material'}
                       </Link>
                     ) : (
                       <button disabled className="flex-1 bg-primary/50 text-white font-bold py-3.5 px-6 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
@@ -132,13 +159,29 @@ export default async function CoursesPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {modules.length > 0 ? modules.map((module, index) => {
-                const isActive = enrollment?.module_id === module.id;
-                const isCompleted = index < (modules.findIndex(m => m.id === enrollment?.module_id));
                 const moduleLessons = module.lessons || [];
                 const publishedLessons = moduleLessons.filter(l => l.is_published);
                 const completedInModule = publishedLessons.filter(l => completedLessons.includes(l.id)).length;
                 const totalInModule = publishedLessons.length;
-                const modProgressPercent = totalInModule > 0 ? Math.round((completedInModule / totalInModule) * 100) : (isCompleted ? 100 : 0);
+                
+                // Real completion: all published lessons done
+                const isModuleCompleted = totalInModule > 0 && completedInModule === totalInModule;
+                
+                // Unlock logic based on prerequisite_module_id
+                let isUnlocked = true;
+                if (module.prerequisite_module_id) {
+                  const prereqModule = modules.find(m => m.id === module.prerequisite_module_id);
+                  if (prereqModule) {
+                    const prereqLessons = (prereqModule.lessons || []).filter(l => l.is_published);
+                    const prereqCompleted = prereqLessons.filter(l => completedLessons.includes(l.id)).length;
+                    isUnlocked = prereqLessons.length > 0 && prereqCompleted === prereqLessons.length;
+                  }
+                }
+                
+                const isActive = isUnlocked && !isModuleCompleted && completedInModule > 0;
+                const isPending = isUnlocked && !isModuleCompleted && completedInModule === 0;
+                const isLocked = !isUnlocked;
+                const modProgressPercent = totalInModule > 0 ? Math.round((completedInModule / totalInModule) * 100) : 0;
                 
                 return (
                   <div key={module.id} className="bg-surface-light dark:bg-surface-dark border border-gray-200 dark:border-gray-700 rounded-2xl p-6 hover:border-primary/50 transition-colors group relative overflow-hidden flex flex-col">
@@ -147,12 +190,14 @@ export default async function CoursesPage() {
                       <div className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-xs font-bold px-3 py-1 rounded-lg">
                         Módulo {index + 1}
                       </div>
-                      {isCompleted ? (
+                      {isModuleCompleted ? (
                         <span className="text-green-500 flex items-center text-sm font-medium gap-1"><span className="material-symbols-outlined text-[18px]">check_circle</span> Completado</span>
                       ) : isActive ? (
                         <span className="text-primary flex items-center text-sm font-medium gap-1"><span className="material-symbols-outlined text-[18px]">clock_loader_40</span> En Progreso</span>
+                      ) : isPending ? (
+                        <span className="text-amber-500 flex items-center text-sm font-medium gap-1"><span className="material-symbols-outlined text-[18px]">hourglass_empty</span> Disponible</span>
                       ) : (
-                        <span className="text-gray-400 flex items-center text-sm font-medium gap-1"><span className="material-symbols-outlined text-[18px]">lock</span> Pendiente</span>
+                        <span className="text-gray-400 flex items-center text-sm font-medium gap-1"><span className="material-symbols-outlined text-[18px]">lock</span> Bloqueado</span>
                       )}
                     </div>
                     
@@ -167,26 +212,33 @@ export default async function CoursesPage() {
                     <div className="mt-auto">
                       <div className="flex justify-between items-center text-xs text-gray-500 font-medium mb-2">
                         <span>{completedInModule} / {totalInModule} Lecciones</span>
-                        <span>{isCompleted ? 100 : modProgressPercent}%</span>
+                        <span>{modProgressPercent}%</span>
                       </div>
                       <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mb-4">
                         <div 
-                          className={`h-1.5 rounded-full ${isCompleted ? 'bg-green-500' : isActive ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
-                          style={{ width: `${isCompleted ? 100 : modProgressPercent}%` }}
+                          className={`h-1.5 rounded-full ${isModuleCompleted ? 'bg-green-500' : isActive ? 'bg-primary' : isLocked ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+                          style={{ width: `${modProgressPercent}%` }}
                         ></div>
                       </div>
                       
-                      {isActive && moduleLessons.length > 0 ? (
-                        <Link href={`/lessons/${moduleLessons[0].id}`} className="block w-full text-center bg-primary/10 hover:bg-primary/20 text-primary font-bold py-2 rounded-lg transition-colors text-sm">
-                          Continuar Módulo
-                        </Link>
-                      ) : isCompleted ? (
-                        <Link href={`/lessons/${moduleLessons[0]?.id || ''}`} className="block w-full text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold py-2 rounded-lg transition-colors text-sm">
-                          Repasar Material
-                        </Link>
-                      ) : (
+                      {(isActive || isPending || isModuleCompleted) && moduleLessons.length > 0 ? (() => {
+                        const firstIncompleteMod = moduleLessons.find(l => l.is_published && !completedLessons.includes(l.id));
+                        const targetId = firstIncompleteMod?.id || moduleLessons[0].id;
+                        return (
+                          <Link href={`/lessons/${targetId}`} className={`block w-full text-center font-bold py-2 rounded-lg transition-colors text-sm ${
+                            isModuleCompleted 
+                              ? 'bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400' 
+                              : 'bg-primary/10 hover:bg-primary/20 text-primary'
+                          }`}>
+                            {isModuleCompleted ? 'Repasar Módulo' : firstIncompleteMod ? 'Continuar Módulo' : 'Comenzar Módulo'}
+                          </Link>
+                        );
+                      })() : (
                         <button disabled className="block w-full text-center bg-gray-50 dark:bg-gray-800/50 text-gray-400 font-bold py-2 rounded-lg cursor-not-allowed text-sm border border-gray-100 dark:border-gray-700/50">
-                          Bloqueado
+                          <span className="flex items-center justify-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px]">lock</span>
+                            Completa el módulo anterior
+                          </span>
                         </button>
                       )}
                     </div>

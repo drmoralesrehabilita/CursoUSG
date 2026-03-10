@@ -1,5 +1,5 @@
 import { Header } from "@/components/dashboard/header"
-import { getUserProfile, getUserCertificates, getModules } from "@/lib/data"
+import { getUserProfile, getUserCertificates, getModules, getCertificateConfig } from "@/lib/data"
 import { CertificateGenerator } from "@/components/student/CertificateGenerator"
 
 export default async function CertificatesPage() {
@@ -8,6 +8,13 @@ export default async function CertificatesPage() {
   
   const certificates = await getUserCertificates()
   const modules = await getModules()
+  const certConfig = await getCertificateConfig()
+
+  // Build signers from config, or use default
+  const signers = certConfig?.signers || [
+    { name: "Dr. Raúl Morales", role: "Director General del Curso" },
+    { name: "Sociedad Mexicana", role: "Mesa Directiva (Aval)" }
+  ]
 
   return (
     <>
@@ -24,7 +31,7 @@ export default async function CertificatesPage() {
               <div>
                 <h2 className="text-2xl md:text-3xl font-bold text-secondary dark:text-white mb-2">Tus Logros Académicos</h2>
                 <p className="text-gray-600 dark:text-gray-300 max-w-xl">
-                  Aquí encontrarás todos los certificados obtenidos al completar los módulos y programas del diplomado. Descárgalos y compártelos con tu comunidad profesional.
+                  Aquí encontrarás todos los certificados obtenidos al completar los módulos y programas del diplomado. Descárgalos en PDF y compártelos con tu comunidad profesional.
                 </p>
               </div>
             </div>
@@ -37,34 +44,65 @@ export default async function CertificatesPage() {
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {certificates.length > 0 ? certificates.map((cert) => {
+              {certificates.length > 0 ? certificates.map((cert: Record<string, unknown>) => {
                 const certModule = modules.find(m => m.id === cert.module_id);
                 const isGlobal = !cert.module_id;
+                const certCourseName = isGlobal 
+                  ? "Diplomado Completo en Rehabilitación Intervencionista" 
+                  : (certModule?.title || (cert.course_name as string) || "Módulo Completado");
+                
+                // Build the institutionalText
+                const institutionalText = (cert.institutional_text as string) || certConfig?.institutional_text || 
+                  `Por haber completado con éxito ${isGlobal ? 'todos los módulos obligatorios, talleres presenciales y cuestionarios de evaluación del diplomado' : `el módulo "${certCourseName}"`}, demostrando competencia en los fundamentos y técnicas de la Rehabilitación Intervencionista y Ecografía Musculoesquelética.`;
+
+                const certificateData = {
+                  folio: (cert.folio as string) || "SIN-FOLIO",
+                  recipientName: (cert.recipient_name as string) || displayName,
+                  courseName: certCourseName,
+                  courseHours: (cert.course_hours as string) || certConfig?.course_hours || "",
+                  institutionalText,
+                  issueDate: (cert.issue_date as string) || new Date().toISOString(),
+                  issuedBy: (cert.issued_by as string) || "Dr. Raúl Morales",
+                  qrUrl: (cert.qr_url as string) || null,
+                  signers,
+                  primaryColor: certConfig?.primary_color || "#0ea5e9",
+                  elementLayout: certConfig?.element_layout || null,
+                  backgroundUrl: certConfig?.background_url || null,
+                }
+
                 return (
-                  <div key={cert.id} className="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group relative overflow-hidden flex flex-col">
+                  <div key={cert.id as string} className="bg-surface-light dark:bg-surface-dark rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5 group relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors"></div>
                     
                     <div className="flex items-start justify-between mb-6 relative z-10">
                       <div className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-sm ${isGlobal ? 'bg-linear-to-br from-primary to-blue-600 text-white' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/50'}`}>
                         <span className="material-symbols-outlined text-[28px]">{isGlobal ? 'school' : 'workspace_premium'}</span>
                       </div>
-                      <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full border border-green-200 dark:border-green-800">
-                        {isGlobal ? 'Diplomado' : 'Módulo'}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full border border-green-200 dark:border-green-800">
+                          {isGlobal ? 'Diplomado' : 'Módulo'}
+                        </div>
+                        {cert.folio && (
+                          <span className="text-[10px] text-gray-400 font-mono">{String(cert.folio)}</span>
+                        )}
                       </div>
                     </div>
 
                     <div className="relative z-10 mb-6 flex-1">
                       <h4 className="text-lg font-bold text-secondary dark:text-white mb-2 line-clamp-2">
-                        {isGlobal ? "Diplomado Compl. en Rehabilitación Intervencionista" : (certModule?.title || "Módulo Completado")}
+                        {certCourseName}
                       </h4>
                       <p className="text-sm text-gray-500 flex items-center gap-1">
                         <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                        Emitido: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Fecha no disponible'}
+                        Emitido: {cert.issue_date ? new Date(cert.issue_date as string).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Fecha no disponible'}
                       </p>
                     </div>
 
                     <div className="relative z-10 pt-4 border-t border-gray-100 dark:border-gray-800 mt-auto">
-                      <CertificateGenerator studentName={displayName} date={cert.issue_date || undefined} className="w-full justify-center bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-secondary dark:text-white border-none h-11 rounded-xl" />
+                      <CertificateGenerator 
+                        certificate={certificateData}
+                        className="w-full justify-center"
+                      />
                     </div>
                   </div>
                 );
@@ -75,7 +113,7 @@ export default async function CertificatesPage() {
                   </div>
                   <h3 className="text-xl font-bold text-secondary dark:text-white mb-2">Aún no tienes certificados</h3>
                   <p className="text-gray-500 max-w-md">
-                    Completa módulos y programas para obtener certificados digitales con valor curricular y validación blockchain.
+                    Completa módulos y programas para obtener certificados digitales con valor curricular.
                   </p>
                 </div>
               )}

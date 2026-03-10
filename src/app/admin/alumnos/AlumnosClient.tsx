@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { AdminHeader } from "@/components/admin/AdminHeader"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { toggleStudentStatus } from "@/app/actions/admin"
+import { toggleStudentStatus, approveAccessRequest, deleteStudent } from "@/app/actions/admin"
 
 interface ModuleGrade {
   moduleId: string;
@@ -26,6 +26,12 @@ export interface StudentDetail {
   globalGrade: number | null;
   moduleGrades: ModuleGrade[];
   isActive: boolean;
+  licenseId: string | null;
+  experienceLevel: string | null;
+  interestArea: string | null;
+  phone: string | null;
+  accessRequested: boolean;
+  accessRequestedAt: string | null;
 }
 
 interface Stats {
@@ -33,6 +39,7 @@ interface Stats {
   completed: number;
   inProgress: number;
   pending: number;
+  accessRequests: number;
 }
 
 function Initials({ name }: { name: string }) {
@@ -82,12 +89,15 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
   const [localStudents, setLocalStudents] = useState<StudentDetail[]>(students)
   const [isPending, startTransition] = useTransition()
   const [toggleError, setToggleError] = useState<string | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"all" | "requests">(stats.accessRequests > 0 ? "requests" : "all")
 
   const handleToggleStatus = (student: StudentDetail) => {
     const newIsActive = !student.isActive
     setToggleError(null)
 
-    // Optimistic UI
     const update = (list: StudentDetail[]) =>
       list.map(s => s.id === student.id ? { ...s, isActive: newIsActive } : s)
 
@@ -97,7 +107,6 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
     startTransition(async () => {
       const result = await toggleStudentStatus(student.id, newIsActive)
       if (!result.success) {
-        // Revert
         const revert = (list: StudentDetail[]) =>
           list.map(s => s.id === student.id ? { ...s, isActive: !newIsActive } : s)
         setLocalStudents(prev => revert(prev))
@@ -107,22 +116,68 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
     })
   }
 
+  const handleApprove = (student: StudentDetail) => {
+    setToggleError(null)
+
+    // Optimistic UI
+    setLocalStudents(prev =>
+      prev.map(s => s.id === student.id ? { ...s, isActive: true, accessRequested: false } : s)
+    )
+    setSelectedStudent(prev =>
+      prev?.id === student.id ? { ...prev, isActive: true, accessRequested: false } : prev
+    )
+
+    startTransition(async () => {
+      const result = await approveAccessRequest(student.id)
+      if (!result.success) {
+        // Revert
+        setLocalStudents(prev =>
+          prev.map(s => s.id === student.id ? { ...s, isActive: false, accessRequested: true } : s)
+        )
+        setSelectedStudent(prev =>
+          prev?.id === student.id ? { ...prev, isActive: false, accessRequested: true } : prev
+        )
+        setToggleError(result.error || "Error al aprobar acceso")
+      }
+    })
+  }
+
+  const pendingRequests = localStudents.filter(s => s.accessRequested && !s.isActive)
+  const allStudents = localStudents
+
   const statsCards = [
     { label: "Total", value: stats.total, icon: "groups", gradient: "from-primary/30 to-cyan-500/10", iconColor: "text-primary" },
     { label: "Certificados", value: stats.completed, icon: "workspace_premium", gradient: "from-emerald-500/30 to-emerald-500/5", iconColor: "text-emerald-400" },
     { label: "En Progreso", value: stats.inProgress, icon: "trending_up", gradient: "from-blue-500/30 to-blue-500/5", iconColor: "text-blue-400" },
-    { label: "Pendientes", value: stats.pending, icon: "hourglass_top", gradient: "from-amber-500/30 to-amber-500/5", iconColor: "text-amber-400" },
+    { label: "Solicitudes", value: pendingRequests.length, icon: "person_add", gradient: pendingRequests.length > 0 ? "from-orange-500/30 to-orange-500/5" : "from-amber-500/30 to-amber-500/5", iconColor: pendingRequests.length > 0 ? "text-orange-400" : "text-amber-400" },
   ]
 
-  const filtered = localStudents.filter(s =>
+  const filtered = (activeTab === "requests" ? pendingRequests : allStudents).filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.specialty.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleDelete = async (student: StudentDetail) => {
+    setIsDeleting(true)
+    setDeleteError(null)
+
+    const result = await deleteStudent(student.id)
+    if (result.success) {
+      setLocalStudents(prev => prev.filter(s => s.id !== student.id))
+      setSelectedStudent(null)
+      setShowDeleteConfirm(false)
+    } else {
+      setDeleteError(result.error || "Error al eliminar el usuario")
+    }
+    setIsDeleting(false)
+  }
+
   const closeDetail = () => {
     setSelectedStudent(null)
     setToggleError(null)
+    setShowDeleteConfirm(false)
+    setDeleteError(null)
   }
 
   return (
@@ -144,6 +199,37 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 bg-white/3 rounded-xl border border-white/8 p-1">
+          <button
+            onClick={() => setActiveTab("requests")}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+              activeTab === "requests"
+                ? "bg-orange-500/20 text-orange-300 shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">person_add</span>
+            Solicitudes
+            {pendingRequests.length > 0 && (
+              <span className="bg-orange-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center">
+                {pendingRequests.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
+              activeTab === "all"
+                ? "bg-primary/20 text-primary shadow-sm"
+                : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">groups</span>
+            Todos los Alumnos
+          </button>
         </div>
 
         {/* Search */}
@@ -169,75 +255,116 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
           <div className={`flex-1 min-w-0 transition-all duration-300 ${selectedStudent ? "hidden xl:block xl:w-3/5" : "w-full"}`}>
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-500">
-                <span className="material-symbols-outlined text-5xl mb-3 text-gray-600">person_search</span>
-                <p className="text-sm font-medium">No se encontraron estudiantes</p>
-                <p className="text-xs text-gray-600 mt-1">Intenta con otro término de búsqueda</p>
+                <span className="material-symbols-outlined text-5xl mb-3 text-gray-600">
+                  {activeTab === "requests" ? "inbox" : "person_search"}
+                </span>
+                <p className="text-sm font-medium">
+                  {activeTab === "requests" ? "No hay solicitudes pendientes" : "No se encontraron estudiantes"}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {activeTab === "requests" ? "Las nuevas solicitudes aparecerán aquí" : "Intenta con otro término de búsqueda"}
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
                 {filtered.map(s => (
-                  <button
+                  <div
                     key={s.id}
-                    onClick={() => { setSelectedStudent(s); setToggleError(null) }}
                     className={`w-full text-left bg-white/3 hover:bg-white/6 border rounded-xl p-4 transition-all duration-200 group ${
                       selectedStudent?.id === s.id
                         ? "border-primary/40 bg-primary/5 shadow-[0_0_20px_rgba(0,180,216,0.08)]"
+                        : activeTab === "requests"
+                        ? "border-orange-500/20 hover:border-orange-500/30"
                         : "border-white/5 hover:border-white/10"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      {/* Avatar */}
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-black text-white transition-all ${
-                        s.isActive
-                          ? "bg-gradient-to-br from-primary to-cyan-400 shadow-md shadow-primary/20"
-                          : "bg-gradient-to-br from-gray-600 to-gray-700"
-                      }`}>
-                        <Initials name={s.name} />
-                      </div>
-
-                      {/* Name + email */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold text-white truncate">{s.name}</p>
-                          <AccessBadge isActive={s.isActive} />
+                    <button
+                      onClick={() => { setSelectedStudent(s); setToggleError(null) }}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Avatar */}
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-black text-white transition-all ${
+                          s.isActive
+                            ? "bg-gradient-to-br from-primary to-cyan-400 shadow-md shadow-primary/20"
+                            : activeTab === "requests"
+                            ? "bg-gradient-to-br from-orange-500 to-amber-400 shadow-md shadow-orange-500/20"
+                            : "bg-gradient-to-br from-gray-600 to-gray-700"
+                        }`}>
+                          <Initials name={s.name} />
                         </div>
-                        <p className="text-[11px] text-gray-500 truncate">{s.email}</p>
+
+                        {/* Name + email */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-semibold text-white truncate">{s.name}</p>
+                            {activeTab === "requests" ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/10 text-orange-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                                Solicitud
+                              </span>
+                            ) : (
+                              <AccessBadge isActive={s.isActive} />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-gray-500 truncate">{s.email}</p>
+                        </div>
+
+                        {/* Progress on desktop */}
+                        <div className="hidden sm:flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500">{s.specialty}</p>
+                            {activeTab === "all" && (
+                              <div className="flex items-center gap-2 mt-1 justify-end">
+                                <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary rounded-full" style={{ width: `${s.progress}%` }} />
+                                </div>
+                                <span className="text-xs text-gray-400 w-8 text-right">{s.progress}%</span>
+                              </div>
+                            )}
+                          </div>
+                          {activeTab === "all" && <ProgressBadge status={s.status} isActive={s.isActive} />}
+                          <span className={`material-symbols-outlined text-gray-500 text-lg transition-transform ${selectedStudent?.id === s.id ? "text-primary rotate-90" : "group-hover:translate-x-0.5"}`}>
+                            chevron_right
+                          </span>
+                        </div>
+
+                        {/* Mobile only: chevron */}
+                        <div className="sm:hidden">
+                          <span className="material-symbols-outlined text-gray-500 text-lg">chevron_right</span>
+                        </div>
                       </div>
 
-                      {/* Progress on desktop */}
-                      <div className="hidden sm:flex items-center gap-3 shrink-0">
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">{s.specialty}</p>
-                          <div className="flex items-center gap-2 mt-1 justify-end">
-                            <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      {/* Mobile: progress row */}
+                      {activeTab === "all" && (
+                        <div className="sm:hidden mt-2.5 flex items-center gap-3">
+                          <ProgressBadge status={s.status} isActive={s.isActive} />
+                          <div className="flex-1 flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
                               <div className="h-full bg-primary rounded-full" style={{ width: `${s.progress}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400 w-8 text-right">{s.progress}%</span>
+                            <span className="text-xs text-gray-400 shrink-0">{s.progress}%</span>
                           </div>
                         </div>
-                        <ProgressBadge status={s.status} isActive={s.isActive} />
-                        <span className={`material-symbols-outlined text-gray-500 text-lg transition-transform ${selectedStudent?.id === s.id ? "text-primary rotate-90" : "group-hover:translate-x-0.5"}`}>
-                          chevron_right
-                        </span>
-                      </div>
+                      )}
+                    </button>
 
-                      {/* Mobile only: chevron */}
-                      <div className="sm:hidden">
-                        <span className="material-symbols-outlined text-gray-500 text-lg">chevron_right</span>
+                    {/* Quick approve button for request tab */}
+                    {activeTab === "requests" && (
+                      <div className="mt-3 pt-3 border-t border-white/5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleApprove(s) }}
+                          disabled={isPending}
+                          className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20"
+                        >
+                          <span className={`material-symbols-outlined text-base ${isPending ? "animate-spin" : ""}`}>
+                            {isPending ? "autorenew" : "check_circle"}
+                          </span>
+                          {isPending ? "Aprobando..." : "Admitir Alumno"}
+                        </button>
                       </div>
-                    </div>
-
-                    {/* Mobile: progress row */}
-                    <div className="sm:hidden mt-2.5 flex items-center gap-3">
-                      <ProgressBadge status={s.status} isActive={s.isActive} />
-                      <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full bg-primary rounded-full" style={{ width: `${s.progress}%` }} />
-                        </div>
-                        <span className="text-xs text-gray-400 shrink-0">{s.progress}%</span>
-                      </div>
-                    </div>
-                  </button>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -261,6 +388,8 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-lg ${
                       selectedStudent.isActive
                         ? "bg-gradient-to-br from-primary to-cyan-400 shadow-primary/30"
+                        : selectedStudent.accessRequested
+                        ? "bg-gradient-to-br from-orange-500 to-amber-400 shadow-orange-500/30"
                         : "bg-gradient-to-br from-gray-600 to-gray-700"
                     }`}>
                       <Initials name={selectedStudent.name} />
@@ -272,11 +401,16 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                     <AccessBadge isActive={selectedStudent.isActive} />
                   </div>
 
-                  {/* Info rows */}
+                  {/* Registration Info — ENHANCED */}
                   <div className="space-y-2.5 bg-white/3 rounded-xl p-4 border border-white/5">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Información de Registro</p>
                     {[
                       { icon: "stethoscope", label: "Especialidad", value: selectedStudent.specialty },
-                      { icon: "location_on", label: "Ciudad", value: selectedStudent.city },
+                      { icon: "badge", label: "Cédula Profesional", value: selectedStudent.licenseId || "No proporcionada" },
+                      { icon: "location_on", label: "Estado", value: selectedStudent.city },
+                      { icon: "school", label: "Experiencia en USG", value: selectedStudent.experienceLevel || "No especificada" },
+                      { icon: "interests", label: "Área de Interés", value: selectedStudent.interestArea || "No especificada" },
+                      { icon: "phone", label: "Teléfono", value: selectedStudent.phone || "No proporcionado" },
                       { icon: "calendar_today", label: "Inscripción", value: format(new Date(selectedStudent.enrollDate), "d MMM yyyy", { locale: es }) },
                     ].map(item => (
                       <div key={item.label} className="flex items-center justify-between text-sm gap-4">
@@ -288,6 +422,33 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                       </div>
                     ))}
                   </div>
+
+                  {/* Access Request Notice */}
+                  {selectedStudent.accessRequested && !selectedStudent.isActive && (
+                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-orange-400 text-lg">notifications_active</span>
+                        <div>
+                          <p className="text-sm font-semibold text-orange-300">Solicitud de Acceso Pendiente</p>
+                          {selectedStudent.accessRequestedAt && (
+                            <p className="text-[11px] text-gray-400">
+                              Solicitado el {format(new Date(selectedStudent.accessRequestedAt), "d MMM yyyy, HH:mm", { locale: es })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleApprove(selectedStudent)}
+                        disabled={isPending}
+                        className="w-full py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
+                      >
+                        <span className={`material-symbols-outlined text-base ${isPending ? "animate-spin" : ""}`}>
+                          {isPending ? "autorenew" : "check_circle"}
+                        </span>
+                        {isPending ? "Aprobando..." : "Admitir Alumno"}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Progress stats */}
                   <div className="grid grid-cols-2 gap-3">
@@ -360,6 +521,56 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                       </span>
                       {isPending ? "Guardando..." : selectedStudent.isActive ? "Desactivar Acceso" : "Activar Acceso"}
                     </button>
+                  </div>
+
+                  {/* Delete user */}
+                  <div className="pt-3 border-t border-white/5">
+                    {!showDeleteConfirm ? (
+                      <button
+                        onClick={() => { setShowDeleteConfirm(true); setDeleteError(null) }}
+                        className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 bg-red-500/8 text-red-400/70 hover:bg-red-500/15 hover:text-red-400 border border-transparent hover:border-red-500/20"
+                      >
+                        <span className="material-symbols-outlined text-base">person_remove</span>
+                        Eliminar Alumno
+                      </button>
+                    ) : (
+                      <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-4 space-y-3">
+                        <div className="flex items-start gap-2">
+                          <span className="material-symbols-outlined text-red-400 text-lg shrink-0 mt-0.5">warning</span>
+                          <div>
+                            <p className="text-sm font-semibold text-red-300">¿Eliminar a {selectedStudent.name}?</p>
+                            <p className="text-[11px] text-gray-400 mt-1">Se eliminará su cuenta, progreso y toda la información asociada. Esta acción no se puede deshacer.</p>
+                          </div>
+                        </div>
+
+                        {deleteError && (
+                          <div className="flex items-center gap-2 p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg">
+                            <span className="material-symbols-outlined text-red-400 text-sm shrink-0">error</span>
+                            <p className="text-xs text-red-400">{deleteError}</p>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
+                            disabled={isDeleting}
+                            className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10 transition-all disabled:opacity-50"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => handleDelete(selectedStudent)}
+                            disabled={isDeleting}
+                            className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20"
+                          >
+                            <span className={`material-symbols-outlined text-base ${isDeleting ? 'animate-spin' : ''}`}>
+                              {isDeleting ? 'autorenew' : 'delete_forever'}
+                            </span>
+                            {isDeleting ? 'Eliminando...' : 'Sí, Eliminar'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Module grades */}

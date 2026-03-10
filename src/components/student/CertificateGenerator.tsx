@@ -1,166 +1,48 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { CertificatePDF } from '@/components/certificates/CertificatePDF';
+import type { ElementLayoutMap } from "@/app/actions/certificates"
 
-// PDF components imported statically. pdf renderer imported dynamically on click.
-// Formateo de fecha
-const formatDate = (dateString?: string) => {
-  if (!dateString) return new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-  const d = new Date(dateString);
-  return d.toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
-};
+// Types for certificate data
+type CertificateData = {
+  folio: string
+  recipientName: string
+  courseName: string
+  courseHours: string
+  institutionalText: string
+  issueDate: string
+  issuedBy: string
+  qrUrl: string | null
+  signers: Array<{ name: string; role: string; signature_url?: string | null }>
+  primaryColor?: string
+  elementLayout?: ElementLayoutMap | null
+  backgroundUrl?: string | null
+}
 
-// Create styles
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#ffffff',
-    padding: 40,
-    fontFamily: 'Helvetica',
-  },
-  borderRoot: {
-    border: '2pt solid #0f172a',
-    borderRadius: 8,
-    flex: 1,
-    padding: 30,
-    position: 'relative'
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 40,
-    alignItems: 'center'
-  },
-  headerText: {
-    fontSize: 12,
-    color: '#64748b'
-  },
-  title: {
-    fontSize: 32,
-    textAlign: 'center',
-    fontWeight: 'bold',
-    color: '#0f172a',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#475569',
-    marginBottom: 40,
-  },
-  presentedTo: {
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#64748b',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: 10,
-  },
-  studentName: {
-    fontSize: 28,
-    textAlign: 'center',
-    color: '#0f172a',
-    fontWeight: 'bold',
-    marginBottom: 30,
-    borderBottom: '1pt solid #cbd5e1',
-    marginHorizontal: 100,
-    paddingBottom: 5,
-  },
-  description: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#334155',
-    lineHeight: 1.5,
-    marginHorizontal: 60,
-    marginBottom: 50,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    position: 'absolute',
-    bottom: 40,
-    left: 40,
-    right: 40,
-  },
-  signatureBox: {
-    width: 200,
-    alignItems: 'center',
-  },
-  signatureLine: {
-    borderTop: '1pt solid #0f172a',
-    width: '100%',
-    marginTop: 40,
-    marginBottom: 8,
-  },
-  signatureName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#0f172a',
-  },
-  signatureRole: {
-    fontSize: 10,
-    color: '#64748b',
-  },
-  dateBox: {
-    position: 'absolute',
-    top: 30,
-    right: 30,
-    fontSize: 10,
-    color: '#64748b'
+// QR code generation helper (generates data URL from text)
+async function generateQRDataUrl(text: string): Promise<string> {
+  try {
+    // Use a simple QR code API to generate the image
+    const response = await fetch(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}&format=png`)
+    const blob = await response.blob()
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  } catch {
+    return '' // Return empty if QR generation fails
   }
-});
-
-// Document Component
-const CertificateDocument = ({ studentName, date }: { studentName: string, date: string }) => (
-  <Document>
-    <Page size="A4" orientation="landscape" style={styles.page}>
-      <View style={styles.borderRoot}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Avalado por: Sociedad Mexicana de Medicina Física</Text>
-          <Text style={styles.dateBox}>Emitido: {formatDate(date)}</Text>
-        </View>
-
-        <Text style={styles.title}>CERTIFICADO DE FINALIZACIÓN</Text>
-        <Text style={styles.subtitle}>Diplomado en Rehabilitación Intervencionista</Text>
-
-        <Text style={styles.presentedTo}>Este certificado es otorgado a</Text>
-        <Text style={styles.studentName}>{studentName || "Estudiante"}</Text>
-
-        <Text style={styles.description}>
-          Por haber completado con éxito todos los módulos obligatorios, talleres presenciales y
-          cuestionarios de evaluación del diplomado, demostrando competencia en los fundamentos y técnicas
-          de la Rehabilitación Intervencionista y Ecografía Musculoesquelética.
-        </Text>
-
-        <View style={styles.footer}>
-          <View style={styles.signatureBox}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureName}>Dr. Raúl Morales</Text>
-            <Text style={styles.signatureRole}>Director General del Curso</Text>
-          </View>
-
-          <View style={styles.signatureBox}>
-            <View style={styles.signatureLine} />
-            <Text style={styles.signatureName}>Sociedad Mexicana</Text>
-            <Text style={styles.signatureRole}>Mesa Directiva (Aval)</Text>
-          </View>
-        </View>
-      </View>
-    </Page>
-  </Document>
-);
+}
 
 export function CertificateGenerator({ 
-  studentName = "Estudiante", 
-  date = new Date().toISOString(),
+  certificate,
   className
 }: { 
-  studentName?: string, 
-  date?: string,
+  certificate: CertificateData,
   className?: string 
 }) {
   const [mounted, setMounted] = useState(false);
@@ -182,20 +64,43 @@ export function CertificateGenerator({
     setLoading(true);
     try {
       const { pdf } = await import('@react-pdf/renderer');
-      const doc = <CertificateDocument studentName={studentName} date={date} />;
+      
+      // Generate QR code if we have a URL
+      let qrDataUrl = ''
+      if (certificate.qrUrl) {
+        qrDataUrl = await generateQRDataUrl(certificate.qrUrl)
+      }
+
+      const doc = (
+        <CertificatePDF
+          recipientName={certificate.recipientName}
+          courseName={certificate.courseName}
+          courseHours={certificate.courseHours}
+          institutionalText={certificate.institutionalText}
+          folio={certificate.folio}
+          issueDate={certificate.issueDate}
+          issuedBy={certificate.issuedBy}
+          qrDataUrl={qrDataUrl}
+          signers={certificate.signers}
+          primaryColor={certificate.primaryColor}
+          elementLayout={certificate.elementLayout}
+          backgroundUrl={certificate.backgroundUrl}
+        />
+      );
+      
       const blob = await pdf(doc).toBlob();
       
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Certificado_DrRaulMorales_${studentName.replace(/\s+/g, "_")}.pdf`;
+      link.download = `Certificado_${certificate.folio}_${certificate.recipientName.replace(/\s+/g, "_")}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("Error generating student certificate:", err);
-      alert("Hubo un error al generar el PDF del certificado.");
+      console.error("Error generating certificate PDF:", err);
+      alert("Hubo un error al generar el PDF del certificado. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -206,7 +111,7 @@ export function CertificateGenerator({
       onClick={handleDownload}
       disabled={loading}
       className={cn(
-        "flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-violet-600 to-primary text-white font-bold rounded-2xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20",
+        "flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-violet-600 to-primary text-white font-bold rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-primary/20 active:scale-95",
         className,
         loading ? "opacity-70 cursor-not-allowed" : ""
       )}
@@ -218,11 +123,10 @@ export function CertificateGenerator({
         </>
       ) : (
         <>
-          <span className="material-symbols-outlined text-base">workspace_premium</span>
-          ¡Descargar Certificado!
+          <span className="material-symbols-outlined text-base">picture_as_pdf</span>
+          Descargar Certificado PDF
         </>
       )}
     </button>
   );
 }
-

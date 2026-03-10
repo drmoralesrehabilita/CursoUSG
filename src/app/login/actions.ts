@@ -16,7 +16,11 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    redirect('/error')
+    console.error("[Login] signInWithPassword error:", error.message, error.status)
+    if (error.message?.includes('Email not confirmed')) {
+      redirect('/login?error=not_confirmed')
+    }
+    redirect('/login?error=credentials')
   }
 
   // Check user role to determine redirect destination

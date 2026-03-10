@@ -38,7 +38,7 @@ export function ImageCarousel({ images, autoPlayInterval = 4000, compact = false
   const totalGroups = Math.ceil(total / dotGroupSize)
 
   const getImageUrl = (id: string) =>
-    `https://drive.google.com/thumbnail?id=${id}&sz=w1200`
+    `https://lh3.googleusercontent.com/d/${id}=w1200`
 
   return (
     <div
