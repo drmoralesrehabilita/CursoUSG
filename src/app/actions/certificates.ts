@@ -3,34 +3,12 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 
-// Types
-export type ElementLayout = {
-  x: number
-  y: number
-  w: number
-  h: number
-  visible: boolean
-  fontSize?: number
-  align?: "left" | "center" | "right"
-  imageUrl?: string
-}
+// Re-export types from shared module for convenience
+export type { CertElement, ElementType, ElementLayout, ElementLayoutMap } from "@/lib/certificates/types"
 
-export type ElementLayoutMap = {
-  header: ElementLayout
-  title: ElementLayout
-  recipient: ElementLayout
-  body: ElementLayout
-  signature: ElementLayout
-  qr: ElementLayout
-  folio: ElementLayout
-  course_name: ElementLayout
-  course_hours: ElementLayout
-  date: ElementLayout
-  divider: ElementLayout
-  decorative_line: ElementLayout
-  custom_image: ElementLayout
-}
-
+// ─────────────────────────────────────────────────
+// CONFIG TYPES
+// ─────────────────────────────────────────────────
 export type CertificateConfig = {
   id: string
   course_name: string
@@ -44,7 +22,7 @@ export type CertificateConfig = {
   auto_issue: boolean
   min_progress: number
   require_evaluations: boolean
-  element_layout: ElementLayoutMap | null
+  element_layout: unknown
   background_url: string | null
 }
 
@@ -171,7 +149,6 @@ export async function issueCertificate(data: {
   revalidatePath("/admin/certificados")
   return { success: true, certificate: cert, folio }
 }
-
 
 // ============================================================
 // DELETE CERTIFICATE

@@ -162,11 +162,11 @@ export default function LoginPage() {
            <div className="flex gap-4">
               {[1, 0.7, 0.4].map((op, i) => (
                 <div key={i} className="flex gap-1 items-end">
-                   {[1, 2, 3, 4, 5].map((bar) => (
+                   {[35, 52, 28, 58, 42].map((h, j) => (
                      <div 
-                      key={bar} 
+                      key={j} 
                       className="w-1.5 bg-primary rounded-full transition-all duration-1000 animate-pulse"
-                      style={{ height: `${Math.random() * 40 + 20}px`, opacity: op }} 
+                      style={{ height: `${h}px`, opacity: op }} 
                     />
                    ))}
                 </div>

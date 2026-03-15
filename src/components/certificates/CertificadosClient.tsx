@@ -2,9 +2,10 @@
 
 import { useState, useTransition, useEffect, useRef, useCallback } from "react"
 import { AdminHeader } from "@/components/admin/AdminHeader"
-import { saveCertificateConfig, issueCertificate, deleteCertificate, type CertificateConfig, type IssuedCertificate, type ElementLayoutMap } from "@/app/actions/certificates"
-import CertificateDesigner, { DEFAULT_LAYOUT } from "@/components/certificates/CertificateDesigner"
-import dynamic from "next/dynamic"
+import { saveCertificateConfig, issueCertificate, deleteCertificate, type CertificateConfig, type IssuedCertificate } from "@/app/actions/certificates"
+import { normalizeLayout, type CertElement } from "@/lib/certificates/types"
+import CertificateDesigner, { DEFAULT_ELEMENTS } from "@/components/certificates/CertificateDesigner"
+
 
 // PDF generation is handled async inside DownloadPdfButton component.
 
@@ -42,7 +43,9 @@ export default function CertificadosClient({ initialConfig, initialCertificates 
     "Se otorga el presente certificado por haber completado satisfactoriamente el Curso de Ecografía Neuromusculoesquelética impartido por el Dr. Raúl Morales."
   )
   const [primaryColor, setPrimaryColor] = useState(initialConfig?.primary_color ?? "#0ea5e9")
-  const [elementLayout, setElementLayout] = useState<ElementLayoutMap>(initialConfig?.element_layout ?? DEFAULT_LAYOUT)
+  const [elementLayout, setElementLayout] = useState<CertElement[]>(
+    () => normalizeLayout(initialConfig?.element_layout) ?? [...DEFAULT_ELEMENTS]
+  )
   const [backgroundUrl, setBackgroundUrl] = useState(initialConfig?.background_url ?? "")
   const [autoIssue, setAutoIssue] = useState(initialConfig?.auto_issue ?? true)
   const [minProgress, setMinProgress] = useState(String(initialConfig?.min_progress ?? 100))
@@ -78,7 +81,7 @@ export default function CertificadosClient({ initialConfig, initialCertificates 
   // Compute current config snapshot for preview and designer
   const configSnapshot = { course_name: courseName, folio_prefix: folioPrefix, course_hours: courseHours, institutional_text: institutionalText, primary_color: primaryColor }
 
-  const handleLayoutChange = useCallback((newLayout: ElementLayoutMap) => {
+  const handleLayoutChange = useCallback((newLayout: CertElement[]) => {
     setElementLayout(newLayout)
   }, [])
 
@@ -395,7 +398,7 @@ function CertificateRow({
   cert: IssuedCertificate
   institutionalText: string
   primaryColor: string
-  elementLayout: ElementLayoutMap
+  elementLayout: CertElement[]
   backgroundUrl: string
   onDelete: (cert: IssuedCertificate) => void
   deleting: boolean
@@ -491,7 +494,7 @@ function DownloadPdfButton({
   cert: IssuedCertificate
   institutionalText: string
   primaryColor: string
-  elementLayout: ElementLayoutMap
+  elementLayout: CertElement[]
   backgroundUrl: string
   qrDataUrl: string
   className?: string

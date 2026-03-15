@@ -595,7 +595,7 @@ export async function deleteLesson(id: string) {
   }
 
   // 1. Buscar Storage objects dependientes
-  const { data: lessonData } = await supabase.from("lessons").select("thumbnail_url, materials").eq("id", id).single();
+  const { data: lessonData } = await supabase.from("lessons").select("thumbnail_url, materials, mux_asset_id").eq("id", id).single();
   const thumbnailsToDelete: string[] = [];
   const docsToDelete: string[] = [];
 
@@ -611,6 +611,17 @@ export async function deleteLesson(id: string) {
           if (mPath) docsToDelete.push(mPath);
         }
       });
+    }
+
+    // Eliminar asset de Mux para evitar costos por almacenamiento huérfano
+    if (lessonData.mux_asset_id) {
+      try {
+        await mux.video.assets.delete(lessonData.mux_asset_id);
+        console.log(`[Mux] Asset ${lessonData.mux_asset_id} eliminado correctamente`);
+      } catch (muxErr) {
+        // No bloquear la eliminación si Mux falla (asset podría ya no existir)
+        console.warn(`[Mux] No se pudo eliminar asset ${lessonData.mux_asset_id}:`, muxErr);
+      }
     }
   }
 

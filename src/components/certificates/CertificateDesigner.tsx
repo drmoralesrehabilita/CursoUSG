@@ -1,92 +1,84 @@
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import type { ElementLayout, ElementLayoutMap } from "@/app/actions/certificates"
+import type { CertElement, ElementType } from "@/lib/certificates/types"
 import { uploadCertificateAsset } from "@/app/actions/certificates"
 
 // ─────────────────────────────────────────────────
-// DEFAULT LAYOUT — 12 elements, no overlaps
+// DEFAULT ELEMENTS — initial array
 // ─────────────────────────────────────────────────
-export const DEFAULT_LAYOUT: ElementLayoutMap = {
-  header:          { x: 30,  y: 24,  w: 300, h: 44,  visible: true,  fontSize: 13,  align: "left" },
-  folio:           { x: 580, y: 24,  w: 220, h: 30,  visible: true,  fontSize: 7.5, align: "right" },
-  title:           { x: 0,   y: 80,  w: 842, h: 44,  visible: true,  fontSize: 30,  align: "center" },
-  divider:         { x: 341, y: 128, w: 160, h: 4,   visible: true,  fontSize: 2,   align: "center" },
-  recipient:       { x: 60,  y: 146, w: 722, h: 56,  visible: true,  fontSize: 24,  align: "center" },
-  decorative_line: { x: 260, y: 206, w: 320, h: 3,   visible: true,  fontSize: 1,   align: "center" },
-  course_name:     { x: 60,  y: 218, w: 722, h: 30,  visible: true,  fontSize: 14,  align: "center" },
-  body:            { x: 60,  y: 256, w: 722, h: 50,  visible: true,  fontSize: 10,  align: "center" },
-  course_hours:    { x: 60,  y: 312, w: 722, h: 24,  visible: true,  fontSize: 11,  align: "center" },
-  date:            { x: 60,  y: 346, w: 722, h: 24,  visible: true,  fontSize: 9,   align: "center" },
-  signature:       { x: 30,  y: 400, w: 160, h: 80,  visible: true,  fontSize: 9,   align: "center" },
-  qr:              { x: 700, y: 400, w: 80,  h: 80,  visible: true,  fontSize: 6,   align: "center" },
-  custom_image:    { x: 350, y: 490, w: 140, h: 60,  visible: false, fontSize: 8,   align: "center", imageUrl: "" },
-}
+export const DEFAULT_ELEMENTS: CertElement[] = [
+  { id: "el_header",    type: "header",          x: 30,  y: 24,  w: 300, h: 44,  visible: true,  fontSize: 13,  align: "left",   label: "Encabezado" },
+  { id: "el_folio",     type: "folio",           x: 580, y: 24,  w: 220, h: 30,  visible: true,  fontSize: 7.5, align: "right",  label: "Folio" },
+  { id: "el_title",     type: "title",           x: 0,   y: 80,  w: 842, h: 44,  visible: true,  fontSize: 30,  align: "center", label: "Título" },
+  { id: "el_divider",   type: "divider",         x: 341, y: 128, w: 160, h: 4,   visible: true,  fontSize: 2,   align: "center", label: "Divisor Dorado" },
+  { id: "el_recipient", type: "recipient",       x: 60,  y: 146, w: 722, h: 56,  visible: true,  fontSize: 24,  align: "center", label: "Destinatario" },
+  { id: "el_decoline",  type: "decorative_line", x: 260, y: 206, w: 320, h: 3,   visible: true,  fontSize: 1,   align: "center", label: "Línea Nombre" },
+  { id: "el_coursename",type: "course_name",     x: 60,  y: 218, w: 722, h: 30,  visible: true,  fontSize: 14,  align: "center", label: "Nombre Curso" },
+  { id: "el_body",      type: "body",            x: 60,  y: 256, w: 722, h: 50,  visible: true,  fontSize: 10,  align: "center", label: "Texto" },
+  { id: "el_hours",     type: "course_hours",    x: 60,  y: 312, w: 722, h: 24,  visible: true,  fontSize: 11,  align: "center", label: "Horas del Curso" },
+  { id: "el_date",      type: "date",            x: 60,  y: 346, w: 722, h: 24,  visible: true,  fontSize: 9,   align: "center", label: "Fecha de Emisión" },
+  { id: "el_signature", type: "signature",       x: 30,  y: 400, w: 160, h: 80,  visible: true,  fontSize: 9,   align: "center", label: "Firma", signerName: "Dr. Raúl Morales", signerRole: "Director del Curso" },
+  { id: "el_qr",        type: "qr",              x: 700, y: 400, w: 80,  h: 80,  visible: true,  fontSize: 6,   align: "center", label: "Código QR" },
+  { id: "el_img",       type: "custom_image",    x: 350, y: 490, w: 140, h: 60,  visible: false, fontSize: 8,   align: "center", label: "Imagen", imageUrl: "" },
+]
 
 // Canvas dimensions (A4 landscape in pts)
 const CANVAS_W = 842
 const CANVAS_H = 595
 
-type ElementKey = keyof ElementLayoutMap
-
-// ─────────────────────────────────────────────────
-// ELEMENT DEFINITIONS
-// ─────────────────────────────────────────────────
-const ELEMENT_META: Record<ElementKey, { label: string; icon: string; color: string; description: string }> = {
-  header:          { label: "Encabezado",       icon: "badge",              color: "#3b82f6", description: "Nombre del instructor / institución" },
-  folio:           { label: "Folio",            icon: "tag",               color: "#6366f1", description: "Número de folio y fecha" },
-  title:           { label: "Título",           icon: "title",             color: "#8b5cf6", description: "Palabra 'CERTIFICADO'" },
-  divider:         { label: "Divisor Dorado",   icon: "horizontal_rule",   color: "#ca8a04", description: "Línea decorativa bajo el título" },
-  recipient:       { label: "Destinatario",     icon: "person",            color: "#06b6d4", description: "Nombre del médico/estudiante" },
-  decorative_line: { label: "Línea Nombre",     icon: "remove",            color: "#a855f7", description: "Línea bajo el nombre" },
-  course_name:     { label: "Nombre Curso",     icon: "school",            color: "#0891b2", description: "Nombre completo del curso" },
-  body:            { label: "Texto",            icon: "article",           color: "#10b981", description: "Texto institucional descriptivo" },
-  course_hours:    { label: "Horas del Curso",  icon: "schedule",          color: "#f97316", description: "Duración en horas del programa" },
-  date:            { label: "Fecha de Emisión", icon: "calendar_month",    color: "#ec4899", description: "Lugar y fecha de expedición" },
-  signature:       { label: "Firma",            icon: "draw",              color: "#f59e0b", description: "Firma del director del curso" },
-  qr:              { label: "Código QR",        icon: "qr_code_2",         color: "#ef4444", description: "Código QR de verificación" },
-  custom_image:    { label: "Imagen",           icon: "image",             color: "#14b8a6", description: "Logo, sello o imagen personalizada" },
+// Generate unique ID
+function genId() {
+  return `el_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`
 }
 
-// Render order (z-index priority from back to front)
-const ELEMENT_ORDER: ElementKey[] = [
-  "custom_image", "divider", "decorative_line", "header", "folio", "title",
-  "recipient", "course_name", "body", "course_hours", "date",
-  "signature", "qr",
+// ─────────────────────────────────────────────────
+// ELEMENT META (for icons and colors by TYPE)
+// ─────────────────────────────────────────────────
+const TYPE_META: Record<ElementType, { icon: string; color: string; defaultLabel: string }> = {
+  header:          { icon: "badge",            color: "#3b82f6", defaultLabel: "Encabezado" },
+  folio:           { icon: "tag",              color: "#6366f1", defaultLabel: "Folio" },
+  title:           { icon: "title",            color: "#8b5cf6", defaultLabel: "Título" },
+  divider:         { icon: "horizontal_rule",  color: "#ca8a04", defaultLabel: "Divisor Dorado" },
+  recipient:       { icon: "person",           color: "#06b6d4", defaultLabel: "Destinatario" },
+  decorative_line: { icon: "remove",           color: "#a855f7", defaultLabel: "Línea Decorativa" },
+  course_name:     { icon: "school",           color: "#0891b2", defaultLabel: "Nombre Curso" },
+  body:            { icon: "article",          color: "#10b981", defaultLabel: "Texto Institucional" },
+  course_hours:    { icon: "schedule",         color: "#f97316", defaultLabel: "Horas del Curso" },
+  date:            { icon: "calendar_month",   color: "#ec4899", defaultLabel: "Fecha de Emisión" },
+  signature:       { icon: "draw",             color: "#f59e0b", defaultLabel: "Firma" },
+  qr:              { icon: "qr_code_2",        color: "#ef4444", defaultLabel: "Código QR" },
+  custom_image:    { icon: "image",            color: "#14b8a6", defaultLabel: "Imagen" },
+  custom_text:     { icon: "text_fields",      color: "#7c3aed", defaultLabel: "Texto Libre" },
+}
+
+// Addable element types
+const ADDABLE_TYPES: { type: ElementType; label: string; category: string }[] = [
+  { type: "custom_text",     label: "Texto Libre",       category: "Contenido" },
+  { type: "signature",       label: "Firma",             category: "Contenido" },
+  { type: "custom_image",    label: "Imagen",            category: "Contenido" },
+  { type: "divider",         label: "Divisor Dorado",    category: "Decorativo" },
+  { type: "decorative_line", label: "Línea Decorativa",  category: "Decorativo" },
 ]
-
-type Props = {
-  layout: ElementLayoutMap
-  onLayoutChange: (layout: ElementLayoutMap) => void
-  backgroundUrl: string
-  onBackgroundChange: (url: string) => void
-  config: {
-    primary_color: string
-    course_name: string
-    course_hours: string
-    folio_prefix: string
-    institutional_text: string
-  }
-}
 
 // ─────────────────────────────────────────────────
 // ELEMENT CONTENT RENDERER
 // ─────────────────────────────────────────────────
-function ElementContent({ elKey, el, config, scale }: { elKey: ElementKey; el: ElementLayout; config: Props["config"]; scale: number }) {
+function ElementContent({ el, config, scale }: { el: CertElement; config: Props["config"]; scale: number }) {
   const fs = (size: number) => size * scale
 
-  switch (elKey) {
+  switch (el.type) {
     case "header":
       return (
         <div className="flex flex-col" style={{ textAlign: (el.align || "left") as "left" | "center" | "right" }}>
-          <span style={{ fontSize: fs(el.fontSize || 13), fontWeight: 700, color: config.primary_color }}>Dr. Raúl Morales</span>
+          <span style={{ fontSize: fs(el.fontSize || 13), fontWeight: 700, color: config.primary_color }}>{el.customText || "Dr. Raúl Morales"}</span>
           <span style={{ fontSize: fs(7), color: "#64748b", letterSpacing: 1 * scale, marginTop: 1 * scale }}>Ecografía Neuromusculoesquelética</span>
         </div>
       )
     case "title":
       return (
         <span style={{ fontSize: fs(el.fontSize || 30), fontWeight: 700, letterSpacing: 4 * scale, color: "#1e293b", textAlign: (el.align || "center") as "left" | "center" | "right", width: "100%" }}>
-          CERTIFICADO
+          {el.customText || "CERTIFICADO"}
         </span>
       )
     case "divider":
@@ -115,13 +107,13 @@ function ElementContent({ elKey, el, config, scale }: { elKey: ElementKey; el: E
     case "body":
       return (
         <span style={{ fontSize: fs(el.fontSize || 10), color: "#334155", lineHeight: 1.7, textAlign: (el.align || "center") as "left" | "center" | "right", width: "100%" }}>
-          {config.institutional_text || `Por haber completado satisfactoriamente el curso impartido por el Dr. Raúl Morales.`}
+          {el.customText || config.institutional_text || `Por haber completado satisfactoriamente el curso impartido por el Dr. Raúl Morales.`}
         </span>
       )
     case "date":
       return (
         <span style={{ fontSize: fs(el.fontSize || 9), color: "#64748b", textAlign: (el.align || "center") as "left" | "center" | "right", width: "100%" }}>
-          Ciudad de México, a {new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}
+          {el.customText || `Ciudad de México, a ${new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" })}`}
         </span>
       )
     case "folio":
@@ -136,9 +128,12 @@ function ElementContent({ elKey, el, config, scale }: { elKey: ElementKey; el: E
     case "signature":
       return (
         <div className="flex flex-col items-center justify-end w-full h-full" style={{ paddingBottom: 4 * scale }}>
+          {el.imageUrl && (
+            <img src={el.imageUrl} alt="" style={{ width: "60%", height: "auto", maxHeight: "50%", objectFit: "contain", marginBottom: 3 * scale }} draggable={false} />
+          )}
           <div style={{ width: "80%", borderBottom: "1px solid #374151", marginBottom: 3 * scale }} />
-          <span style={{ fontSize: fs(el.fontSize || 9), color: "#0f172a", fontWeight: 700, textAlign: "center" }}>Dr. Raúl Morales</span>
-          <span style={{ fontSize: fs((el.fontSize || 9) * 0.8), color: "#64748b", textAlign: "center" }}>Director del Curso</span>
+          <span style={{ fontSize: fs(el.fontSize || 9), color: "#0f172a", fontWeight: 700, textAlign: "center" }}>{el.signerName || "Nombre"}</span>
+          <span style={{ fontSize: fs((el.fontSize || 9) * 0.8), color: "#64748b", textAlign: "center" }}>{el.signerRole || "Cargo"}</span>
         </div>
       )
     case "qr":
@@ -159,6 +154,12 @@ function ElementContent({ elKey, el, config, scale }: { elKey: ElementKey; el: E
           <span style={{ fontSize: fs(7), color: "#94a3b8", marginTop: 2 * scale }}>Subir imagen</span>
         </div>
       )
+    case "custom_text":
+      return (
+        <span style={{ fontSize: fs(el.fontSize || 10), color: "#334155", textAlign: (el.align || "center") as "left" | "center" | "right", width: "100%", lineHeight: 1.5 }}>
+          {el.customText || "[Texto personalizado]"}
+        </span>
+      )
     default:
       return null
   }
@@ -167,12 +168,27 @@ function ElementContent({ elKey, el, config, scale }: { elKey: ElementKey; el: E
 // ─────────────────────────────────────────────────
 // MAIN DESIGNER COMPONENT
 // ─────────────────────────────────────────────────
+type Props = {
+  layout: CertElement[]
+  onLayoutChange: (layout: CertElement[]) => void
+  backgroundUrl: string
+  onBackgroundChange: (url: string) => void
+  config: {
+    primary_color: string
+    course_name: string
+    course_hours: string
+    folio_prefix: string
+    institutional_text: string
+  }
+}
+
 export default function CertificateDesigner({ layout, onLayoutChange, backgroundUrl, onBackgroundChange, config }: Props) {
-  const [selected, setSelected] = useState<ElementKey | null>(null)
-  const [dragging, setDragging] = useState<ElementKey | null>(null)
-  const [resizing, setResizing] = useState<{ key: ElementKey; corner: string } | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
+  const [dragging, setDragging] = useState<string | null>(null)
+  const [resizing, setResizing] = useState<{ id: string; corner: string } | null>(null)
   const [previewMode, setPreviewMode] = useState(false)
   const [showManager, setShowManager] = useState(true)
+  const [showAddMenu, setShowAddMenu] = useState(false)
   const [uploading, setUploading] = useState(false)
   const canvasRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -190,12 +206,67 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
     return () => window.removeEventListener("resize", updateScale)
   }, [])
 
+  // ── Element helpers ──
+  const getEl = useCallback((id: string) => layout.find(e => e.id === id), [layout])
+
   const updateElement = useCallback(
-    (key: ElementKey, updates: Partial<ElementLayout>) => {
-      onLayoutChange({ ...layout, [key]: { ...layout[key], ...updates } })
+    (id: string, updates: Partial<CertElement>) => {
+      onLayoutChange(layout.map(e => e.id === id ? { ...e, ...updates } : e))
     },
     [layout, onLayoutChange]
   )
+
+  const addElement = useCallback((type: ElementType) => {
+    const meta = TYPE_META[type]
+    const defaults: Partial<CertElement> = {
+      x: 200, y: 300, w: 200, h: 40, visible: true, fontSize: 10, align: "center",
+    }
+    if (type === "signature") {
+      defaults.w = 160; defaults.h = 80; defaults.signerName = "Nombre"; defaults.signerRole = "Cargo"
+    }
+    if (type === "custom_image") {
+      defaults.w = 140; defaults.h = 60; defaults.imageUrl = ""
+    }
+    if (type === "custom_text") {
+      defaults.customText = "Texto personalizado"
+    }
+    if (type === "divider") {
+      defaults.w = 160; defaults.h = 4; defaults.fontSize = 2
+    }
+    if (type === "decorative_line") {
+      defaults.w = 200; defaults.h = 3; defaults.fontSize = 1
+    }
+    const newEl: CertElement = {
+      id: genId(),
+      type,
+      label: meta.defaultLabel,
+      ...defaults,
+    } as CertElement
+    const updated = [...layout, newEl]
+    onLayoutChange(updated)
+    setSelected(newEl.id)
+    setShowAddMenu(false)
+  }, [layout, onLayoutChange])
+
+  const duplicateElement = useCallback((id: string) => {
+    const src = getEl(id)
+    if (!src) return
+    const dup: CertElement = {
+      ...src,
+      id: genId(),
+      x: Math.min(src.x + 20, CANVAS_W - src.w),
+      y: Math.min(src.y + 20, CANVAS_H - src.h),
+      label: `${src.label || TYPE_META[src.type].defaultLabel} (copia)`,
+    }
+    const updated = [...layout, dup]
+    onLayoutChange(updated)
+    setSelected(dup.id)
+  }, [layout, onLayoutChange, getEl])
+
+  const deleteElement = useCallback((id: string) => {
+    onLayoutChange(layout.filter(e => e.id !== id))
+    setSelected(null)
+  }, [layout, onLayoutChange])
 
   // ── Upload handler ────────────────────────────
   const handleUpload = useCallback(async (file: File, target: "image" | "background") => {
@@ -219,19 +290,21 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
 
   // ── Drag handlers ──────────────────────────────
   const handlePointerDown = useCallback(
-    (e: React.PointerEvent, key: ElementKey) => {
+    (e: React.PointerEvent, id: string) => {
       if (previewMode) return
       e.preventDefault()
       e.stopPropagation()
+      const el = getEl(id)
+      if (!el) return
       const rect = canvasRef.current!.getBoundingClientRect()
       const mx = (e.clientX - rect.left) / scale
       const my = (e.clientY - rect.top) / scale
-      dragOffset.current = { x: mx - layout[key].x, y: my - layout[key].y }
-      setDragging(key)
-      setSelected(key)
+      dragOffset.current = { x: mx - el.x, y: my - el.y }
+      setDragging(id)
+      setSelected(id)
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     },
-    [layout, scale, previewMode]
+    [getEl, scale, previewMode]
   )
 
   const handlePointerMove = useCallback(
@@ -242,16 +315,17 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
       const my = (e.clientY - rect.top) / scale
 
       if (dragging) {
+        const el = getEl(dragging)
+        if (!el) return
         let nx = mx - dragOffset.current.x
         let ny = my - dragOffset.current.y
-        const el = layout[dragging]
         nx = Math.max(0, Math.min(CANVAS_W - el.w, nx))
         ny = Math.max(0, Math.min(CANVAS_H - el.h, ny))
         updateElement(dragging, { x: Math.round(nx), y: Math.round(ny) })
       }
 
       if (resizing) {
-        const { key, corner } = resizing
+        const { id, corner } = resizing
         const { mx: smx, my: smy, ow, oh, ox, oy } = resizeStart.current
         const dx = mx - smx
         const dy = my - smy
@@ -263,29 +337,33 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
         newX = Math.max(0, newX); newY = Math.max(0, newY)
         if (newX + newW > CANVAS_W) newW = CANVAS_W - newX
         if (newY + newH > CANVAS_H) newH = CANVAS_H - newY
-        updateElement(key, { x: Math.round(newX), y: Math.round(newY), w: Math.round(newW), h: Math.round(newH) })
+        updateElement(id, { x: Math.round(newX), y: Math.round(newY), w: Math.round(newW), h: Math.round(newH) })
       }
     },
-    [dragging, resizing, layout, scale, updateElement]
+    [dragging, resizing, getEl, scale, updateElement]
   )
 
   const handlePointerUp = useCallback(() => { setDragging(null); setResizing(null) }, [])
 
   const handleResizeStart = useCallback(
-    (e: React.PointerEvent, key: ElementKey, corner: string) => {
+    (e: React.PointerEvent, id: string, corner: string) => {
       e.preventDefault(); e.stopPropagation()
+      const el = getEl(id)
+      if (!el) return
       const rect = canvasRef.current!.getBoundingClientRect()
       const mx = (e.clientX - rect.left) / scale
       const my = (e.clientY - rect.top) / scale
-      resizeStart.current = { mx, my, ow: layout[key].w, oh: layout[key].h, ox: layout[key].x, oy: layout[key].y }
-      setResizing({ key, corner })
-      setSelected(key)
+      resizeStart.current = { mx, my, ow: el.w, oh: el.h, ox: el.x, oy: el.y }
+      setResizing({ id, corner })
+      setSelected(id)
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     },
-    [layout, scale]
+    [getEl, scale]
   )
 
-  const visibleElements = ELEMENT_ORDER.filter((k) => layout[k]?.visible)
+  const visibleElements = layout.filter(e => e.visible)
+  const selectedEl = selected ? getEl(selected) : null
+  const selectedMeta = selectedEl ? TYPE_META[selectedEl.type] : null
 
   return (
     <div className="space-y-4">
@@ -295,7 +373,36 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
           <span className="material-symbols-outlined text-primary text-lg">design_services</span>
           Editor Visual de Certificado
         </h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Add element */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAddMenu(!showAddMenu)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all bg-primary/10 text-primary hover:bg-primary/20"
+            >
+              <span className="material-symbols-outlined text-sm">add</span>
+              Agregar
+            </button>
+            {showAddMenu && (
+              <div className="absolute top-full right-0 mt-1 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-white/10 shadow-xl z-50 min-w-[200px] py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                {["Contenido", "Decorativo"].map(cat => (
+                  <div key={cat}>
+                    <p className="px-3 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">{cat}</p>
+                    {ADDABLE_TYPES.filter(a => a.category === cat).map(item => (
+                      <button
+                        key={item.type + item.label}
+                        onClick={() => addElement(item.type)}
+                        className="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                      >
+                        <span className="material-symbols-outlined text-sm" style={{ color: TYPE_META[item.type].color }}>{TYPE_META[item.type].icon}</span>
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setShowManager(!showManager)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${showManager ? "bg-primary/10 text-primary" : "bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/15"}`}
@@ -311,7 +418,7 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
             {previewMode ? "Modo Edición" : "Vista Previa"}
           </button>
           <button
-            onClick={() => { onLayoutChange(DEFAULT_LAYOUT); setSelected(null) }}
+            onClick={() => { onLayoutChange([...DEFAULT_ELEMENTS]); setSelected(null) }}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/15 flex items-center gap-1.5 transition-all"
           >
             <span className="material-symbols-outlined text-sm">restart_alt</span>
@@ -350,7 +457,7 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
             style={{ background: backgroundUrl ? `url(${backgroundUrl}) center/cover no-repeat` : "linear-gradient(135deg, #fefcf3 0%, #fdf8e7 100%)", borderRadius: 8, boxShadow: "0 4px 24px rgba(0,0,0,.12), 0 0 0 1px rgba(201,168,76,0.3)" }}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            onClick={(e) => { if (e.target === canvasRef.current) setSelected(null) }}
+            onClick={(e) => { if (e.target === canvasRef.current) { setSelected(null); setShowAddMenu(false) } }}
           >
             {/* Uploading overlay */}
             {uploading && (
@@ -387,23 +494,21 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
             )}
 
             {/* ── Draggable elements ── */}
-            {visibleElements.map((key, idx) => {
-              const el = layout[key]
-              if (!el) return null
-              const meta = ELEMENT_META[key]
-              const isSelected = selected === key && !previewMode
+            {visibleElements.map((el, idx) => {
+              const meta = TYPE_META[el.type]
+              const isSelected = selected === el.id && !previewMode
 
               return (
                 <div
-                  key={key}
+                  key={el.id}
                   className="absolute group"
                   style={{
                     left: el.x * scale, top: el.y * scale, width: el.w * scale, height: el.h * scale,
-                    cursor: previewMode ? "default" : dragging === key ? "grabbing" : "grab",
-                    zIndex: dragging === key ? 30 : isSelected ? 20 : idx + 1,
+                    cursor: previewMode ? "default" : dragging === el.id ? "grabbing" : "grab",
+                    zIndex: dragging === el.id ? 30 : isSelected ? 20 : idx + 1,
                     touchAction: "none",
                   }}
-                  onPointerDown={(e) => handlePointerDown(e, key)}
+                  onPointerDown={(e) => handlePointerDown(e, el.id)}
                 >
                   {/* Selection border */}
                   {!previewMode && (
@@ -420,7 +525,7 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
                       fontSize: Math.max(8, 9 * scale), lineHeight: `${Math.max(12, 14 * scale)}px`,
                       transform: `scale(${1 / scale})`, transformOrigin: "bottom left",
                     }}>
-                      {meta.label}
+                      {el.label || meta.defaultLabel}
                     </div>
                   )}
 
@@ -428,7 +533,7 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
                   <div className="w-full h-full flex items-center overflow-hidden px-1" style={{
                     justifyContent: el.align === "center" ? "center" : el.align === "right" ? "flex-end" : "flex-start",
                   }}>
-                    <ElementContent elKey={key} el={el} config={config} scale={scale} />
+                    <ElementContent el={el} config={config} scale={scale} />
                   </div>
 
                   {/* Resize handles */}
@@ -449,7 +554,7 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
                             ...pos, width: sz, height: sz, backgroundColor: meta.color,
                             border: "2px solid white", cursor: cursors[corner], zIndex: 40,
                             boxShadow: "0 1px 3px rgba(0,0,0,.2)",
-                          }} onPointerDown={(e) => handleResizeStart(e, key, corner)} />
+                          }} onPointerDown={(e) => handleResizeStart(e, el.id, corner)} />
                         )
                       })}
                     </>
@@ -461,67 +566,88 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
         </div>
       </div>
 
-      {/* ── Properties panel (when element selected) ── */}
-      {selected && !previewMode && layout[selected] && (
+      {/* ── Properties panel ── */}
+      {selectedEl && selectedMeta && !previewMode && (
         <div className="bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10 p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200"
-          style={{ borderLeftColor: ELEMENT_META[selected].color, borderLeftWidth: 3 }}>
+          style={{ borderLeftColor: selectedMeta.color, borderLeftWidth: 3 }}>
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm" style={{ color: ELEMENT_META[selected].color }}>{ELEMENT_META[selected].icon}</span>
-              Propiedades: {ELEMENT_META[selected].label}
+              <span className="material-symbols-outlined text-sm" style={{ color: selectedMeta.color }}>{selectedMeta.icon}</span>
+              Propiedades: {selectedEl.label || selectedMeta.defaultLabel}
             </h4>
-            <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
-              <span className="material-symbols-outlined text-gray-400 text-base">close</span>
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Duplicate */}
+              <button onClick={() => duplicateElement(selectedEl.id)} title="Duplicar elemento"
+                className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                <span className="material-symbols-outlined text-base">content_copy</span>
+              </button>
+              {/* Delete */}
+              <button onClick={() => deleteElement(selectedEl.id)} title="Eliminar elemento"
+                className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                <span className="material-symbols-outlined text-base">delete</span>
+              </button>
+              <button onClick={() => setSelected(null)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                <span className="material-symbols-outlined text-gray-400 text-base">close</span>
+              </button>
+            </div>
           </div>
 
+          {/* Label */}
+          <div>
+            <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Etiqueta</label>
+            <input type="text" value={selectedEl.label || ""} placeholder={selectedMeta.defaultLabel}
+              onChange={(e) => updateElement(selectedEl.id, { label: e.target.value })}
+              className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white outline-none" />
+          </div>
+
+          {/* Position & Size */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "X", key: "x" as const, max: CANVAS_W - layout[selected].w },
-              { label: "Y", key: "y" as const, max: CANVAS_H - layout[selected].h },
-              { label: "Ancho", key: "w" as const, max: CANVAS_W - layout[selected].x, min: 30 },
-              { label: "Alto", key: "h" as const, max: CANVAS_H - layout[selected].y, min: 3 },
+              { label: "X", key: "x" as const, max: CANVAS_W - selectedEl.w },
+              { label: "Y", key: "y" as const, max: CANVAS_H - selectedEl.h },
+              { label: "Ancho", key: "w" as const, max: CANVAS_W - selectedEl.x, min: 30 },
+              { label: "Alto", key: "h" as const, max: CANVAS_H - selectedEl.y, min: 3 },
             ].map(({ label, key: k, max, min }) => (
               <div key={k}>
                 <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">{label}</label>
-                <input type="number" value={layout[selected][k]}
-                  onChange={(e) => updateElement(selected, { [k]: Math.max(min || 0, Math.min(max, +e.target.value)) })}
+                <input type="number" value={selectedEl[k]}
+                  onChange={(e) => updateElement(selectedEl.id, { [k]: Math.max(min || 0, Math.min(max, +e.target.value)) })}
                   className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white outline-none font-mono" />
               </div>
             ))}
           </div>
 
           <div className="flex items-center gap-4 flex-wrap pt-1">
-            {/* Font size — hide for pure decorative lines and images */}
-            {selected !== "qr" && selected !== "divider" && selected !== "decorative_line" && selected !== "custom_image" && (
+            {/* Font size */}
+            {selectedEl.type !== "qr" && selectedEl.type !== "divider" && selectedEl.type !== "decorative_line" && selectedEl.type !== "custom_image" && (
               <div className="flex items-center gap-2">
                 <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Tamaño</label>
-                <input type="range" min={6} max={40} step={0.5} value={layout[selected].fontSize || 10}
-                  onChange={(e) => updateElement(selected, { fontSize: +e.target.value })} className="w-20 accent-primary" />
-                <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-8">{layout[selected].fontSize || 10}</span>
+                <input type="range" min={6} max={40} step={0.5} value={selectedEl.fontSize || 10}
+                  onChange={(e) => updateElement(selectedEl.id, { fontSize: +e.target.value })} className="w-20 accent-primary" />
+                <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-8">{selectedEl.fontSize || 10}</span>
               </div>
             )}
 
             {/* Line thickness for dividers */}
-            {(selected === "divider" || selected === "decorative_line") && (
+            {(selectedEl.type === "divider" || selectedEl.type === "decorative_line") && (
               <div className="flex items-center gap-2">
                 <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">Grosor</label>
-                <input type="range" min={1} max={6} step={0.5} value={layout[selected].fontSize || 2}
-                  onChange={(e) => updateElement(selected, { fontSize: +e.target.value })} className="w-20 accent-primary" />
-                <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-8">{layout[selected].fontSize || 2}px</span>
+                <input type="range" min={1} max={6} step={0.5} value={selectedEl.fontSize || 2}
+                  onChange={(e) => updateElement(selectedEl.id, { fontSize: +e.target.value })} className="w-20 accent-primary" />
+                <span className="text-xs font-mono text-gray-600 dark:text-gray-300 w-8">{selectedEl.fontSize || 2}px</span>
               </div>
             )}
 
-            {/* Image upload for custom_image */}
-            {selected === "custom_image" && (
+            {/* Upload for images & signatures */}
+            {(selectedEl.type === "custom_image" || selectedEl.type === "signature") && (
               <div className="flex items-center gap-2">
                 <button onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-500/10 text-teal-600 hover:bg-teal-500/20 transition-colors">
                   <span className="material-symbols-outlined text-sm">upload</span>
-                  {layout[selected].imageUrl ? "Cambiar Imagen" : "Subir Imagen"}
+                  {selectedEl.imageUrl ? "Cambiar Imagen" : "Subir Imagen"}
                 </button>
-                {layout[selected].imageUrl && (
-                  <button onClick={() => updateElement(selected, { imageUrl: "" })}
+                {selectedEl.imageUrl && (
+                  <button onClick={() => updateElement(selectedEl.id, { imageUrl: "" })}
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-500 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
                     <span className="material-symbols-outlined text-sm">delete</span>
                     Quitar
@@ -530,12 +656,12 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
               </div>
             )}
 
-            {/* Alignment — hide for decorative elements and images */}
-            {selected !== "divider" && selected !== "decorative_line" && selected !== "qr" && selected !== "custom_image" && (
+            {/* Alignment */}
+            {selectedEl.type !== "divider" && selectedEl.type !== "decorative_line" && selectedEl.type !== "qr" && selectedEl.type !== "custom_image" && (
               <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-white/10 rounded-lg p-0.5">
                 {(["left", "center", "right"] as const).map((a) => (
-                  <button key={a} onClick={() => updateElement(selected, { align: a })}
-                    className={`p-1.5 rounded-md transition-all ${layout[selected].align === a ? "bg-white dark:bg-white/20 shadow-sm text-primary" : "text-gray-400 hover:text-gray-600"}`}>
+                  <button key={a} onClick={() => updateElement(selectedEl.id, { align: a })}
+                    className={`p-1.5 rounded-md transition-all ${selectedEl.align === a ? "bg-white dark:bg-white/20 shadow-sm text-primary" : "text-gray-400 hover:text-gray-600"}`}>
                     <span className="material-symbols-outlined text-sm">
                       {a === "left" ? "format_align_left" : a === "center" ? "format_align_center" : "format_align_right"}
                     </span>
@@ -545,12 +671,45 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
             )}
 
             {/* Visibility toggle */}
-            <button onClick={() => { updateElement(selected, { visible: false }); setSelected(null) }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-500 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+            <button onClick={() => { updateElement(selectedEl.id, { visible: false }); setSelected(null) }}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-orange-500 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors">
               <span className="material-symbols-outlined text-sm">visibility_off</span>
               Ocultar
             </button>
           </div>
+
+          {/* ── Type-specific fields ── */}
+          {/* Signature fields */}
+          {selectedEl.type === "signature" && (
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100 dark:border-white/5">
+              <div>
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Nombre del Firmante</label>
+                <input type="text" value={selectedEl.signerName || ""}
+                  onChange={(e) => updateElement(selectedEl.id, { signerName: e.target.value })}
+                  placeholder="Dr. Nombre Apellido"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Cargo / Rol</label>
+                <input type="text" value={selectedEl.signerRole || ""}
+                  onChange={(e) => updateElement(selectedEl.id, { signerRole: e.target.value })}
+                  placeholder="Director del Curso"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white outline-none" />
+              </div>
+            </div>
+          )}
+
+          {/* Custom text / body text field */}
+          {(selectedEl.type === "custom_text" || selectedEl.type === "body" || selectedEl.type === "title" || selectedEl.type === "header" || selectedEl.type === "date") && (
+            <div className="pt-2 border-t border-gray-100 dark:border-white/5">
+              <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-1">Contenido del Texto</label>
+              <textarea value={selectedEl.customText || ""}
+                onChange={(e) => updateElement(selectedEl.id, { customText: e.target.value })}
+                placeholder="Escribe el texto aquí..."
+                rows={2}
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 dark:text-white outline-none resize-y" />
+            </div>
+          )}
         </div>
       )}
 
@@ -563,22 +722,20 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
             <h4 className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-base">dashboard_customize</span>
               Gestión de Elementos
-              <span className="text-[10px] font-normal text-gray-400 ml-1">{visibleElements.length} / {ELEMENT_ORDER.length} visibles</span>
+              <span className="text-[10px] font-normal text-gray-400 ml-1">{visibleElements.length} / {layout.length} visibles</span>
             </h4>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100 dark:bg-white/5">
-            {ELEMENT_ORDER.map((key) => {
-              const meta = ELEMENT_META[key]
-              const el = layout[key]
-              if (!el) return null
+            {layout.map((el) => {
+              const meta = TYPE_META[el.type]
               const isVis = el.visible
-              const isSel = selected === key
+              const isSel = selected === el.id
 
               return (
-                <div key={key}
-                  className={`bg-white dark:bg-gray-950 p-3 flex items-center gap-3 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5`}
+                <div key={el.id}
+                  className="bg-white dark:bg-gray-950 p-3 flex items-center gap-3 transition-all cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5"
                   style={isSel ? { outline: `2px solid ${meta.color}`, outlineOffset: -2 } : {}}
-                  onClick={() => { if (!previewMode) setSelected(key) }}
+                  onClick={() => { if (!previewMode) setSelected(el.id) }}
                 >
                   {/* Icon */}
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${meta.color}15` }}>
@@ -588,9 +745,9 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs font-semibold truncate ${isVis ? "text-gray-900 dark:text-white" : "text-gray-400 line-through"}`}>
-                      {meta.label}
+                      {el.label || meta.defaultLabel}
                     </p>
-                    <p className="text-[10px] text-gray-400 truncate">{meta.description}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{meta.defaultLabel}</p>
                     {isVis && (
                       <p className="text-[9px] text-gray-300 dark:text-gray-600 font-mono mt-0.5">
                         x:{el.x} y:{el.y} · {el.w}×{el.h}
@@ -598,14 +755,30 @@ export default function CertificateDesigner({ layout, onLayoutChange, background
                     )}
                   </div>
 
-                  {/* Visibility toggle */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); updateElement(key, { visible: !isVis }); if (!isVis) setSelected(key) }}
-                    className={`p-1.5 rounded-lg transition-all shrink-0 ${isVis ? "text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" : "text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"}`}
-                    title={isVis ? "Ocultar elemento" : "Mostrar elemento"}
-                  >
-                    <span className="material-symbols-outlined text-base">{isVis ? "visibility" : "visibility_off"}</span>
-                  </button>
+                  {/* Actions */}
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); duplicateElement(el.id) }}
+                      className="p-1 rounded-md text-gray-300 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                      title="Duplicar"
+                    >
+                      <span className="material-symbols-outlined text-sm">content_copy</span>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); updateElement(el.id, { visible: !isVis }); if (!isVis) setSelected(el.id) }}
+                      className={`p-1 rounded-md transition-all ${isVis ? "text-gray-300 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20" : "text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20"}`}
+                      title={isVis ? "Ocultar" : "Mostrar"}
+                    >
+                      <span className="material-symbols-outlined text-sm">{isVis ? "visibility" : "visibility_off"}</span>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); deleteElement(el.id) }}
+                      className="p-1 rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      title="Eliminar"
+                    >
+                      <span className="material-symbols-outlined text-sm">delete_outline</span>
+                    </button>
+                  </div>
                 </div>
               )
             })}

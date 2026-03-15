@@ -1,13 +1,7 @@
 "use client"
 
 import { Page, Text, View, Document, StyleSheet, Image } from "@react-pdf/renderer"
-import type { ElementLayoutMap } from "@/app/actions/certificates"
-
-type Signer = {
-  name: string
-  role: string
-  signature_url?: string | null
-}
+import type { CertElement } from "@/lib/certificates/types"
 
 type CertificatePDFProps = {
   recipientName: string
@@ -18,9 +12,9 @@ type CertificatePDFProps = {
   issueDate: string
   issuedBy: string
   qrDataUrl: string // base64 QR image
-  signers: Signer[]
+  signers: Array<{ name: string; role: string; signature_url?: string | null }>
   primaryColor?: string
-  elementLayout?: ElementLayoutMap | null
+  elementLayout?: CertElement[] | null
   backgroundUrl?: string | null
 }
 
@@ -33,6 +27,7 @@ const hexToRgb = (hex: string) => {
 
 export function CertificatePDF({
   recipientName,
+  courseName,
   courseHours,
   institutionalText,
   folio,
@@ -51,8 +46,268 @@ export function CertificatePDF({
     year: "numeric",
   })
 
-  // If we have a custom layout, render with absolute positioning
-  if (elementLayout) {
+  // ─── Dynamic layout rendering (CertElement[] array) ───
+  if (elementLayout && Array.isArray(elementLayout) && elementLayout.length > 0) {
+    const visibleElements = elementLayout.filter(el => el.visible)
+
+    const renderElement = (el: CertElement) => {
+      const baseStyle = {
+        position: "absolute" as const,
+        left: el.x,
+        top: el.y,
+        width: el.w,
+        height: el.h,
+      }
+
+      switch (el.type) {
+        case "header":
+          return (
+            <View key={el.id} style={baseStyle}>
+              <Text style={{
+                fontSize: el.fontSize || 13,
+                fontWeight: "bold",
+                color: pc,
+                textAlign: (el.align || "left") as "left" | "center" | "right",
+              }}>
+                {el.customText || issuedBy}
+              </Text>
+              <Text style={{
+                fontSize: 7,
+                color: "#64748b",
+                letterSpacing: 1,
+                marginTop: 1,
+                textAlign: (el.align || "left") as "left" | "center" | "right",
+              }}>
+                ECOGRAFÍA NEUROMUSCULOESQUELÉTICA
+              </Text>
+            </View>
+          )
+
+        case "folio":
+          return (
+            <View key={el.id} style={baseStyle}>
+              <Text style={{
+                fontSize: el.fontSize || 7.5,
+                color: "#64748b",
+                textAlign: (el.align || "right") as "left" | "center" | "right",
+              }}>
+                Folio: {folio}
+              </Text>
+              <Text style={{
+                fontSize: el.fontSize || 7.5,
+                color: "#64748b",
+                textAlign: (el.align || "right") as "left" | "center" | "right",
+                marginTop: 2,
+              }}>
+                Fecha: {formattedDate}
+              </Text>
+            </View>
+          )
+
+        case "title":
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 30,
+                fontWeight: "bold",
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#1e293b",
+                letterSpacing: 4,
+              }}>
+                {el.customText || "CERTIFICADO"}
+              </Text>
+            </View>
+          )
+
+        case "divider":
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              height: Math.max(1, el.fontSize || 2),
+              backgroundColor: "#c9a84c",
+              borderRadius: 1,
+            }} />
+          )
+
+        case "decorative_line":
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              height: Math.max(1, el.fontSize || 1),
+              backgroundColor: "#cbd5e1",
+              borderRadius: 1,
+            }} />
+          )
+
+        case "recipient":
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              justifyContent: "center",
+              alignItems: el.align === "left" ? "flex-start" : el.align === "right" ? "flex-end" : "center",
+            }}>
+              <Text style={{
+                fontSize: 9,
+                color: "#64748b",
+                letterSpacing: 3,
+                textTransform: "uppercase",
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                marginBottom: 8,
+              }}>
+                Se otorga a
+              </Text>
+              <Text style={{
+                fontSize: el.fontSize || 24,
+                fontWeight: "bold",
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#0f172a",
+                paddingBottom: 4,
+                marginHorizontal: 20,
+              }}>
+                {recipientName}
+              </Text>
+            </View>
+          )
+
+        case "course_name":
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 14,
+                fontWeight: "bold",
+                fontStyle: "italic",
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#1e293b",
+              }}>
+                {courseName || "Curso de Ecografía Neuromusculoesquelética"}
+              </Text>
+            </View>
+          )
+
+        case "body":
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 10,
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#334155",
+                lineHeight: 1.7,
+              }}>
+                {el.customText || institutionalText}
+              </Text>
+            </View>
+          )
+
+        case "course_hours":
+          if (!courseHours) return null
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 11,
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#475569",
+              }}>
+                (Duración: {courseHours} horas)
+              </Text>
+            </View>
+          )
+
+        case "date":
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 9,
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#64748b",
+              }}>
+                {el.customText || `Ciudad de México, a ${formattedDate}`}
+              </Text>
+            </View>
+          )
+
+        case "signature": {
+          // Each signature element now has its own signer info
+          const signerName = el.signerName || signers[0]?.name || "Nombre"
+          const signerRole = el.signerRole || signers[0]?.role || "Cargo"
+          const signatureUrl = el.imageUrl || signers[0]?.signature_url
+
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}>
+              {signatureUrl ? (
+                <Image style={{ width: 80, height: 32, marginBottom: 4 }} src={signatureUrl} />
+              ) : null}
+              <View style={{ width: "100%", borderTop: "1pt solid #0f172a", marginBottom: 4 }} />
+              <Text style={{
+                fontSize: el.fontSize || 9,
+                fontWeight: "bold",
+                color: "#0f172a",
+                textAlign: "center",
+              }}>
+                {signerName}
+              </Text>
+              <Text style={{
+                fontSize: (el.fontSize || 9) * 0.85,
+                color: "#64748b",
+                textAlign: "center",
+              }}>
+                {signerRole}
+              </Text>
+            </View>
+          )
+        }
+
+        case "qr":
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              {qrDataUrl ? <Image style={{ width: 52, height: 52, marginBottom: 3 }} src={qrDataUrl} /> : null}
+              <Text style={{ fontSize: 6, color: "#94a3b8", textAlign: "center" }}>
+                Verificar autenticidad
+              </Text>
+              <Text style={{ fontSize: 6, color: "#94a3b8", textAlign: "center", marginTop: 2 }}>
+                Escanea el código QR
+              </Text>
+            </View>
+          )
+
+        case "custom_image":
+          if (!el.imageUrl) return null
+          return (
+            <View key={el.id} style={{
+              ...baseStyle,
+              alignItems: "center",
+              justifyContent: "center",
+            }}>
+              <Image src={el.imageUrl} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+            </View>
+          )
+
+        case "custom_text":
+          return (
+            <View key={el.id} style={{ ...baseStyle, justifyContent: "center" }}>
+              <Text style={{
+                fontSize: el.fontSize || 10,
+                textAlign: (el.align || "center") as "left" | "center" | "right",
+                color: "#334155",
+                lineHeight: 1.5,
+              }}>
+                {el.customText || ""}
+              </Text>
+            </View>
+          )
+
+        default:
+          return null
+      }
+    }
+
     return (
       <Document>
         <Page size="A4" orientation="landscape" style={absoluteStyles.page}>
@@ -68,295 +323,7 @@ export function CertificatePDF({
             <View style={absoluteStyles.cornerBR} />
 
             <View style={absoluteStyles.innerBorder}>
-              {/* Divider (gold line) */}
-              {elementLayout.divider?.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.divider.x,
-                  top: elementLayout.divider.y,
-                  width: elementLayout.divider.w,
-                  height: Math.max(1, elementLayout.divider.fontSize || 2),
-                  backgroundColor: "#c9a84c",
-                  borderRadius: 1,
-                }} />
-              )}
-
-              {/* Decorative line (under recipient name) */}
-              {elementLayout.decorative_line?.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.decorative_line.x,
-                  top: elementLayout.decorative_line.y,
-                  width: elementLayout.decorative_line.w,
-                  height: Math.max(1, elementLayout.decorative_line.fontSize || 1),
-                  backgroundColor: "#cbd5e1",
-                  borderRadius: 1,
-                }} />
-              )}
-
-              {/* Header */}
-              {elementLayout.header.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.header.x,
-                  top: elementLayout.header.y,
-                  width: elementLayout.header.w,
-                  height: elementLayout.header.h,
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.header.fontSize || 13,
-                    fontWeight: "bold",
-                    color: pc,
-                    textAlign: (elementLayout.header.align || "left") as "left" | "center" | "right",
-                  }}>
-                    {issuedBy}
-                  </Text>
-                  <Text style={{
-                    fontSize: 7,
-                    color: "#64748b",
-                    letterSpacing: 1,
-                    marginTop: 1,
-                    textAlign: (elementLayout.header.align || "left") as "left" | "center" | "right",
-                  }}>
-                    ECOGRAFÍA NEUROMUSCULOESQUELÉTICA
-                  </Text>
-                </View>
-              )}
-
-              {/* Folio */}
-              {elementLayout.folio.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.folio.x,
-                  top: elementLayout.folio.y,
-                  width: elementLayout.folio.w,
-                  height: elementLayout.folio.h,
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.folio.fontSize || 7.5,
-                    color: "#64748b",
-                    textAlign: (elementLayout.folio.align || "right") as "left" | "center" | "right",
-                  }}>
-                    Folio: {folio}
-                  </Text>
-                  <Text style={{
-                    fontSize: elementLayout.folio.fontSize || 7.5,
-                    color: "#64748b",
-                    textAlign: (elementLayout.folio.align || "right") as "left" | "center" | "right",
-                    marginTop: 2,
-                  }}>
-                    Fecha: {formattedDate}
-                  </Text>
-                </View>
-              )}
-
-              {/* Title */}
-              {elementLayout.title.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.title.x,
-                  top: elementLayout.title.y,
-                  width: elementLayout.title.w,
-                  height: elementLayout.title.h,
-                  justifyContent: "center",
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.title.fontSize || 30,
-                    fontWeight: "bold",
-                    textAlign: (elementLayout.title.align || "center") as "left" | "center" | "right",
-                    color: "#1e293b",
-                    letterSpacing: 4,
-                  }}>
-                    CERTIFICADO
-                  </Text>
-                </View>
-              )}
-
-              {/* Recipient */}
-              {elementLayout.recipient.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.recipient.x,
-                  top: elementLayout.recipient.y,
-                  width: elementLayout.recipient.w,
-                  height: elementLayout.recipient.h,
-                  justifyContent: "center",
-                  alignItems: elementLayout.recipient.align === "left" ? "flex-start" : elementLayout.recipient.align === "right" ? "flex-end" : "center",
-                }}>
-                  <Text style={{
-                    fontSize: 9,
-                    color: "#64748b",
-                    letterSpacing: 3,
-                    textTransform: "uppercase",
-                    textAlign: (elementLayout.recipient.align || "center") as "left" | "center" | "right",
-                    marginBottom: 8,
-                  }}>
-                    Se otorga a
-                  </Text>
-                  <Text style={{
-                    fontSize: elementLayout.recipient.fontSize || 24,
-                    fontWeight: "bold",
-                    textAlign: (elementLayout.recipient.align || "center") as "left" | "center" | "right",
-                    color: "#0f172a",
-                    paddingBottom: 4,
-                    marginHorizontal: 20,
-                  }}>
-                    {recipientName}
-                  </Text>
-                </View>
-              )}
-
-              {/* Course Name */}
-              {elementLayout.course_name?.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.course_name.x,
-                  top: elementLayout.course_name.y,
-                  width: elementLayout.course_name.w,
-                  height: elementLayout.course_name.h,
-                  justifyContent: "center",
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.course_name.fontSize || 14,
-                    fontWeight: "bold",
-                    fontStyle: "italic",
-                    textAlign: (elementLayout.course_name.align || "center") as "left" | "center" | "right",
-                    color: "#1e293b",
-                  }}>
-                    {institutionalText.split("el ").slice(1).join("el ") || "Curso de Ecografía Neuromusculoesquelética"}
-                  </Text>
-                </View>
-              )}
-
-              {/* Body text */}
-              {elementLayout.body.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.body.x,
-                  top: elementLayout.body.y,
-                  width: elementLayout.body.w,
-                  height: elementLayout.body.h,
-                  justifyContent: "center",
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.body.fontSize || 10,
-                    textAlign: (elementLayout.body.align || "center") as "left" | "center" | "right",
-                    color: "#334155",
-                    lineHeight: 1.7,
-                  }}>
-                    {institutionalText}
-                  </Text>
-                </View>
-              )}
-
-              {/* Course Hours */}
-              {elementLayout.course_hours?.visible && courseHours && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.course_hours.x,
-                  top: elementLayout.course_hours.y,
-                  width: elementLayout.course_hours.w,
-                  height: elementLayout.course_hours.h,
-                  justifyContent: "center",
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.course_hours.fontSize || 11,
-                    textAlign: (elementLayout.course_hours.align || "center") as "left" | "center" | "right",
-                    color: "#475569",
-                  }}>
-                    (Duración: {courseHours} horas)
-                  </Text>
-                </View>
-              )}
-
-              {/* Date */}
-              {elementLayout.date?.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.date.x,
-                  top: elementLayout.date.y,
-                  width: elementLayout.date.w,
-                  height: elementLayout.date.h,
-                  justifyContent: "center",
-                }}>
-                  <Text style={{
-                    fontSize: elementLayout.date.fontSize || 9,
-                    textAlign: (elementLayout.date.align || "center") as "left" | "center" | "right",
-                    color: "#64748b",
-                  }}>
-                    Ciudad de México, a {formattedDate}
-                  </Text>
-                </View>
-              )}
-
-              {/* Signature */}
-              {elementLayout.signature.visible && signers.map((signer, i) => (
-                <View key={i} style={{
-                  position: "absolute",
-                  left: elementLayout.signature.x,
-                  top: elementLayout.signature.y,
-                  width: elementLayout.signature.w,
-                  height: elementLayout.signature.h,
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                }}>
-                  {signer.signature_url ? (
-                    <Image style={{ width: 80, height: 32, marginBottom: 4 }} src={signer.signature_url} />
-                  ) : null}
-                  <View style={{ width: "100%", borderTop: "1pt solid #0f172a", marginBottom: 4 }} />
-                  <Text style={{
-                    fontSize: elementLayout.signature.fontSize || 9,
-                    fontWeight: "bold",
-                    color: "#0f172a",
-                    textAlign: "center",
-                  }}>
-                    {signer.name}
-                  </Text>
-                  <Text style={{
-                    fontSize: (elementLayout.signature.fontSize || 9) * 0.85,
-                    color: "#64748b",
-                    textAlign: "center",
-                  }}>
-                    {signer.role}
-                  </Text>
-                </View>
-              ))}
-
-              {/* QR Code */}
-              {elementLayout.qr.visible && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.qr.x,
-                  top: elementLayout.qr.y,
-                  width: elementLayout.qr.w,
-                  height: elementLayout.qr.h,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}>
-                  {qrDataUrl ? <Image style={{ width: 52, height: 52, marginBottom: 3 }} src={qrDataUrl} /> : null}
-                  <Text style={{ fontSize: 6, color: "#94a3b8", textAlign: "center" }}>
-                    Verificar autenticidad
-                  </Text>
-                  <Text style={{ fontSize: 6, color: "#94a3b8", textAlign: "center", marginTop: 2 }}>
-                    Escanea el código QR
-                  </Text>
-                </View>
-              )}
-
-              {/* Custom Image */}
-              {elementLayout.custom_image?.visible && elementLayout.custom_image.imageUrl && (
-                <View style={{
-                  position: "absolute",
-                  left: elementLayout.custom_image.x,
-                  top: elementLayout.custom_image.y,
-                  width: elementLayout.custom_image.w,
-                  height: elementLayout.custom_image.h,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}>
-                  <Image src={elementLayout.custom_image.imageUrl} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-                </View>
-              )}
+              {visibleElements.map(renderElement)}
             </View>
           </View>
         </Page>

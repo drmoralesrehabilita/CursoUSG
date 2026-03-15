@@ -77,6 +77,27 @@ export async function POST(req: Request) {
       console.log(`Lección actualizada con éxito. Playback ID insertado para: ${uploadId}`);
     }
 
+    // Cuando el video falla al procesarse
+    if (event.type === "video.asset.errored") {
+      const asset = event.data;
+      const uploadId = asset.upload_id;
+
+      if (uploadId) {
+        // Limpiar mux_upload_id para que el admin vea "Sin video" en vez de "Procesando..." eternamente
+        const { error } = await supabase
+          .from('lessons')
+          .update({
+            mux_upload_id: null,
+          } as any)
+          .eq('mux_upload_id', uploadId);
+
+        if (error) {
+          console.error("Error limpiando lección tras fallo de Mux:", error);
+        }
+        console.warn(`[Mux Webhook] Video falló al procesarse. Upload: ${uploadId}. Error: ${asset.errors?.messages?.join(', ') || 'desconocido'}`);
+      }
+    }
+
     return NextResponse.json({ message: "OK" }, { status: 200 });
 
   } catch (error: unknown) {

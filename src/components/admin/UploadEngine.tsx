@@ -26,6 +26,7 @@ export function UploadEngine({ modules = [] }: { modules: Module[] }) {
   const [file, setFile] = useState<File | null>(null)
   
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   const openModal = (type: UploadType) => {
     setUploadType(type)
@@ -38,6 +39,7 @@ export function UploadEngine({ modules = [] }: { modules: Module[] }) {
     setTitle("")
     setSelectedModule("")
     setSelectedLesson("")
+    setUploadProgress(0)
   }
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>, type: UploadType) => {
@@ -77,9 +79,8 @@ export function UploadEngine({ modules = [] }: { modules: Module[] }) {
           toast.error("Error transfiriendo a Mux. Reintenta.")
         })
 
-        upload.on('progress', () => {
-          // Si quisieramos mostrar barra de progreso se haría aquí:
-          // console.log(`Progreso: ${progress.detail}%`)
+        upload.on('progress', (evt) => {
+          setUploadProgress(Math.round(evt.detail as number))
         })
 
         upload.on('success', () => {
@@ -283,13 +284,21 @@ export function UploadEngine({ modules = [] }: { modules: Module[] }) {
               <button 
                 onClick={doUpload}
                 disabled={isUploading}
-                className="px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary/90 flex items-center gap-2 transition-colors disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-primary/90 flex items-center gap-2 transition-colors disabled:opacity-50 relative overflow-hidden min-w-[140px]"
               >
-                {isUploading ? (
-                  <><span className="material-symbols-outlined shrink-0 animate-spin text-sm">progress_activity</span> Subiendo...</>
-                ) : (
-                  <><span className="material-symbols-outlined shrink-0 text-sm">upload</span> Subir Archivo</>
+                {isUploading && uploadProgress > 0 && (
+                  <div 
+                    className="absolute inset-0 bg-white/20 transition-all duration-300 ease-out" 
+                    style={{ width: `${uploadProgress}%` }} 
+                  />
                 )}
+                <span className="relative flex items-center gap-2">
+                  {isUploading ? (
+                    <><span className="material-symbols-outlined shrink-0 animate-spin text-sm">progress_activity</span> {uploadProgress > 0 ? `${uploadProgress}%` : 'Preparando...'}</>
+                  ) : (
+                    <><span className="material-symbols-outlined shrink-0 text-sm">upload</span> Subir Archivo</>
+                  )}
+                </span>
               </button>
             </div>
           </div>

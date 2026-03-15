@@ -48,7 +48,6 @@ export async function toggleStudentStatus(
     return { success: false, error: "No se encontró el usuario" }
   }
 
-  console.log("[Admin] toggleStudentStatus success:", data)
   revalidatePath("/admin/alumnos")
   return { success: true }
 }
@@ -94,7 +93,6 @@ export async function approveAccessRequest(
     return { success: false, error: "No se encontró el usuario" }
   }
 
-  console.log("[Admin] approveAccessRequest success:", data)
   revalidatePath("/admin/alumnos")
   return { success: true }
 }
@@ -153,7 +151,6 @@ export async function deleteStudent(
     return { success: false, error: authDeleteError.message }
   }
 
-  console.log("[Admin] deleteStudent success for userId:", userId)
   revalidatePath("/admin/alumnos")
   return { success: true }
 }

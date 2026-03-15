@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { CertificatePDF } from '@/components/certificates/CertificatePDF';
-import type { ElementLayoutMap } from "@/app/actions/certificates"
+import type { CertElement } from "@/lib/certificates/types"
 
 // Types for certificate data
 type CertificateData = {
@@ -17,7 +17,7 @@ type CertificateData = {
   qrUrl: string | null
   signers: Array<{ name: string; role: string; signature_url?: string | null }>
   primaryColor?: string
-  elementLayout?: ElementLayoutMap | null
+  elementLayout?: CertElement[] | null
   backgroundUrl?: string | null
 }
 

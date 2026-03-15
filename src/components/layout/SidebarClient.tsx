@@ -91,7 +91,7 @@ export function SidebarClient({ modules, enrollment, profile }: SidebarClientPro
       </ScrollArea>
       
       <div className="p-4 border-t text-xs text-muted-foreground text-center">
-        &copy; 2024 DeepLuxMed
+        &copy; {new Date().getFullYear()} DeepLuxMed
       </div>
     </div>
   )

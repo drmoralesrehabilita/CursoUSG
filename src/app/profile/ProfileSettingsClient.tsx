@@ -1,10 +1,11 @@
 "use client"
 
 import { logout } from "@/app/login/actions"
-import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export function ProfileSettingsClient() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const router = useRouter()
 
   return (
     <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -13,7 +14,10 @@ export function ProfileSettingsClient() {
         Configuración de Cuenta
       </h3>
       <div className="space-y-4">
-        <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+        <button 
+          onClick={() => router.push('/settings')}
+          className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+        >
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">lock</span>
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Cambiar Contraseña</span>
@@ -22,23 +26,15 @@ export function ProfileSettingsClient() {
         </button>
         <button 
           className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
-          onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+          onClick={() => toast.info("Las notificaciones push estarán disponibles próximamente.")}
         >
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">notifications</span>
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Notificaciones</span>
           </div>
-          <div className="relative inline-block w-8 h-4 align-middle select-none transition duration-200 ease-in pointer-events-none">
-            <input 
-              className="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none checked:right-0 right-4 checked:border-primary border-gray-300 transition-all duration-200" 
-              type="checkbox" 
-              checked={notificationsEnabled}
-              readOnly
-            />
-            <div className={`block overflow-hidden h-4 rounded-full transition-colors duration-200 ${notificationsEnabled ? 'bg-primary' : 'bg-gray-300'}`}></div>
-          </div>
+          <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">Próximamente</span>
         </button>
-        <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600">
+        <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group border border-transparent hover:border-gray-200 dark:hover:border-gray-600 cursor-default">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">language</span>
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-secondary dark:group-hover:text-white">Idioma / Región</span>

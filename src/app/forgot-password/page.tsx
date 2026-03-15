@@ -1,14 +1,17 @@
+"use client"
+
+import { useActionState } from "react"
 import Link from "next/link"
 import { Logo } from "@/components/ui/logo"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Mail } from "lucide-react"
-
-export const metadata = {
-  title: "Recuperar contraseña | Diplomado Dr. Raúl Morales",
-  description: "Recupera el acceso a tu cuenta del Diplomado en Rehabilitación Intervencionista.",
-}
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft, Mail, CheckCircle, AlertCircle } from "lucide-react"
+import { resetPassword } from "@/app/login/actions"
 
 export default function ForgotPasswordPage() {
+  const [state, formAction, isPending] = useActionState(resetPassword, null)
+
   return (
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
       <header className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
@@ -29,17 +32,46 @@ export default function ForgotPasswordPage() {
             ¿Olvidaste tu contraseña?
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Contacta a nuestro equipo de soporte para recuperar el acceso a tu cuenta. Te responderemos en el menor tiempo posible.
+            Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
           </p>
-          <a
-            href="mailto:drmoralesrehabilita@gmail.com?subject=Recuperación%20de%20contraseña"
-            className="inline-block"
-          >
-            <Button className="w-full sm:w-auto gap-2">
-              <Mail className="w-4 h-4" />
-              Contactar a Soporte
-            </Button>
-          </a>
+
+          {state?.success && (
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-400 text-sm font-medium text-left">
+              <CheckCircle className="w-5 h-5 shrink-0" />
+              <span>¡Listo! Revisa tu correo electrónico para restablecer tu contraseña. Si no lo ves, revisa tu carpeta de spam.</span>
+            </div>
+          )}
+
+          {state?.error && (
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400 text-sm font-medium text-left">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <span>{state.error}</span>
+            </div>
+          )}
+
+          {!state?.success && (
+            <form action={formAction} className="space-y-4 text-left">
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-slate-600 dark:text-slate-300">Correo Electrónico</Label>
+                <Input 
+                  type="email" 
+                  name="email" 
+                  placeholder="nombre@correo.com" 
+                  required 
+                  className="h-11 rounded-xl"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                disabled={isPending} 
+                className="w-full h-11 rounded-xl font-bold gap-2"
+              >
+                <Mail className="w-4 h-4" />
+                {isPending ? "Enviando..." : "Enviar enlace de recuperación"}
+              </Button>
+            </form>
+          )}
+
           <Link href="/login" className="block text-sm text-primary hover:underline font-medium">
             <span className="flex items-center justify-center gap-2">
               <ArrowLeft className="w-4 h-4" />
