@@ -303,7 +303,7 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
         {/* Stats — 2x2 on mobile, 4 cols on xl */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
           {statsCards.map((card) => (
-            <div key={card.label} className={`bg-gradient-to-br ${card.gradient} rounded-2xl border border-white/5 p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform`}>
+            <div key={card.label} className={`bg-linear-to-br ${card.gradient} rounded-2xl border border-white/5 p-4 flex items-center gap-3 hover:scale-[1.02] transition-transform`}>
               <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
                 <span className={`material-symbols-outlined text-xl ${card.iconColor}`}>{card.icon}</span>
               </div>
@@ -523,10 +523,10 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                         {/* Avatar */}
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-black text-white transition-all ${
                           s.isActive
-                            ? "bg-gradient-to-br from-primary to-cyan-400 shadow-md shadow-primary/20"
+                            ? "bg-linear-to-br from-primary to-cyan-400 shadow-md shadow-primary/20"
                             : activeTab === "requests"
-                            ? "bg-gradient-to-br from-orange-500 to-amber-400 shadow-md shadow-orange-500/20"
-                            : "bg-gradient-to-br from-gray-600 to-gray-700"
+                            ? "bg-linear-to-br from-orange-500 to-amber-400 shadow-md shadow-orange-500/20"
+                            : "bg-linear-to-br from-gray-600 to-gray-700"
                         }`}>
                           <Initials name={s.name} />
                         </div>
@@ -624,10 +624,10 @@ export function AlumnosClient({ students, stats }: { students: StudentDetail[]; 
                   <div className="flex flex-col items-center text-center gap-2 pt-2">
                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-xl font-black text-white shadow-lg ${
                       selectedStudent.isActive
-                        ? "bg-gradient-to-br from-primary to-cyan-400 shadow-primary/30"
+                        ? "bg-linear-to-br from-primary to-cyan-400 shadow-primary/30"
                         : selectedStudent.accessRequested
-                        ? "bg-gradient-to-br from-orange-500 to-amber-400 shadow-orange-500/30"
-                        : "bg-gradient-to-br from-gray-600 to-gray-700"
+                        ? "bg-linear-to-br from-orange-500 to-amber-400 shadow-orange-500/30"
+                        : "bg-linear-to-br from-gray-600 to-gray-700"
                     }`}>
                       <Initials name={selectedStudent.name} />
                     </div>

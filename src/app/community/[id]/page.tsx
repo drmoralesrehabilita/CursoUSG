@@ -12,7 +12,7 @@ async function getThread(id: string) {
     .select(`
       id, title, body, category, is_official, is_pinned,
       reply_count, like_count, created_at,
-      profiles:author_id (full_name, role)
+      profiles (full_name, role)
     `)
     .eq("id", id)
     .single()
@@ -27,7 +27,7 @@ async function getThreadPosts(threadId: string) {
     .from("forum_posts")
     .select(`
       id, body, like_count, created_at,
-      profiles:author_id (full_name, role)
+      profiles (full_name, role)
     `)
     .eq("thread_id", threadId)
     .order("created_at", { ascending: true })

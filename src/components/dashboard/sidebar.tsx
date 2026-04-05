@@ -19,6 +19,7 @@ const navItems = [
   { href: "/dashboard", icon: "dashboard", label: "Dashboard" },
   { href: "/courses", icon: "school", label: "Mis Cursos" },
   { href: "/progress", icon: "trending_up", label: "Mi Progreso" },
+  { href: "/dashboard/tareas", icon: "assignment", label: "Avisos y Tareas" },
   { href: "/community", icon: "groups", label: "Comunidad", badge: 3 },
   { href: "/certificates", icon: "workspace_premium", label: "Certificados" },
 ]
@@ -70,7 +71,7 @@ export function Sidebar({ userProfile }: { userProfile: UserProfile | null }) {
       <aside className={cn(
         "fixed md:relative flex flex-col w-64 h-screen bg-secondary text-white z-50 transition-transform duration-300 ease-in-out font-body shadow-xl",
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-        "flex-shrink-0 overflow-y-auto sidebar-scroll"
+        "shrink-0 overflow-y-auto sidebar-scroll"
       )}>
         {/* Logo Section */}
         <div className="p-6 flex flex-col items-center border-b border-white/10 shrink-0">

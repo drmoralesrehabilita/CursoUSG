@@ -6,6 +6,8 @@ import { toast } from "sonner"
 import { createForumThread, toggleThreadLike, deleteForumThread } from "@/app/actions/forum"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import { ForumEditor } from "@/components/forum/ForumEditor"
+import { ForumContent } from "@/components/forum/ForumContent"
 
 type Thread = {
   id: string
@@ -38,6 +40,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Recursos": "bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300",
 }
 
+import { useRouter } from "next/navigation"
+
 export function CommunityClient({
   threads: initialThreads,
   likedIds: initialLikedIds,
@@ -51,6 +55,7 @@ export function CommunityClient({
   isAdmin: boolean
   categories: string[]
 }) {
+  const router = useRouter()
   const [threads, setThreads] = useState(initialThreads)
   const [likedIds, setLikedIds] = useState<string[]>(initialLikedIds)
   const [activeCategory, setActiveCategory] = useState("Todos")
@@ -71,10 +76,21 @@ export function CommunityClient({
     }
     startTransition(async () => {
       const res = await createForumThread({ title: newTitle, body: newBody, category: newCategory })
-      if (res.success) {
+      if (res.success && res.thread) {
         toast.success("Tema publicado correctamente.")
         setShowNewThread(false)
         setNewTitle(""); setNewBody(""); setNewCategory("General")
+        // Agregar al estado local (optimistic/immediate update)
+        const newThreadData = res.thread as Record<string, unknown>
+        const newThread: Thread = {
+          ...newThreadData,
+          profiles: Array.isArray(newThreadData.profiles) 
+            ? newThreadData.profiles[0] 
+            : newThreadData.profiles
+        } as Thread
+        setThreads(prev => [newThread, ...prev])
+        // Informar a nextjs que refresque el contexto del servidor en background
+        router.refresh()
       } else {
         toast.error(res.error || "Error al publicar.")
       }
@@ -174,14 +190,13 @@ export function CommunityClient({
                   className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-secondary dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>
-              <div>
+              <div className="z-20 relative">
                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Contenido</label>
-                <textarea
-                  rows={5}
-                  value={newBody}
-                  onChange={e => setNewBody(e.target.value)}
-                  placeholder="Describe tu caso, duda o aportación..."
-                  className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-secondary dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                <ForumEditor
+                  content={newBody}
+                  onChange={setNewBody}
+                  placeholder="Describe tu caso, duda o aportación con formato, imágenes y links..."
+                  minHeight="250px"
                 />
               </div>
               <div className="flex gap-3 justify-end">
@@ -210,7 +225,6 @@ export function CommunityClient({
             </div>
           ) : filteredThreads.map(thread => {
             const isLiked = likedIds.includes(thread.id)
-            const isOwn = currentUserId === null ? false : false // Will rely on delete RLS
             const initials = getInitials(thread.profiles?.full_name ?? null)
 
             return (
@@ -241,7 +255,9 @@ export function CommunityClient({
                         <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">{timeAgo(thread.created_at)}</span>
                       </div>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 mb-3">{thread.body}</p>
+                      <div className="mb-3 overflow-hidden line-clamp-3">
+                        <ForumContent content={thread.body} />
+                      </div>
 
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-3 text-xs font-medium text-gray-500">

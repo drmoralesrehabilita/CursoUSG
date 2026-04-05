@@ -141,8 +141,8 @@ function LoginContent() {
         
         {/* Abstract shapes and patterns */}
         <div className="absolute inset-0 z-0">
-           <div className="absolute -top-[10%] -right-[10%] w-[80%] h-[80%] bg-[radial-gradient(circle_at_center,_#00B4D8_0%,_transparent_70%)] opacity-20 blur-[100px]" />
-           <div className="absolute -bottom-[20%] -left-[20%] w-[70%] h-[70%] bg-[radial-gradient(circle_at_center,_#00B4D8_0%,_transparent_70%)] opacity-10 blur-[100px]" />
+           <div className="absolute -top-[10%] -right-[10%] w-[80%] h-[80%] bg-[radial-gradient(circle_at_center,#00B4D8_0%,transparent_70%)] opacity-20 blur-[100px]" />
+           <div className="absolute -bottom-[20%] -left-[20%] w-[70%] h-[70%] bg-[radial-gradient(circle_at_center,#00B4D8_0%,transparent_70%)] opacity-10 blur-[100px]" />
            
            {/* Grid pattern overlay */}
            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />

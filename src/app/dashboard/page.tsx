@@ -1,5 +1,6 @@
 import { Header } from "@/components/dashboard/header"
-import { getUserProfile, getUserEnrollment, getModules, getLiveSessions, getUserCertificates, getUserCompletedLessons, getMicroLessons, getRecentActivity, getStudyStreak, getCertificateConfig, getUserNotifications, getUnreadNotificationCount } from "@/lib/data"
+import { getUserProfile, getUserEnrollment, getModules, getLiveSessions, getUserCertificates, getUserCompletedLessons, getMicroLessons, getRecentActivity, getStudyStreak, getCertificateConfig, getUserNotifications, getUnreadNotificationCount, getAppSettings } from "@/lib/data"
+import { getStudentAssignments } from "@/app/actions/assignments"
 import Link from "next/link"
 import { CertificateGenerator } from "@/components/student/CertificateGenerator"
 
@@ -18,6 +19,10 @@ export default async function DashboardPage() {
   const certConfig = await getCertificateConfig()
   const notifications = await getUserNotifications(15)
   const unreadCount = await getUnreadNotificationCount()
+  const appSettings = await getAppSettings()
+  
+  const assignmentsRes = await getStudentAssignments()
+  const pendingAssignments = (assignmentsRes.success ? (assignmentsRes.data || []) : []).filter((a: any) => !a.mySubmission)
   
   const activeModule = modules.find(m => m.id === enrollment?.module_id) || modules[0];
   const progressPercent = enrollment?.progress || 0;
@@ -29,9 +34,9 @@ export default async function DashboardPage() {
   const continueLessonId = firstIncompleteLesson?.id || firstLessonFallback?.id;
   const continueLesson = firstIncompleteLesson || firstLessonFallback;
 
-  // Revisar si el módulo actual está bloqueado por otro módulo
+  // Revisar si el módulo actual está bloqueado por otro módulo (solo si enforce_prerequisites está activo)
   let isModuleLocked = false;
-  if (activeModule?.prerequisite_module_id) {
+  if (appSettings.enforce_prerequisites && activeModule?.prerequisite_module_id) {
     const prereqModule = modules.find(m => m.id === activeModule.prerequisite_module_id);
     if (prereqModule) {
       const publishedLessonsInPrereq = prereqModule.lessons?.filter(l => l.is_published) || [];
@@ -103,18 +108,20 @@ export default async function DashboardPage() {
                     __html: activeModule?.description || "Identificación de estructuras tendinosas del manguito rotador y técnicas de infiltración subacromial guiada por ultrasonido." 
                   }}
                 />
-                <div className="mb-8">
-                  <div className="flex justify-between text-sm mb-2 font-medium">
-                    <span className="text-secondary dark:text-gray-300">Progreso del módulo</span>
-                    <span className="text-primary">{progressPercent}%</span>
+                {appSettings.show_progress_bar && (
+                  <div className="mb-8">
+                    <div className="flex justify-between text-sm mb-2 font-medium">
+                      <span className="text-secondary dark:text-gray-300">Progreso del módulo</span>
+                      <span className="text-primary">{progressPercent}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                      <div
+                        className="bg-primary h-3 rounded-full shadow-lg shadow-primary/30 transition-all duration-500"
+                        style={{ width: `${progressPercent}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className="bg-primary h-3 rounded-full shadow-lg shadow-primary/30 transition-all duration-500"
-                      style={{ width: `${progressPercent}%` }}
-                    ></div>
-                  </div>
-                </div>
+                )}
                 <div className="flex flex-col sm:flex-row gap-4">
                   {isModuleLocked ? (
                     <button disabled className="flex-1 bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 font-semibold py-3 px-6 rounded-xl cursor-not-allowed flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-700">
@@ -153,6 +160,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Micro Learning */}
+            {appSettings.show_microlearning && (
             <div>
               <h3 className="text-lg font-semibold text-secondary dark:text-white mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">bolt</span>
@@ -199,10 +207,12 @@ export default async function DashboardPage() {
                 </Link>
               </div>
             </div>
+            )}
           </div>
 
           <div className="lg:col-span-1 space-y-8">
             {/* Streak Widget */}
+            {appSettings.show_study_streak && (
             <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
               <div className="flex items-center justify-between mb-5 relative z-10">
@@ -234,7 +244,9 @@ export default async function DashboardPage() {
                 {streak.currentStreak > 0 && ' · ¡Sigue así!'}
               </p>
             </div>
+            )}
 
+            {appSettings.show_live_sessions && (
             <div className="bg-secondary rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
               <div className="absolute top-[-20px] right-[-20px] w-24 h-24 rounded-full bg-primary/20 blur-xl"></div>
               <h3 className="font-bold text-lg mb-4 flex items-center gap-2 relative z-10">
@@ -277,6 +289,52 @@ export default async function DashboardPage() {
               ) : (
                 <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm border border-white/10 mb-4">
                   <p className="text-sm text-gray-300">No hay sesiones en vivo programadas próximamente.</p>
+                </div>
+              )}
+            </div>
+            )}
+
+            {/* Pending Tasks Widget */}
+            <div className="bg-surface-light dark:bg-surface-dark rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-secondary dark:text-white flex items-center gap-2">
+                  <span className="material-symbols-outlined text-amber-500">assignment_late</span>
+                  Tareas Pendientes
+                </h3>
+                <Link href="/dashboard/tareas" className="text-xs text-primary font-medium hover:underline">Ver todas</Link>
+              </div>
+              
+              {pendingAssignments.length > 0 ? (
+                <div className="space-y-4">
+                  {pendingAssignments.slice(0, 3).map((assignment: any) => {
+                    const isLate = assignment.due_date && new Date(assignment.due_date) < new Date()
+                    return (
+                      <Link key={assignment.id} href="/dashboard/tareas" className="block group">
+                        <div className="flex border-l-2 border-primary/50 pl-3 py-1 group-hover:border-primary transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-secondary dark:text-gray-200 truncate group-hover:text-primary transition-colors">
+                              {assignment.title}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-[10px] text-gray-500 uppercase tracking-widest truncate max-w-[120px]">
+                                {assignment.module?.title || "General"}
+                              </p>
+                              {assignment.due_date && (
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isLate ? "bg-red-500/10 text-red-500" : "bg-primary/10 text-primary"}`}>
+                                  Vence: {new Date(assignment.due_date).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <span className="material-symbols-outlined text-3xl text-gray-300 dark:text-gray-600 mb-2 block">task_alt</span>
+                  <p className="text-sm text-gray-400">Todo al día</p>
                 </div>
               )}
             </div>
@@ -344,6 +402,7 @@ export default async function DashboardPage() {
                           <p className="text-xs text-gray-500">Emitido: {cert.issue_date ? new Date(cert.issue_date).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}</p>
                         </div>
                       </div>
+                      {appSettings.allow_certificate_download && (
                       <CertificateGenerator certificate={{
                         folio: cert.folio || "SIN-FOLIO",
                         recipientName: cert.recipient_name || displayName,
@@ -358,6 +417,7 @@ export default async function DashboardPage() {
                         elementLayout: certConfig?.element_layout || null,
                         backgroundUrl: certConfig?.background_url || null,
                       }} />
+                      )}
                     </div>
                   );
                 }) : (
@@ -373,6 +433,8 @@ export default async function DashboardPage() {
                 )}
               </div>
             </div>
+
+
           </div>
         </div>
       </div>

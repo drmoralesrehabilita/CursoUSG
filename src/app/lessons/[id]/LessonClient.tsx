@@ -35,7 +35,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
       </div>
       <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-primary to-cyan-400 rounded-full transition-all duration-500"
+          className="h-full bg-linear-to-r from-primary to-cyan-400 rounded-full transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -167,7 +167,7 @@ function LessonSidebar({ sidebarOpen, setSidebarOpen, moduleTitle, moduleLessons
             {moduleLessons.length > 0 && (
               <div className="mt-2 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-500"
+                  className="h-full bg-linear-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-500"
                   style={{ width: `${Math.round((completedCount / moduleLessons.length) * 100)}%` }}
                 />
               </div>
@@ -910,7 +910,6 @@ export function LessonClient({
                       <p className="text-sm text-gray-400">Reproduce el archivo de audio</p>
                     </div>
                   </div>
-                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                   <audio controls className="w-full rounded-lg" preload="metadata">
                     <source src={audioUrl} />
                     Tu navegador no soporta el elemento de audio.
@@ -1466,10 +1465,10 @@ export function LessonClient({
 
       {/* 🎉 MODULE COMPLETION CELEBRATION MODAL */}
       {showCelebration && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-surface-light dark:bg-surface-dark rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl border border-gray-200 dark:border-gray-700 animate-in zoom-in-95 duration-500">
             {/* Trophy Icon */}
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-linear-to-br from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
               <span className="material-symbols-outlined text-white" style={{ fontSize: '40px' }}>emoji_events</span>
             </div>
 
@@ -1501,7 +1500,7 @@ export function LessonClient({
             <div className="space-y-3">
               <Link
                 href="/certificates"
-                className="block w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40"
+                className="block w-full bg-linear-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40"
               >
                 <span className="flex items-center justify-center gap-2">
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>workspace_premium</span>

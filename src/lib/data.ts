@@ -560,3 +560,62 @@ export async function getCertificateByFolio(folio: string) {
 
   return data ?? null;
 }
+
+// ============================================================
+// APP SETTINGS (all platform toggles)
+// ============================================================
+export type AppSettings = {
+  maintenance_mode: boolean;
+  announcement_banner: { active: boolean; message: string; type?: string };
+  // Certificates
+  auto_certificates: boolean;
+  require_evaluations_for_cert: boolean;
+  allow_certificate_download: boolean;
+  // Content
+  enforce_prerequisites: boolean;
+  show_microlearning: boolean;
+  show_progress_bar: boolean;
+  // Community
+  enable_community_forum: boolean;
+  show_study_streak: boolean;
+  // Access
+  open_registration: boolean;
+  show_live_sessions: boolean;
+};
+
+const SETTINGS_DEFAULTS: AppSettings = {
+  maintenance_mode: false,
+  announcement_banner: { active: false, message: '' },
+  auto_certificates: true,
+  require_evaluations_for_cert: true,
+  allow_certificate_download: true,
+  enforce_prerequisites: true,
+  show_microlearning: true,
+  show_progress_bar: true,
+  enable_community_forum: true,
+  show_study_streak: true,
+  open_registration: true,
+  show_live_sessions: true,
+};
+
+export async function getAppSettings(): Promise<AppSettings> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('app_settings')
+    .select('key, value');
+
+  if (error) {
+    // Table might not exist yet; return safe defaults
+    return { ...SETTINGS_DEFAULTS };
+  }
+
+  const result = { ...SETTINGS_DEFAULTS };
+  (data || []).forEach((row: { key: string; value: unknown }) => {
+    if (row.key in result) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (result as any)[row.key] = row.value;
+    }
+  });
+
+  return result;
+}

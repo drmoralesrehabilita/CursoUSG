@@ -5,6 +5,8 @@ import { toast } from "sonner"
 import { createForumPost } from "@/app/actions/forum"
 import { formatDistanceToNow } from "date-fns"
 import { es } from "date-fns/locale"
+import { ForumEditor } from "@/components/forum/ForumEditor"
+import { ForumContent } from "@/components/forum/ForumContent"
 
 type Post = {
   id: string
@@ -57,17 +59,18 @@ export function ThreadDetailClient({
     }
     startTransition(async () => {
       const res = await createForumPost({ threadId: thread.id, body: replyBody })
-      if (res.success) {
+      if (res.success && res.post) {
         toast.success("Respuesta publicada.")
         setReplyBody("")
         // The page will revalidate via server action, but also update locally for UX
-        setPosts(prev => [...prev, {
-          id: Math.random().toString(),
-          body: replyBody,
-          like_count: 0,
-          created_at: new Date().toISOString(),
-          profiles: { full_name: "Tú", role: null }
-        }])
+        const newPostData = res.post as Record<string, unknown>
+        const newPost: Post = {
+          ...newPostData,
+          profiles: Array.isArray(newPostData.profiles) 
+            ? newPostData.profiles[0] 
+            : newPostData.profiles
+        } as Post
+        setPosts(prev => [...prev, newPost])
       } else {
         toast.error(res.error || "Error al publicar.")
       }
@@ -101,8 +104,10 @@ export function ThreadDetailClient({
             </div>
           </div>
         </div>
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{thread.body}</p>
-        <div className="mt-4 flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-4">
+        <div className="mt-4">
+          <ForumContent content={thread.body} />
+        </div>
+        <div className="mt-6 flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-4">
           <span className="flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
             {posts.length} respuestas
@@ -137,7 +142,9 @@ export function ThreadDetailClient({
                 <p className="text-xs text-gray-400">{timeAgo(post.created_at)}</p>
               </div>
             </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line pl-12">{post.body}</p>
+            <div className="pl-12 mt-2">
+              <ForumContent content={post.body} />
+            </div>
           </div>
         ))}
       </div>
@@ -149,13 +156,14 @@ export function ThreadDetailClient({
             <span className="material-symbols-outlined text-primary text-base">reply</span>
             Tu respuesta
           </h3>
-          <textarea
-            rows={4}
-            value={replyBody}
-            onChange={e => setReplyBody(e.target.value)}
-            placeholder="Escribe tu respuesta..."
-            className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm text-secondary dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary/50 transition-colors resize-none mb-3"
-          />
+          <div className="mb-4 z-20 relative">
+            <ForumEditor
+              content={replyBody}
+              onChange={setReplyBody}
+              placeholder="Escribe tu respuesta con formato, imágenes y links..."
+              minHeight="150px"
+            />
+          </div>
           <div className="flex justify-end">
             <button
               onClick={handleReply}

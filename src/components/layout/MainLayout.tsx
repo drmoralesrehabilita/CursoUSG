@@ -19,9 +19,9 @@ export async function MainLayout({ children }: { children: React.ReactNode }) {
   })) || []
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-dvh">
       <Sidebar modules={modules} />
-      <main className="flex-1 lg:pl-80 min-h-screen transition-all duration-300 ease-in-out">
+      <main className="flex-1 lg:pl-80 min-h-dvh pb-safe transition-all duration-300 ease-in-out">
         <div className="container mx-auto p-4 md:p-6 lg:p-8 pt-16 lg:pt-8">
           {children}
         </div>

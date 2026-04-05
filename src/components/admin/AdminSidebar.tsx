@@ -20,6 +20,8 @@ const adminNavItems = [
   { href: "/admin/contenido", icon: "video_library", label: "Contenido del Curso" },
   { href: "/admin/microlearning", icon: "bolt", label: "Micro-Aprendizaje" },
   { href: "/admin/sesiones", icon: "videocam", label: "Clases en Vivo" },
+  { href: "/admin/tareas", icon: "assignment", label: "Gestión de Tareas" },
+  { href: "/community", icon: "forum", label: "Comunidad" },
   { href: "/admin/certificados", icon: "workspace_premium", label: "Certificados" },
 ]
 

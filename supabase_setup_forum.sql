@@ -18,6 +18,12 @@ CREATE TABLE IF NOT EXISTS forum_threads (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- PostgREST necesita un FK directo a profiles para resolver joins embebidos
+-- profiles.id ya es 1:1 con auth.users.id, así que este FK adicional es seguro
+ALTER TABLE forum_threads
+  ADD CONSTRAINT fk_forum_threads_profiles
+  FOREIGN KEY (author_id) REFERENCES profiles(id) ON DELETE CASCADE;
+
 -- Forum Posts (respuestas dentro de cada hilo)
 CREATE TABLE IF NOT EXISTS forum_posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -27,6 +33,10 @@ CREATE TABLE IF NOT EXISTS forum_posts (
   like_count INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE forum_posts
+  ADD CONSTRAINT fk_forum_posts_profiles
+  FOREIGN KEY (author_id) REFERENCES profiles(id) ON DELETE CASCADE;
 
 -- Thread Likes (para evitar likes duplicados)
 CREATE TABLE IF NOT EXISTS forum_thread_likes (
@@ -48,16 +58,14 @@ ALTER TABLE forum_thread_likes ENABLE ROW LEVEL SECURITY;
 -- Leer hilos: alumnos activos y admins
 CREATE POLICY "Enrolled users can view threads" ON forum_threads
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = auth.uid() AND e.status = 'active')
-    OR EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
+    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND (p.is_active = true OR p.role = 'admin'))
   );
 
 -- Crear hilos: alumnos activos y admins
 CREATE POLICY "Enrolled users can create threads" ON forum_threads
   FOR INSERT WITH CHECK (
     auth.uid() = author_id AND (
-      EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = auth.uid() AND e.status = 'active')
-      OR EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
+      EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND (p.is_active = true OR p.role = 'admin'))
     )
   );
 
@@ -71,16 +79,14 @@ CREATE POLICY "Authors can delete own threads" ON forum_threads
 -- Posts: leer
 CREATE POLICY "Enrolled users can view posts" ON forum_posts
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = auth.uid() AND e.status = 'active')
-    OR EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
+    EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND (p.is_active = true OR p.role = 'admin'))
   );
 
 -- Posts: crear
 CREATE POLICY "Enrolled users can create posts" ON forum_posts
   FOR INSERT WITH CHECK (
     auth.uid() = author_id AND (
-      EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = auth.uid() AND e.status = 'active')
-      OR EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin')
+      EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND (p.is_active = true OR p.role = 'admin'))
     )
   );
 

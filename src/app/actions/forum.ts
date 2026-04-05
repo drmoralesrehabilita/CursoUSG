@@ -16,12 +16,16 @@ export async function createForumThread(data: {
     return { success: false, error: "El título y el contenido son requeridos." }
   }
 
-  const { error } = await supabase.from("forum_threads").insert({
+  const { data: newThread, error } = await supabase.from("forum_threads").insert({
     author_id: user.user.id,
     title: data.title.trim(),
     body: data.body.trim(),
     category: data.category || "General",
-  })
+  }).select(`
+    id, title, body, category, is_pinned, is_official,
+    reply_count, like_count, created_at,
+    profiles (full_name, role)
+  `).single()
 
   if (error) {
     console.error("[Forum] Error creating thread:", error)
@@ -29,7 +33,7 @@ export async function createForumThread(data: {
   }
 
   revalidatePath("/community")
-  return { success: true }
+  return { success: true, thread: newThread }
 }
 
 export async function createForumPost(data: {
@@ -44,11 +48,14 @@ export async function createForumPost(data: {
     return { success: false, error: "La respuesta no puede estar vacía." }
   }
 
-  const { error } = await supabase.from("forum_posts").insert({
+  const { data: newPost, error } = await supabase.from("forum_posts").insert({
     thread_id: data.threadId,
     author_id: user.user.id,
     body: data.body.trim(),
-  })
+  }).select(`
+    id, body, like_count, created_at,
+    profiles (full_name, role)
+  `).single()
 
   if (error) {
     console.error("[Forum] Error creating post:", error)
@@ -57,7 +64,7 @@ export async function createForumPost(data: {
 
   revalidatePath(`/community/${data.threadId}`)
   revalidatePath("/community")
-  return { success: true }
+  return { success: true, post: newPost }
 }
 
 export async function toggleThreadLike(threadId: string) {
@@ -92,4 +99,42 @@ export async function deleteForumThread(threadId: string) {
 
   revalidatePath("/community")
   return { success: true }
+}
+
+export async function uploadForumImage(formData: FormData) {
+  const supabase = await createClient()
+  const { data: user } = await supabase.auth.getUser()
+  
+  if (!user?.user?.id) {
+    return { success: false, error: "No autenticado" }
+  }
+
+  const file = formData.get("file") as File
+  if (!file) {
+    return { success: false, error: "No se proporcionó ningún archivo" }
+  }
+
+  // Optimize image size if needed before uploading, or just restrict size server side
+  if (file.size > 5 * 1024 * 1024) {
+    return { success: false, error: "La imagen no debe pesar más de 5MB" }
+  }
+
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
+  const filePath = `${user.user.id}/${fileName}`
+
+  const { error: uploadError } = await supabase.storage
+    .from("forum-images")
+    .upload(filePath, file)
+
+  if (uploadError) {
+    console.error("[Forum] Error uploading image:", uploadError)
+    return { success: false, error: uploadError.message }
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from("forum-images")
+    .getPublicUrl(filePath)
+
+  return { success: true, url: publicUrl }
 }

@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { IOSInstallPrompt } from "@/components/pwa/iOSInstallPrompt";
+import { PwaRegister } from "@/components/pwa/PwaRegister";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,6 +39,8 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <IOSInstallPrompt />
+            <PwaRegister />
             <Toaster position="top-center" />
         </ThemeProvider>
       </body>
