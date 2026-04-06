@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Diplomado USG Dr. Raúl Morales',
     short_name: 'CursoUSG',
-D    description: 'Plataforma educativa médica y de intervencionismo en rehabilitación.',
+    description: 'Plataforma educativa médica y de intervencionismo en rehabilitación.',
     start_url: '/',
     display: 'standalone',
     background_color: '#0f172a',
